@@ -1,0 +1,1209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Revolver Collective – Your Gunslinger</title>
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Bebas+Neue&family=Oswald:wght@300;400;600;700&family=Inter:wght@300;400&display=swap" rel="stylesheet" />
+
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --gold: #ffd700;
+      --gold-dim: #8a6e2f;
+      --white: #f0ede6;
+      --black: #070707;
+      --dark: #0d0c0b;
+      --mid: #1a1915;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--black);
+      color: var(--white);
+      font-family: 'Inter', sans-serif;
+      overflow-x: hidden;
+      min-height: 100vh;
+    }
+
+    /* ── GRAIN OVERLAY (SVG feTurbulence – pure CSS, no image) ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      pointer-events: none;
+      opacity: 0.055;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
+      background-size: 180px 180px;
+      background-repeat: repeat;
+      mix-blend-mode: overlay;
+    }
+
+    /* ── SCRATCH LINES OVERLAY ── */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      z-index: 9998;
+      pointer-events: none;
+      background-image:
+        linear-gradient(87deg, transparent 0%, transparent 48%, rgba(255,255,255,0.012) 49%, rgba(255,255,255,0.012) 50%, transparent 51%, transparent 100%),
+        linear-gradient(91deg, transparent 0%, transparent 30%, rgba(255,255,255,0.008) 31%, rgba(255,255,255,0.008) 32%, transparent 33%, transparent 100%),
+        linear-gradient(89.5deg, transparent 0%, transparent 70%, rgba(255,255,255,0.01) 71%, rgba(255,255,255,0.01) 72%, transparent 73%, transparent 100%),
+        linear-gradient(93deg, transparent 0%, transparent 15%, rgba(255,255,255,0.007) 16%, rgba(255,255,255,0.007) 17%, transparent 18%, transparent 100%),
+        linear-gradient(88deg, transparent 0%, transparent 82%, rgba(255,255,255,0.009) 83%, rgba(255,255,255,0.009) 84%, transparent 85%, transparent 100%);
+      background-size: 100% 100%;
+    }
+
+    /* ── HERO ── */
+    .hero {
+      position: relative;
+      padding: 70px 32px 60px;
+      text-align: center;
+      background: var(--black);
+      overflow: hidden;
+    }
+
+    /* 3D video — ambient background */
+    .hero-video {
+  position: absolute;
+  top: 0px;
+  left: 20%;
+  transform: none;
+  width: 60%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  opacity: 0.6;
+  mix-blend-mode: lighten;
+  pointer-events: none;
+}
+    
+
+    /* Logo image */
+    .hero-logo-img {
+      display: block;
+      width: clamp(280px, 60vw, 560px);
+      margin: 60px auto 4px;
+      position: relative;
+      z-index: 1;
+      filter: drop-shadow(0 0 40px rgba(201,168,76,0.15));
+    }
+
+    /* Rough outer border on hero — hand-cut feel */
+    .hero::before {
+      content: '';
+      position: absolute;
+      inset: 8px;
+      border: 1px solid rgba(201,168,76,0.18);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.03);
+      pointer-events: none;
+    }
+
+    /* Diagonal scratch across hero */
+    .hero-scratch {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      pointer-events: none;
+      overflow: hidden;
+    }
+    .hero-scratch::before {
+      content: '';
+      position: absolute;
+      top: -20%;
+      left: 15%;
+      width: 1px;
+      height: 140%;
+      background: linear-gradient(180deg, transparent 0%, rgba(255,255,255,0.05) 30%, rgba(255,255,255,0.09) 60%, transparent 100%);
+      transform: rotate(-12deg);
+    }
+    .hero-scratch::after {
+      content: '';
+      position: absolute;
+      top: -20%;
+      right: 25%;
+      width: 1px;
+      height: 120%;
+      background: linear-gradient(180deg, transparent 0%, rgba(255,255,255,0.04) 40%, rgba(255,255,255,0.06) 65%, transparent 100%);
+      transform: rotate(7deg);
+    }
+
+    .hero-eyebrow {
+      font-family: 'Oswald', sans-serif;
+      font-size: 10px;
+      font-weight: 400;
+      letter-spacing: 8px;
+      color: var(--gold);
+      text-transform: uppercase;
+      margin-bottom: 20px;
+      position: relative;
+      z-index: 1;
+    }
+    .hero-eyebrow::before,
+    .hero-eyebrow::after {
+      content: '——';
+      opacity: 0.4;
+      margin: 0 12px;
+    }
+
+    /* hero-logo-sub removed — using image logo now */
+
+    /* Gold rule */
+    .hero-rule {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0;
+      margin: 28px auto 24px;
+      width: 200px;
+      position: relative;
+      z-index: 1;
+    }
+    .hero-rule::before,
+    .hero-rule::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(to right, transparent, var(--gold));
+    }
+    .hero-rule::after {
+      background: linear-gradient(to left, transparent, var(--gold));
+    }
+    .hero-rule-diamond {
+      width: 6px;
+      height: 6px;
+      background: var(--gold);
+      transform: rotate(45deg);
+      margin: 0 10px;
+      flex-shrink: 0;
+    }
+
+    .hero-tagline {
+      font-family: 'Oswald', sans-serif;
+      font-weight: 600;
+      font-size: 13px;
+      letter-spacing: 10px;
+      color: var(--gold);
+      text-transform: uppercase;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero-location {
+      font-size: 10px;
+      letter-spacing: 4px;
+      color: rgba(240,237,230,0.2);
+      text-transform: uppercase;
+      margin-top: 10px;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ── UPCOMING EVENTS ── */
+    .events-section {
+      padding: 10px 40px 30px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    .events-section .section-title {
+      padding: 0 0 20px;
+    }
+    .events-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+    .event-card {
+      border: 1px solid rgba(201,168,76,0.2);
+      padding: 18px 24px;
+      position: relative;
+      transition: border-color 0.3s, background 0.3s;
+    }
+    .event-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(to right, transparent, var(--gold), transparent);
+      opacity: 0.5;
+    }
+    .event-card:hover {
+      border-color: rgba(201,168,76,0.5);
+      background: rgba(201,168,76,0.03);
+    }
+    .event-date {
+      font-family: 'Anton', sans-serif;
+      font-size: 32px;
+      color: var(--gold);
+      letter-spacing: 2px;
+      line-height: 1;
+    }
+    .event-month {
+      font-family: 'Oswald', sans-serif;
+      font-size: 10px;
+      letter-spacing: 5px;
+      color: rgba(255,255,255,0.4);
+      text-transform: uppercase;
+      margin-top: 4px;
+      margin-bottom: 20px;
+    }
+    .event-name {
+      font-family: 'Oswald', sans-serif;
+      font-size: 18px;
+      font-weight: 600;
+      letter-spacing: 3px;
+      color: var(--white);
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+    .event-venue {
+      font-family: 'Oswald', sans-serif;
+      font-size: 10px;
+      letter-spacing: 3px;
+      color: rgba(255,255,255,0.4);
+      text-transform: uppercase;
+    }
+    .event-venue::before { content: '📍 '; font-size: 9px; }
+    .event-tag {
+      display: inline-block;
+      margin-top: 16px;
+      font-family: 'Oswald', sans-serif;
+      font-size: 8px;
+      letter-spacing: 3px;
+      color: var(--gold);
+      text-transform: uppercase;
+      border: 1px solid rgba(201,168,76,0.3);
+      padding: 4px 10px;
+    }
+    @media (max-width: 720px) {
+      .events-grid { grid-template-columns: 1fr; }
+      .events-section { padding: 40px 24px; }
+    }
+
+    #members {
+      scroll-margin-top: 60px;
+    }
+    .section-title {
+      padding: 52px 0 28px;
+      text-align: center;
+    }
+    .section-title-inner {
+      display: inline-flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .section-title-inner::before,
+    .section-title-inner::after {
+      content: '';
+      width: 40px;
+      height: 1px;
+      background: var(--gold-dim);
+    }
+    .section-title-text {
+      font-family: 'Oswald', sans-serif;
+      font-size: 16px;
+      font-weight: 400;
+      letter-spacing: 8px;
+      color: var(--gold);
+      text-transform: uppercase;
+    }
+
+    /* ── GRID ── */
+    .member-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 3px;
+      background: #050504;
+      padding: 0 3px 3px;
+    }
+
+    /* ── MEMBER CARD ── */
+    .member-card {
+      position: relative;
+      display: block;
+      text-decoration: none;
+      overflow: hidden;
+      cursor: pointer;
+      background: #0a0908;
+      aspect-ratio: 2 / 3;
+    }
+
+    /* Photo */
+    .member-photo {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: top center;
+      display: block;
+      filter: contrast(1.1) brightness(0.82) saturate(0.85);
+      transition: filter 0.5s ease, transform 0.6s ease;
+    }
+
+    .member-card:hover .member-photo {
+      filter: contrast(1.05) brightness(0.65) saturate(1.1);
+      transform: scale(1.04);
+    }
+
+    /* Gradient overlays */
+    .member-overlay {
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(to top, rgba(4,3,2,0.97) 0%, rgba(4,3,2,0.7) 28%, rgba(4,3,2,0.2) 55%, transparent 100%),
+        linear-gradient(to right, rgba(4,3,2,0.6) 0%, transparent 45%);
+      z-index: 1;
+      transition: opacity 0.4s;
+    }
+
+    /* ── GRITTY BORDER — rough SVG edge ── */
+    .member-card-border {
+      position: absolute;
+      inset: 0;
+      z-index: 4;
+      pointer-events: none;
+    }
+
+    /* Top border — jagged */
+    .member-card-border::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg,
+        var(--gold) 0%,
+        var(--gold) 8%,
+        transparent 8%, transparent 9%,
+        var(--gold) 9%, var(--gold) 14%,
+        transparent 14%, transparent 16%,
+        var(--gold) 16%, var(--gold) 51%,
+        transparent 51%, transparent 53%,
+        var(--gold) 53%, var(--gold) 100%
+      );
+      opacity: 0;
+      transition: opacity 0.35s;
+      box-shadow: 0 1px 8px rgba(201,168,76,0.4);
+    }
+    .member-card:hover .member-card-border::before { opacity: 1; }
+
+    /* Left border — partial */
+    .member-card-border::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; bottom: 0;
+      width: 2px;
+      background: linear-gradient(180deg,
+        var(--gold) 0%,
+        var(--gold) 22%,
+        transparent 22%, transparent 25%,
+        var(--gold) 25%, var(--gold) 68%,
+        transparent 68%, transparent 71%,
+        var(--gold) 71%, var(--gold) 100%
+      );
+      opacity: 0;
+      transition: opacity 0.35s;
+    }
+    .member-card:hover .member-card-border::after { opacity: 0.7; }
+
+    /* Inner fine frame */
+    .member-inner-frame {
+      position: absolute;
+      inset: 10px;
+      border: 1px solid rgba(255,255,255,0.04);
+      z-index: 2;
+      pointer-events: none;
+      transition: border-color 0.4s;
+    }
+    .member-card:hover .member-inner-frame {
+      border-color: rgba(201,168,76,0.15);
+    }
+
+    /* Scratch lines on card */
+    .member-scratch {
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      pointer-events: none;
+      overflow: hidden;
+    }
+    .member-scratch::before {
+      content: '';
+      position: absolute;
+      top: -30%;
+      left: 40%;
+      width: 1px;
+      height: 160%;
+      background: linear-gradient(180deg, transparent 0%, rgba(255,255,255,0.06) 35%, rgba(255,255,255,0.1) 55%, transparent 100%);
+      transform: rotate(-8deg);
+    }
+    .member-scratch::after {
+      content: '';
+      position: absolute;
+      top: 10%;
+      right: 20%;
+      width: 1px;
+      height: 60%;
+      background: linear-gradient(180deg, transparent 0%, rgba(255,255,255,0.05) 50%, transparent 100%);
+      transform: rotate(4deg);
+    }
+
+    /* Grain on card */
+    .member-grain {
+      position: absolute;
+      inset: 0;
+      z-index: 3;
+      pointer-events: none;
+      opacity: 0.06;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-size: 120px 120px;
+      mix-blend-mode: overlay;
+    }
+
+    /* Vertical name — big ghost text */
+    .member-name-v {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%) rotate(-90deg) translateX(50%);
+      transform-origin: center center;
+      font-family: 'Anton', sans-serif;
+      font-size: 44px;
+      letter-spacing: 10px;
+      color: rgba(240,237,230,0.04);
+      text-transform: uppercase;
+      white-space: nowrap;
+      z-index: 2;
+      pointer-events: none;
+      transition: color 0.4s;
+      user-select: none;
+    }
+    .member-card:hover .member-name-v {
+      color: rgba(240,237,230,0.32);
+    }
+
+    /* Structure lines */
+    .member-vline {
+      position: absolute;
+      top: 16px; bottom: 16px;
+      left: 46px;
+      width: 1px;
+      background: rgba(255,255,255,0.05);
+      z-index: 3;
+    }
+    .member-hline {
+      position: absolute;
+      left: 16px; right: 16px;
+      bottom: 110px;
+      height: 1px;
+      background: rgba(255,255,255,0.06);
+      z-index: 3;
+      transition: background 0.4s;
+    }
+    .member-card:hover .member-hline {
+      background: rgba(201,168,76,0.2);
+    }
+
+    /* YOUR GUNSLINGER badge */
+    .member-badge {
+      position: absolute;
+      top: 18px;
+      right: 18px;
+      z-index: 5;
+      text-align: right;
+      line-height: 1.4;
+    }
+    .member-badge-text {
+      font-family: 'Oswald', sans-serif;
+      font-weight: 300;
+      font-size: 8.5px;
+      letter-spacing: 3px;
+      color: rgba(240,237,230,0.55);
+      text-transform: uppercase;
+    }
+
+    /* REVO collective reveal */
+    .member-revo {
+      position: absolute;
+      top: 52px;
+      right: 16px;
+      z-index: 5;
+      text-align: right;
+      opacity: 0;
+      transform: translateY(-4px);
+      transition: opacity 0.4s, transform 0.4s;
+    }
+    .member-card:hover .member-revo {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .member-revo-main {
+      font-family: 'Anton', sans-serif;
+      font-size: 20px;
+      letter-spacing: 3px;
+      color: var(--white);
+      line-height: 1;
+    }
+    .member-revo-sub {
+      font-family: 'Oswald', sans-serif;
+      font-size: 7px;
+      letter-spacing: 5px;
+      color: var(--gold);
+      text-transform: uppercase;
+    }
+
+    /* Bottom info */
+    .member-info {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 18px 18px 22px;
+      z-index: 5;
+    }
+    .member-role {
+      font-family: 'Oswald', sans-serif;
+      font-weight: 300;
+      font-size: 8px;
+      letter-spacing: 5px;
+      color: var(--gold);
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+    .member-name {
+      font-family: 'Anton', sans-serif;
+      font-size: clamp(24px, 4vw, 34px);
+      letter-spacing: 5px;
+      color: var(--white);
+      text-transform: uppercase;
+      line-height: 1;
+      text-shadow: 1px 1px 8px rgba(0,0,0,0.8);
+    }
+    .member-realname {
+      font-family: 'Oswald', sans-serif;
+      font-weight: 300;
+      font-size: 10px;
+      letter-spacing: 3px;
+      color: rgba(240,237,230,0.35);
+      text-transform: uppercase;
+      margin-top: 5px;
+    }
+    .member-genres {
+      font-size: 8px;
+      color: rgba(201,168,76,0.65);
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      line-height: 2.1;
+      margin-top: 10px;
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.45s ease;
+    }
+    .member-card:hover .member-genres { max-height: 120px; }
+
+    /* Number badge */
+    .member-number {
+      position: absolute;
+      top: 16px;
+      left: 16px;
+      z-index: 5;
+      font-family: 'Oswald', sans-serif;
+      font-weight: 700;
+      font-size: 9px;
+      letter-spacing: 2px;
+      color: rgba(201,168,76,0.5);
+    }
+
+    /* ── CONTACT ── */
+    #contact {
+      scroll-margin-top: 60px;
+    }
+    .contact-section {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px 40px 80px;
+      text-align: center;
+    }
+    .contact-links {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin-top: 0;
+    }
+    .contact-link {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      text-decoration: none;
+      border: 1px solid rgba(201,168,76,0.2);
+      padding: 20px 24px;
+      transition: border-color 0.3s, background 0.3s;
+      position: relative;
+    }
+    .contact-link::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(to right, transparent, var(--gold), transparent);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .contact-link:hover { border-color: rgba(201,168,76,0.5); background: rgba(201,168,76,0.03); }
+    .contact-link:hover::before { opacity: 0.5; }
+    .contact-link-platform {
+      font-family: 'Oswald', sans-serif;
+      font-size: 9px;
+      letter-spacing: 4px;
+      color: var(--gold);
+      text-transform: uppercase;
+      min-width: 80px;
+      text-align: left;
+    }
+    .contact-link-handle {
+      font-family: 'Oswald', sans-serif;
+      font-size: 13px;
+      letter-spacing: 2px;
+      color: var(--white);
+      text-transform: uppercase;
+    }
+    @media (max-width: 720px) {
+      .contact-section { padding: 60px 24px; }
+    }
+
+    /* ── ABOUT ── */
+    #about {
+      scroll-margin-top: 60px;
+    }
+    .about-section {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 80px 40px;
+      text-align: center;
+    }
+    .about-quote {
+      font-family: 'Anton', sans-serif;
+      font-size: clamp(28px, 4vw, 48px);
+      letter-spacing: 4px;
+      color: var(--white);
+      text-transform: uppercase;
+      line-height: 1.2;
+      margin-bottom: 32px;
+    }
+    .about-quote span { color: var(--gold); }
+    .about-body {
+      font-family: 'Oswald', sans-serif;
+      font-size: 14px;
+      font-weight: 300;
+      letter-spacing: 2px;
+      line-height: 2.2;
+      color: rgba(255,255,255,0.6);
+      text-transform: uppercase;
+      max-width: 600px;
+      margin: 0 auto 40px;
+    }
+    .about-rule {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0;
+      width: 200px;
+      margin: 0 auto 40px;
+    }
+    .about-rule::before, .about-rule::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+    }
+    .about-rule::before { background: linear-gradient(to right, transparent, var(--gold)); }
+    .about-rule::after { background: linear-gradient(to left, transparent, var(--gold)); }
+    .about-rule-diamond {
+      width: 5px; height: 5px;
+      background: var(--gold);
+      transform: rotate(45deg);
+      margin: 0 10px;
+      flex-shrink: 0;
+    }
+    .about-stats {
+      display: flex;
+      justify-content: center;
+      gap: 60px;
+      margin-top: 50px;
+    }
+    .about-stat-number {
+      font-family: 'Anton', sans-serif;
+      font-size: 40px;
+      color: var(--gold);
+      letter-spacing: 2px;
+    }
+    .about-stat-label {
+      font-family: 'Oswald', sans-serif;
+      font-size: 9px;
+      letter-spacing: 4px;
+      color: rgba(255,255,255,0.4);
+      text-transform: uppercase;
+      margin-top: 4px;
+    }
+    @media (max-width: 720px) {
+      .about-section { padding: 60px 24px; }
+      .about-stats { gap: 30px; }
+    }
+
+    /* ── FOOTER ── */
+    .footer {
+      position: relative;
+      text-align: center;
+      padding: 52px 24px 44px;
+      background: #060504;
+      overflow: hidden;
+    }
+    .footer::before {
+      content: '';
+      position: absolute;
+      inset: 10px;
+      border: 1px solid rgba(201,168,76,0.07);
+      pointer-events: none;
+    }
+    /* Gold top line on footer */
+    .footer::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg,
+        transparent 0%,
+        var(--gold-dim) 15%,
+        transparent 20%,
+        var(--gold) 35%,
+        var(--gold) 65%,
+        transparent 80%,
+        var(--gold-dim) 85%,
+        transparent 100%
+      );
+      opacity: 0.5;
+    }
+    .footer-ig {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-family: 'Oswald', sans-serif;
+      font-weight: 400;
+      font-size: 11px;
+      letter-spacing: 6px;
+      color: rgba(240,237,230,0.3);
+      text-decoration: none;
+      text-transform: uppercase;
+      transition: color 0.3s;
+      position: relative;
+      z-index: 1;
+    }
+    .footer-ig:hover { color: var(--gold); }
+    .footer-ig svg { width: 14px; height: 14px; fill: var(--gold-dim); flex-shrink: 0; transition: fill 0.3s; }
+    .footer-ig:hover svg { fill: var(--gold); }
+    .footer-location {
+      font-size: 9px;
+      letter-spacing: 6px;
+      color: rgba(240,237,230,0.1);
+      text-transform: uppercase;
+      margin-top: 14px;
+      position: relative;
+      z-index: 1;
+    }
+    .footer-booking {
+      font-size: 10px;
+      color: rgba(240,237,230,0.2);
+      margin-top: 16px;
+      letter-spacing: 1px;
+      position: relative;
+      z-index: 1;
+    }
+    .footer-booking a { color: var(--gold); text-decoration: none; transition: opacity 0.3s; }
+    .footer-booking a:hover { opacity: 0.7; }
+
+    /* ── NAV ── */
+    .nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 9000;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 40px;
+      height: 70px;
+      background: rgba(7,7,7,0.88);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(201,168,76,0.12);
+    }
+    .nav-logo {
+      font-family: 'Anton', sans-serif;
+      font-size: 16px;
+      letter-spacing: 4px;
+      color: var(--white);
+      text-decoration: none;
+      text-transform: uppercase;
+    }
+    .nav-logo span { color: var(--gold); }
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 36px;
+      list-style: none;
+    }
+    .nav-links > li > a {
+      font-family: 'Oswald', sans-serif;
+      font-weight: 400;
+      font-size: 15px;
+      letter-spacing: 3px;
+      color: rgba(240,237,230,0.5);
+      text-decoration: none;
+      text-transform: uppercase;
+      transition: color 0.3s;
+    }
+    .nav-links > li > a:hover { color: var(--gold); }
+    .nav-dropdown { position: relative; }
+    .nav-dropdown > a::after { content: ' ▾'; font-size: 9px; opacity: 0.5; }
+    .nav-dropdown-menu {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: -35px;
+      transform: none;
+      background: rgba(10,9,8,0.97);
+      border: 1px solid rgba(201,168,76,0.15);
+      width: 140px;
+      padding: 8px 0;
+    }
+    .nav-dropdown:hover .nav-dropdown-menu { display: block; }
+    .nav-dropdown-menu a {
+      display: block;
+      padding: 10px 10px;
+      font-family: 'Oswald', sans-serif;
+      font-size: 10px;
+      letter-spacing: 3px;
+      color: rgba(240,237,230,0.45);
+      text-decoration: none;
+      text-transform: uppercase;
+      white-space: nowrap;
+      transition: color 0.2s, background 0.2s;
+    }
+    .nav-dropdown-menu a:hover {
+      color: var(--gold);
+      background: rgba(201,168,76,0.05);
+    }
+    .hero { padding-top: 116px; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 720px) {
+      .member-grid { grid-template-columns: repeat(2, 1fr); }
+      .hero-logo { letter-spacing: 8px; }
+    }
+    @media (max-width: 440px) {
+      .member-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body id="top">
+
+  <!-- NAV -->
+  <nav class="nav">
+    <a class="nav-logo" href="index.html"><img src="REVOLVER_NEW__PUTIH_.png" alt="Revolver Collective" style="height:32px; display:block;" /></a>
+    <ul class="nav-links">
+      <li><a href="#top">Home</a></li>
+      <li><a href="#members">Members</a></li>
+      <li class="nav-dropdown">
+        <a href="#">Events</a>
+        <div class="nav-dropdown-menu">
+          <a href="upcoming-events.html">Upcoming Events</a>
+          <a href="recap-photo.html">Recap Photo</a>
+        </div>
+      </li>
+      <li><a href="#about">About</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+  </nav>
+
+  <!-- HERO -->
+  <header class="hero">
+    <video class="hero-video" autoplay muted loop playsinline>
+      <source src="3D_Revolver__NEW_.mp4" type="video/mp4" />
+    </video>
+    <div class="hero-scratch"></div>
+    <div class="hero-eyebrow">Yogyakarta · Indonesia</div>
+    <img class="hero-logo-img" src="REVOLVER_NEW__PUTIH_.png" alt="Revolver Collective" />
+    <div class="hero-rule"><div class="hero-rule-diamond"></div></div>
+    <div class="hero-tagline">Your Gunslinger</div>
+    <div class="hero-location">Est. — Six Gunslingers · One Sound</div>
+  </header>
+
+  <!-- UPCOMING EVENTS -->
+  <section class="events-section">
+    <div class="section-title">
+      <div class="section-title-inner">
+        <span class="section-title-text">Upcoming Events</span>
+      </div>
+    </div>
+    <div class="events-grid">
+
+      <div class="event-card">
+        <div class="event-date">21</div>
+        <div class="event-month">June 2026</div>
+        <div class="event-name">Night Frequency</div>
+        <div class="event-venue">Liquid Bar & Resto, Yogyakarta</div>
+        <span class="event-tag">Club Night</span>
+      </div>
+
+      <div class="event-card">
+        <div class="event-date">05</div>
+        <div class="event-month">July 2026</div>
+        <div class="event-name">Gunslinger Sessions</div>
+        <div class="event-venue">Five Seven, Yogyakarta</div>
+        <span class="event-tag">Live Set</span>
+      </div>
+
+      <div class="event-card">
+        <div class="event-date">19</div>
+        <div class="event-month">July 2026</div>
+        <div class="event-name">Bass & Gold</div>
+        <div class="event-venue">Bounty Discotheque, Bali</div>
+        <span class="event-tag">Festival</span>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- MEMBERS -->
+  <main id="members">
+    <div class="section-title">
+      <div class="section-title-inner">
+        <span class="section-title-text">The Gunslingers</span>
+      </div>
+    </div>
+
+    <div class="member-grid">
+
+      <!-- DHEKA -->
+      <a class="member-card" href="dheka.html">
+        <img class="member-photo" src="images/dheka.png" alt="Dheka" />
+        <div class="member-overlay"></div>
+        <div class="member-grain"></div>
+        <div class="member-scratch"></div>
+        <div class="member-card-border"></div>
+        <div class="member-inner-frame"></div>
+        <div class="member-vline"></div>
+        <div class="member-hline"></div>
+        <div class="member-name-v">DHEKA</div>
+        <div class="member-number">01</div>
+        <div class="member-badge"><div class="member-badge-text">YOUR<br>GUNSLINGER</div></div>
+        <div class="member-revo">
+          <div class="member-revo-main">REVO</div>
+          <div class="member-revo-sub">collective</div>
+        </div>
+        <div class="member-info">
+          <div class="member-role">DJ</div>
+          <div class="member-name">Dheka</div>
+          <div class="member-realname">Mahardika Saputra</div>
+          <div class="member-genres">RnB · Hip-Hop · Amapiano<br>House · Tech House · Breakbeat<br>Guaracha · Top 40</div>
+        </div>
+      </a>
+
+      <!-- DUVM -->
+      <a class="member-card" href="duvm.html">
+        <img class="member-photo" src="images/duvm.png" alt="DUVM" />
+        <div class="member-overlay"></div>
+        <div class="member-grain"></div>
+        <div class="member-scratch"></div>
+        <div class="member-card-border"></div>
+        <div class="member-inner-frame"></div>
+        <div class="member-vline"></div>
+        <div class="member-hline"></div>
+        <div class="member-name-v">DUVM</div>
+        <div class="member-number">02</div>
+        <div class="member-badge"><div class="member-badge-text">YOUR<br>GUNSLINGER</div></div>
+        <div class="member-revo">
+          <div class="member-revo-main">REVO</div>
+          <div class="member-revo-sub">collective</div>
+        </div>
+        <div class="member-info">
+          <div class="member-role">DJ &amp; MC</div>
+          <div class="member-name">DUVM</div>
+          <div class="member-realname">Adam Athaya</div>
+          <div class="member-genres">RnB · Amapiano · Baile Funk<br>Tech House · Indo Bounce<br>Guaracha · Breakbeat</div>
+        </div>
+      </a>
+
+      <!-- DIVENT -->
+      <a class="member-card" href="divent.html">
+        <img class="member-photo" src="images/divent.png" alt="Divent" />
+        <div class="member-overlay"></div>
+        <div class="member-grain"></div>
+        <div class="member-scratch"></div>
+        <div class="member-card-border"></div>
+        <div class="member-inner-frame"></div>
+        <div class="member-vline"></div>
+        <div class="member-hline"></div>
+        <div class="member-name-v">DIVENT</div>
+        <div class="member-number">03</div>
+        <div class="member-badge"><div class="member-badge-text">YOUR<br>GUNSLINGER</div></div>
+        <div class="member-revo">
+          <div class="member-revo-main">REVO</div>
+          <div class="member-revo-sub">collective</div>
+        </div>
+        <div class="member-info">
+          <div class="member-role">DJ</div>
+          <div class="member-name">Divent</div>
+          <div class="member-realname">Divent Blvnz</div>
+          <div class="member-genres">RnB · Amapiano · Tech House<br>Indo Bounce · Jungle Dutch<br>Guaracha · Breakbeat</div>
+        </div>
+      </a>
+
+      <!-- RELLION -->
+      <a class="member-card" href="rellion.html">
+        <img class="member-photo" src="images/rellion.png" alt="Rellion" />
+        <div class="member-overlay"></div>
+        <div class="member-grain"></div>
+        <div class="member-scratch"></div>
+        <div class="member-card-border"></div>
+        <div class="member-inner-frame"></div>
+        <div class="member-vline"></div>
+        <div class="member-hline"></div>
+        <div class="member-name-v">RELLION</div>
+        <div class="member-number">04</div>
+        <div class="member-badge"><div class="member-badge-text">YOUR<br>GUNSLINGER</div></div>
+        <div class="member-revo">
+          <div class="member-revo-main">REVO</div>
+          <div class="member-revo-sub">collective</div>
+        </div>
+        <div class="member-info">
+          <div class="member-role">MC · Hype Man</div>
+          <div class="member-name">Rellion</div>
+          <div class="member-realname">Jeromy Ariel</div>
+          <div class="member-genres">The energy on stage.<br>The voice of the crowd.</div>
+        </div>
+      </a>
+
+      <!-- RAVENZ -->
+      <a class="member-card" href="ravenz.html">
+        <img class="member-photo" src="images/ravenz.png" alt="Ravenz" />
+        <div class="member-overlay"></div>
+        <div class="member-grain"></div>
+        <div class="member-scratch"></div>
+        <div class="member-card-border"></div>
+        <div class="member-inner-frame"></div>
+        <div class="member-vline"></div>
+        <div class="member-hline"></div>
+        <div class="member-name-v">RAVENZ</div>
+        <div class="member-number">05</div>
+        <div class="member-badge"><div class="member-badge-text">YOUR<br>GUNSLINGER</div></div>
+        <div class="member-revo">
+          <div class="member-revo-main">REVO</div>
+          <div class="member-revo-sub">collective</div>
+        </div>
+        <div class="member-info">
+          <div class="member-role">DJ</div>
+          <div class="member-name">Ravenz</div>
+          <div class="member-realname">Fan Abdul</div>
+          <div class="member-genres">Amapiano · Afro House<br>Tech House · Indo Bounce<br>Guaracha · Breakbeat</div>
+        </div>
+      </a>
+
+      <!-- WIZZKEY -->
+      <a class="member-card" href="wizzkey.html">
+        <img class="member-photo" src="images/wizzkey.png" alt="Wizzkey" />
+        <div class="member-overlay"></div>
+        <div class="member-grain"></div>
+        <div class="member-scratch"></div>
+        <div class="member-card-border"></div>
+        <div class="member-inner-frame"></div>
+        <div class="member-vline"></div>
+        <div class="member-hline"></div>
+        <div class="member-name-v">WIZZKEY</div>
+        <div class="member-number">06</div>
+        <div class="member-badge"><div class="member-badge-text">YOUR<br>GUNSLINGER</div></div>
+        <div class="member-revo">
+          <div class="member-revo-main">REVO</div>
+          <div class="member-revo-sub">collective</div>
+        </div>
+        <div class="member-info">
+          <div class="member-role">DJ</div>
+          <div class="member-name">Wizzkey</div>
+          <div class="member-realname">Waskito Agung</div>
+          <div class="member-genres">Amapiano · Afro House<br>Tech House · Indo Bounce<br>Jungle Dutch · Breakbeat</div>
+        </div>
+      </a>
+
+    </div>
+  </main>
+
+  <!-- ABOUT -->
+  <section id="about">
+    <div class="section-title">
+      <div class="section-title-inner">
+        <span class="section-title-text">About</span>
+      </div>
+    </div>
+    <div class="about-section">
+      <div class="about-quote">We Don't Follow<br>The <span>Sound</span>.<br>We Define It.</div>
+      <div class="about-rule"><div class="about-rule-diamond"></div></div>
+      <p class="about-body">
+        Revolver Collective is not just a DJ crew — it is a movement. Born in the heart of Yogyakarta, six gunslingers came together with one shared conviction: that music is the most powerful force in a room. We bring together a spectrum of sounds, from deep underground rhythms to euphoric dancefloor anthems, crafted to move people in ways they never expected. Every set is a statement. Every night is a declaration.
+      </p>
+      <div class="about-stats">
+        <div>
+          <div class="about-stat-number">6</div>
+          <div class="about-stat-label">Gunslingers</div>
+        </div>
+        <div>
+          <div class="about-stat-number">1</div>
+          <div class="about-stat-label">Sound</div>
+        </div>
+        <div>
+          <div class="about-stat-number">∞</div>
+          <div class="about-stat-label">Nights</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section id="contact">
+    <div class="section-title">
+      <div class="section-title-inner">
+        <span class="section-title-text">Contact</span>
+      </div>
+    </div>
+    <div class="contact-section">
+      <div class="contact-links">
+        <a class="contact-link" href="https://www.instagram.com/rvlvr.collective/" target="_blank" rel="noopener">
+          <span class="contact-link-platform">Instagram</span>
+          <span class="contact-link-handle">@rvlvr.collective</span>
+        </a>
+        <a class="contact-link" href="mailto:revolversquad01@gmail.com">
+          <span class="contact-link-platform">Email</span>
+          <span class="contact-link-handle">revolversquad01@gmail.com</span>
+        </a>
+        <a class="contact-link" href="https://www.tiktok.com/@revolverid" target="_blank" rel="noopener">
+          <span class="contact-link-platform">TikTok</span>
+          <span class="contact-link-handle">@revolverid</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <a class="footer-ig" href="https://www.instagram.com/rvlvr.collective/" target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+      </svg>
+      @rvlvr.collective
+    </a>
+    <div class="footer-location">Yogyakarta · Indonesia</div>
+    <div class="footer-booking">Bookings → <a href="https://www.instagram.com/rvlvr.collective/" target="_blank" rel="noopener">@rvlvr.collective</a></div>
+  </footer>
+
+</body>
+</html>
