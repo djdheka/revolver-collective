@@ -538,16 +538,91 @@
     .footer-back:hover { color: var(--gold); }
     .footer-back::before { content: '← '; }
 
-    @media (max-width: 720px) {
-      .hero-content { padding: 40px 24px 50px 32px; }
-      .hero-name-vertical { display: none; }
-      .content { padding: 50px 24px; }
-      .two-col { grid-template-columns: 1fr; gap: 40px; }
-      .skills-grid { grid-template-columns: repeat(3, 1fr); }
-      .experience-list { grid-template-columns: 1fr; }
-      .form-row { grid-template-columns: 1fr; }
+
+    @media (max-width: 768px) {
+
+      /* NAV */
       .nav { padding: 0 20px; }
+      .nav-back { font-size: 9px; letter-spacing: 2px; }
+
+      /* HERO — stack layout on mobile */
+      .hero {
+        min-height: 100dvh;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        padding-top: 56px;
+      }
+
+      /* Photo: centered, takes top portion */
+      .hero-photo {
+        position: relative !important;
+        inset: auto !important;
+        width: 100% !important;
+        height: 65vw !important;
+        object-fit: contain !important;
+        object-position: center top !important;
+        display: block;
+        margin: 0 auto;
+      }
+
+      .photo-hover-zone { display: none; }
+
+      /* Content: sits below photo */
+      .hero-content {
+        position: relative !important;
+        z-index: 3;
+        padding: 16px 20px 40px !important;
+        max-width: 100% !important;
+        width: 100%;
+      }
+
+      /* Font name: left aligned, smaller */
+      .hero-name-img {
+        width: clamp(160px, 65vw, 300px) !important;
+        margin: 0 0 12px 0 !important;
+        display: block;
+      }
+
+      .hero-collective { font-size: 9px; letter-spacing: 3px; }
+      .hero-role { font-size: 9px; letter-spacing: 2px; margin-top: 4px; }
+      .hero-realname { font-size: 10px; letter-spacing: 3px; padding-left: 0 !important; margin-top: 12px; }
+      .hero-rule { padding-left: 0 !important; margin: 16px 0 12px; }
+      .hero-tagline { font-size: 10px; letter-spacing: 3px; padding-left: 0 !important; }
+
+      /* CONTENT */
+      .content { padding: 40px 20px 60px; }
+      .three-col-wrapper { padding: 40px 20px 0; }
+      .three-col {
+        grid-template-columns: 1fr !important;
+        gap: 0 !important;
+      }
+      .col-top { padding-bottom: 32px; }
+      .col-bottom { padding-bottom: 32px; }
+
+      /* SKILLS */
+      .skills-grid-v { grid-template-columns: repeat(2, 1fr) !important; }
+
+      /* EXPERIENCE */
+      .experience-list { grid-template-columns: 1fr !important; }
+
+      /* GENRES */
+      .genres-list { gap: 6px; }
+      .genre-tag { font-size: 8px; padding: 5px 10px; }
+
+      /* SOCIAL LINKS */
+      .social-link { padding: 14px 16px; }
+      .social-link-platform { font-size: 8px; letter-spacing: 3px; min-width: 70px; }
+      .social-link-handle { font-size: 11px; }
+      .social-link-qr { width: 48px; height: 48px; }
+
+      /* BOOKING FORM */
+      .form-row { grid-template-columns: 1fr !important; }
+
+      /* SECTION LABEL */
+      .section-label { font-size: 9px; letter-spacing: 4px; }
     }
+
   </style>
 </head>
 <body>

@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin – Revolver Collective</title>
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Oswald:wght@300;400;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --gold: #c9a84c;
+      --black: #070707;
+      --dark: #111;
+      --panel: #161616;
+      --border: rgba(201,168,76,0.2);
+      --white: #f0ede6;
+    }
+    body { background: var(--black); color: var(--white); font-family: 'Oswald', sans-serif; min-height: 100dvh; }
+
+    /* ── LOGIN ── */
+    #login-screen {
+      display: flex; align-items: center; justify-content: center;
+      min-height: 100dvh; flex-direction: column; gap: 24px;
+    }
+    .login-title { font-family: 'Anton', sans-serif; font-size: 32px; letter-spacing: 6px; color: var(--gold); text-transform: uppercase; }
+    .login-sub { font-size: 10px; letter-spacing: 4px; color: rgba(255,255,255,0.3); text-transform: uppercase; }
+    .login-box { display: flex; flex-direction: column; gap: 12px; width: 320px; }
+    .login-input {
+      background: var(--panel); border: 1px solid var(--border);
+      color: var(--white); font-family: 'Oswald', sans-serif;
+      font-size: 14px; letter-spacing: 2px; padding: 14px 16px;
+      outline: none; transition: border-color 0.3s;
+    }
+    .login-input:focus { border-color: var(--gold); }
+    .login-btn {
+      background: var(--gold); color: var(--black);
+      font-family: 'Oswald', sans-serif; font-size: 11px;
+      letter-spacing: 4px; text-transform: uppercase;
+      padding: 14px; border: none; cursor: pointer; transition: background 0.3s;
+    }
+    .login-btn:hover { background: var(--white); }
+    .login-error { font-size: 9px; letter-spacing: 3px; color: #e05; text-transform: uppercase; text-align: center; display: none; }
+
+    /* ── ADMIN LAYOUT ── */
+    #admin-screen { display: none; }
+    .admin-nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 9000;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 32px; height: 60px;
+      background: rgba(7,7,7,0.95); border-bottom: 1px solid var(--border);
+    }
+    .admin-nav-title { font-family: 'Anton', sans-serif; font-size: 14px; letter-spacing: 4px; color: var(--gold); }
+    .admin-nav-logout {
+      font-size: 9px; letter-spacing: 3px; color: rgba(255,255,255,0.4);
+      text-transform: uppercase; cursor: pointer; transition: color 0.3s; background: none; border: none;
+    }
+    .admin-nav-logout:hover { color: var(--gold); }
+
+    .admin-body { display: flex; padding-top: 60px; min-height: 100dvh; }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      width: 200px; flex-shrink: 0;
+      background: var(--panel); border-right: 1px solid var(--border);
+      padding: 24px 0; position: fixed; top: 60px; bottom: 0; overflow-y: auto;
+    }
+    .sidebar-section { font-size: 8px; letter-spacing: 4px; color: rgba(255,255,255,0.25); text-transform: uppercase; padding: 16px 20px 8px; }
+    .sidebar-item {
+      display: block; padding: 10px 20px;
+      font-size: 11px; letter-spacing: 2px; color: rgba(255,255,255,0.5);
+      text-transform: uppercase; cursor: pointer; transition: color 0.2s, background 0.2s;
+      border: none; background: none; width: 100%; text-align: left;
+    }
+    .sidebar-item:hover { color: var(--white); background: rgba(201,168,76,0.05); }
+    .sidebar-item.active { color: var(--gold); border-left: 2px solid var(--gold); }
+
+    /* ── MAIN CONTENT ── */
+    .main-content { margin-left: 200px; flex: 1; padding: 32px; }
+
+    .page { display: none; }
+    .page.active { display: block; }
+
+    .page-title {
+      font-family: 'Anton', sans-serif; font-size: 24px;
+      letter-spacing: 4px; color: var(--white); text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    .page-subtitle { font-size: 9px; letter-spacing: 3px; color: rgba(255,255,255,0.3); text-transform: uppercase; margin-bottom: 32px; }
+
+    /* ── CARDS ── */
+    .card {
+      background: var(--panel); border: 1px solid var(--border);
+      padding: 24px; margin-bottom: 20px; position: relative;
+    }
+    .card-title { font-size: 10px; letter-spacing: 4px; color: var(--gold); text-transform: uppercase; margin-bottom: 16px; }
+    .card-delete {
+      position: absolute; top: 16px; right: 16px;
+      font-size: 8px; letter-spacing: 2px; color: rgba(255,100,100,0.5);
+      text-transform: uppercase; cursor: pointer; background: none; border: none;
+      transition: color 0.2s;
+    }
+    .card-delete:hover { color: #f55; }
+
+    /* ── FORM ELEMENTS ── */
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+    .form-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+    .form-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
+    .form-label { font-size: 8px; letter-spacing: 3px; color: rgba(255,255,255,0.4); text-transform: uppercase; }
+    .form-input, .form-select, .form-textarea {
+      background: #1a1a1a; border: 1px solid var(--border);
+      color: var(--white); font-family: 'Oswald', sans-serif;
+      font-size: 13px; letter-spacing: 1px; padding: 10px 14px;
+      outline: none; transition: border-color 0.3s; width: 100%;
+    }
+    .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--gold); }
+    .form-textarea { resize: vertical; min-height: 80px; }
+    .form-select option { background: #1a1a1a; }
+
+    /* ── BUTTONS ── */
+    .btn {
+      font-family: 'Oswald', sans-serif; font-size: 9px; letter-spacing: 3px;
+      text-transform: uppercase; padding: 10px 20px; border: none; cursor: pointer; transition: background 0.3s;
+    }
+    .btn-gold { background: var(--gold); color: var(--black); }
+    .btn-gold:hover { background: var(--white); }
+    .btn-outline { background: transparent; border: 1px solid var(--border); color: rgba(255,255,255,0.5); }
+    .btn-outline:hover { border-color: var(--gold); color: var(--gold); }
+    .btn-row { display: flex; gap: 12px; margin-top: 8px; }
+
+    /* ── ADD NEW ── */
+    .add-btn {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 9px; letter-spacing: 3px; color: var(--gold);
+      text-transform: uppercase; cursor: pointer; background: none; border: 1px dashed var(--border);
+      padding: 14px 20px; width: 100%; transition: border-color 0.3s; margin-bottom: 20px;
+    }
+    .add-btn:hover { border-color: var(--gold); }
+
+    /* ── EXPORT ── */
+    .export-section { background: var(--panel); border: 1px solid var(--border); padding: 24px; margin-top: 32px; }
+    .export-title { font-size: 10px; letter-spacing: 4px; color: var(--gold); text-transform: uppercase; margin-bottom: 16px; }
+    .export-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    .export-item {
+      background: #1a1a1a; border: 1px solid var(--border);
+      padding: 16px; cursor: pointer; transition: border-color 0.3s;
+      font-size: 10px; letter-spacing: 2px; color: rgba(255,255,255,0.6);
+      text-transform: uppercase; text-align: center;
+    }
+    .export-item:hover { border-color: var(--gold); color: var(--gold); }
+    .export-item-icon { font-size: 20px; margin-bottom: 8px; display: block; }
+
+    /* ── MEMBER GRID ── */
+    .member-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 20px; }
+    .member-card {
+      background: var(--panel); border: 1px solid var(--border);
+      padding: 20px; cursor: pointer; transition: border-color 0.3s;
+      text-align: center;
+    }
+    .member-card:hover, .member-card.active { border-color: var(--gold); }
+    .member-card-name { font-family: 'Anton', sans-serif; font-size: 16px; letter-spacing: 2px; color: var(--white); margin-bottom: 4px; }
+    .member-card-role { font-size: 8px; letter-spacing: 3px; color: var(--gold); text-transform: uppercase; }
+
+    /* ── PHOTO GRID ── */
+    .photo-event-section { margin-bottom: 32px; }
+    .photo-event-name { font-size: 11px; letter-spacing: 3px; color: var(--white); text-transform: uppercase; margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+    .photo-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; margin-bottom: 12px; }
+    .photo-thumb { position: relative; aspect-ratio: 1; background: #1a1a1a; border: 1px solid var(--border); overflow: hidden; }
+    .photo-thumb img { width: 100%; height: 100%; object-fit: cover; }
+    .photo-thumb-del { position: absolute; top: 4px; right: 4px; background: rgba(0,0,0,0.7); color: #f55; border: none; cursor: pointer; font-size: 10px; padding: 2px 5px; }
+    .photo-add { aspect-ratio: 1; background: #1a1a1a; border: 1px dashed var(--border); display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 20px; color: rgba(255,255,255,0.2); transition: border-color 0.3s; }
+    .photo-add:hover { border-color: var(--gold); color: var(--gold); }
+
+    /* ── STATUS ── */
+    .status-bar {
+      position: fixed; bottom: 0; left: 200px; right: 0;
+      background: rgba(7,7,7,0.95); border-top: 1px solid var(--border);
+      padding: 12px 32px; font-size: 9px; letter-spacing: 3px;
+      color: rgba(255,255,255,0.3); text-transform: uppercase;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--gold); display: inline-block; margin-right: 8px; }
+
+    .divider { border: none; border-top: 1px solid var(--border); margin: 24px 0; }
+
+    /* Tags editor */
+    .tags-container { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+    .tag-pill {
+      display: flex; align-items: center; gap: 6px;
+      background: rgba(201,168,76,0.1); border: 1px solid var(--border);
+      padding: 4px 10px; font-size: 9px; letter-spacing: 2px; color: var(--gold); text-transform: uppercase;
+    }
+    .tag-pill-del { cursor: pointer; color: rgba(255,100,100,0.6); background: none; border: none; font-size: 10px; }
+    .tag-input-row { display: flex; gap: 8px; margin-top: 8px; }
+    .tag-input-row .form-input { flex: 1; }
+  </style>
+</head>
+<body>
+
+<!-- LOGIN SCREEN -->
+<div id="login-screen">
+  <div class="login-title">Revolver Admin</div>
+  <div class="login-sub">Restricted Access</div>
+  <div class="login-box">
+    <input class="login-input" type="password" id="pw-input" placeholder="Enter password" onkeydown="if(event.key==='Enter')login()" />
+    <button class="login-btn" onclick="login()">Unlock</button>
+    <div class="login-error" id="login-error">Incorrect password</div>
+  </div>
+</div>
+
+<!-- ADMIN SCREEN -->
+<div id="admin-screen">
+  <nav class="admin-nav">
+    <div class="admin-nav-title">⬡ Revolver Admin</div>
+    <button class="admin-nav-logout" onclick="logout()">Log Out</button>
+  </nav>
+
+  <div class="admin-body">
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+      <div class="sidebar-section">Content</div>
+      <button class="sidebar-item active" onclick="showPage('events', this)">📅 Events</button>
+      <button class="sidebar-item" onclick="showPage('recap', this)">📸 Recap Photos</button>
+      <div class="sidebar-section">Members</div>
+      <button class="sidebar-item" onclick="showPage('members', this)">👤 Member Info</button>
+      <div class="sidebar-section">Export</div>
+      <button class="sidebar-item" onclick="showPage('export', this)">⬇ Export Files</button>
+    </div>
+
+    <!-- MAIN -->
+    <div class="main-content">
+
+      <!-- EVENTS PAGE -->
+      <div class="page active" id="page-events">
+        <div class="page-title">Upcoming Events</div>
+        <div class="page-subtitle">Add, edit or remove events — then export to update your site</div>
+
+        <button class="add-btn" onclick="addEvent()">+ Add New Event</button>
+
+        <div id="events-list"></div>
+      </div>
+
+      <!-- RECAP PHOTOS PAGE -->
+      <div class="page" id="page-recap">
+        <div class="page-title">Recap Photos</div>
+        <div class="page-subtitle">Manage photo galleries by event</div>
+
+        <div id="recap-list"></div>
+      </div>
+
+      <!-- MEMBERS PAGE -->
+      <div class="page" id="page-members">
+        <div class="page-title">Member Info</div>
+        <div class="page-subtitle">Click a member to edit their details</div>
+
+        <div class="member-grid" id="member-grid"></div>
+        <div id="member-editor"></div>
+      </div>
+
+      <!-- EXPORT PAGE -->
+      <div class="page" id="page-export">
+        <div class="page-title">Export Files</div>
+        <div class="page-subtitle">Download updated HTML files and drag them to Netlify to publish</div>
+
+        <div class="export-section">
+          <div class="export-title">Download Updated Files</div>
+          <div class="export-grid">
+            <div class="export-item" onclick="exportFile('index')">
+              <span class="export-item-icon">🏠</span>
+              index.html
+            </div>
+            <div class="export-item" onclick="exportFile('upcoming-events')">
+              <span class="export-item-icon">📅</span>
+              upcoming-events.html
+            </div>
+            <div class="export-item" onclick="exportFile('recap-photo')">
+              <span class="export-item-icon">📸</span>
+              recap-photo.html
+            </div>
+            <div class="export-item" onclick="exportFile('dheka')">
+              <span class="export-item-icon">👤</span>
+              dheka.html
+            </div>
+            <div class="export-item" onclick="exportFile('duvm')">
+              <span class="export-item-icon">👤</span>
+              duvm.html
+            </div>
+            <div class="export-item" onclick="exportFile('divent')">
+              <span class="export-item-icon">👤</span>
+              divent.html
+            </div>
+            <div class="export-item" onclick="exportFile('rellion')">
+              <span class="export-item-icon">👤</span>
+              rellion.html
+            </div>
+            <div class="export-item" onclick="exportFile('ravenz')">
+              <span class="export-item-icon">👤</span>
+              ravenz.html
+            </div>
+            <div class="export-item" onclick="exportFile('wizzkey')">
+              <span class="export-item-icon">👤</span>
+              wizzkey.html
+            </div>
+          </div>
+        </div>
+
+        <div class="export-section" style="margin-top:20px;">
+          <div class="export-title">How to Publish</div>
+          <ol style="font-size:11px;letter-spacing:2px;color:rgba(255,255,255,0.5);line-height:2.5;padding-left:20px;text-transform:uppercase;">
+            <li>Download the files you changed above</li>
+            <li>Go to your Netlify dashboard</li>
+            <li>Drag your updated <code style="color:var(--gold)">my-website</code> folder into the deploy box</li>
+            <li>Your site will update in seconds</li>
+          </ol>
+        </div>
+      </div>
+
+    </div><!-- end main-content -->
+  </div><!-- end admin-body -->
+
+  <div class="status-bar">
+    <div><span class="status-dot"></span>Admin Panel · Revolver Collective</div>
+    <div id="status-msg">All changes saved locally</div>
+  </div>
+</div>
+
+<script>
+  // ── SUPABASE ──
+  const SUPABASE_URL = 'https://bglpsruvpscbupltihzs.supabase.co';
+  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJnbHBzcnV2cHNjYnVwbHRpaHpzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE1MzkzMjgsImV4cCI6MjA5NzExNTMyOH0.C2d3XtZdE2XSoSKVIDnJU1OQng5tuv_e9Ld8i3vM53E';
+
+  const sbHeaders = {
+    'apikey': SUPABASE_KEY,
+    'Authorization': `Bearer ${SUPABASE_KEY}`,
+    'Content-Type': 'application/json',
+    'Prefer': 'return=representation'
+  };
+
+  async function sbGet(table) {
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/${table}?order=date.asc`, { headers: sbHeaders });
+    return r.json();
+  }
+  async function sbInsert(table, obj) {
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/${table}`, { method: 'POST', headers: sbHeaders, body: JSON.stringify(obj) });
+    return r.json();
+  }
+  async function sbUpdate(table, id, obj) {
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/${table}?id=eq.${id}`, { method: 'PATCH', headers: sbHeaders, body: JSON.stringify(obj) });
+    return r.json();
+  }
+  async function sbDelete(table, id) {
+    await fetch(`${SUPABASE_URL}/rest/v1/${table}?id=eq.${id}`, { method: 'DELETE', headers: sbHeaders });
+  }
+
+  function setStatus(msg) {
+    document.getElementById('status-msg').textContent = msg + ' · ' + new Date().toLocaleTimeString();
+  }
+
+  // ── PASSWORD ──
+  const PW_HASH = 'b6a38e768db28e72536969eac41dcf47bc058921fd4f7aa97525997f704bb010';
+
+  async function sha256(str) {
+    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+  }
+
+  async function login() {
+    const pw = document.getElementById('pw-input').value;
+    const hash = await sha256(pw);
+    if (hash === PW_HASH) {
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('admin-screen').style.display = 'block';
+      init();
+    } else {
+      document.getElementById('login-error').style.display = 'block';
+    }
+  }
+
+  function logout() {
+    document.getElementById('login-screen').style.display = 'flex';
+    document.getElementById('admin-screen').style.display = 'none';
+    document.getElementById('pw-input').value = '';
+  }
+
+  // ── NAV ──
+  function showPage(page, btn) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.sidebar-item').forEach(b => b.classList.remove('active'));
+    document.getElementById('page-' + page).classList.add('active');
+    btn.classList.add('active');
+  }
+
+  // ── DATA ──
+  let data = {
+    events: [
+      { id: 1, name: 'Night Frequency', date: '2026-06-21', time: '21:00', venue: 'Liquid Bar & Resto', city: 'Yogyakarta', tag: 'Club Night', entry: 'Free Entry', desc: 'A late-night session built for the dance floor. Pure energy, curated sounds, and a crowd that knows how to move.', lineup: ['Dheka', 'DUVM', 'Rellion'] },
+      { id: 2, name: 'Gunslinger Sessions', date: '2026-07-05', time: '21:00', venue: 'Five Seven', city: 'Yogyakarta', tag: 'Live Set', entry: 'Free Entry', desc: 'An intimate showcase of what Revolver Collective does best — raw, unfiltered sets from the gunslingers themselves.', lineup: ['Divent', 'Ravenz', 'Wizzkey'] },
+      { id: 3, name: 'Bass & Gold', date: '2026-07-19', time: '20:00', venue: 'Bounty Discotheque', city: 'Bali', tag: 'Festival', entry: 'TBA', desc: 'The full collective. One stage. All six gunslingers bringing their best to the island.', lineup: ['Dheka', 'DUVM', 'Rellion', 'Divent', 'Ravenz', 'Wizzkey'] },
+    ],
+    members: [
+      { id: 'dheka', name: 'Dheka', realname: 'Mahardika Saputra', role: 'Open Format DJ', tagline: 'Live the Moment. Feel the Beat.', about: 'Known for energetic performances and crowd-focused music selection, Dheka brings a dynamic atmosphere to every event.' },
+      { id: 'duvm', name: 'DUVM', realname: 'Adam Athaya', role: 'DJ & MC', tagline: 'Drop The Beat. Own The Night.', about: 'Adam Athaya Dirham here. Born in Balikpapan, hyping up stages since 2023.' },
+      { id: 'divent', name: 'Divent', realname: 'M. Divent Belvansaz', role: 'Open Format DJ', tagline: 'Control The Crowd. Own The Floor.', about: 'An open-format DJ with a sharp focus on crowd control, energy management, and musical flow.' },
+      { id: 'rellion', name: 'Rellion', realname: 'Jeromy Ariel Kurniadi', role: 'MC DJ', tagline: 'Bring The Hype. Keep It Alive.', about: 'An MC DJ with a cool and energetic style who knows how to bring the atmosphere to life.' },
+      { id: 'ravenz', name: 'Ravenz', realname: 'Fan Abdul', role: 'DJ & Music Performer', tagline: 'Live The Beat. Feel The Vibe.', about: 'A passionate DJ with a strong interest in music, live performance, and crowd engagement.' },
+      { id: 'wizzkey', name: 'Wizzkey', realname: 'Waskito Agung Wahyu Pratomo', role: 'House DJ', tagline: 'Groove. Vibe. Emotion.', about: 'A House DJ with a cool and calm style, bringing positive energy through music.' },
+    ],
+    recapEvents: [
+      { id: 1, name: 'Night Frequency', date: '21 June 2026', venue: 'Liquid Bar & Resto, Yogyakarta', photos: [] },
+      { id: 2, name: 'Gunslinger Sessions', date: '05 July 2026', venue: 'Five Seven, Yogyakarta', photos: [] },
+      { id: 3, name: 'Bass & Gold', date: '19 July 2026', venue: 'Bounty Discotheque, Bali', photos: [] },
+    ]
+  };
+
+  const MEMBERS = ['Dheka', 'DUVM', 'Rellion', 'Divent', 'Ravenz', 'Wizzkey'];
+
+  function save() {
+    localStorage.setItem('revolver_admin_data', JSON.stringify(data));
+  }
+
+  async function init() {
+    const saved = localStorage.getItem('revolver_admin_data');
+    if (saved) data = JSON.parse(saved);
+    // Load events from Supabase
+    const sbEvents = await sbGet('events');
+    if (sbEvents && !sbEvents.error) data.events = sbEvents;
+    renderEvents();
+    renderMembers();
+    renderRecap();
+    setStatus('Loaded from Supabase');
+  }
+
+  // ── EVENTS ──
+  function renderEvents() {
+    const list = document.getElementById('events-list');
+    list.innerHTML = data.events.map(ev => `
+      <div class="card" id="ev-${ev.id}">
+        <div class="card-title">Event · ${ev.name}</div>
+        <button class="card-delete" onclick="deleteEvent(${ev.id})">✕ Delete</button>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Event Name</label>
+            <input class="form-input" value="${ev.name||''}" onchange="updateEvent(${ev.id},'name',this.value)" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Tag (Club Night / Festival etc)</label>
+            <input class="form-input" value="${ev.tag||''}" onchange="updateEvent(${ev.id},'tag',this.value)" />
+          </div>
+        </div>
+        <div class="form-row-3">
+          <div class="form-group">
+            <label class="form-label">Date</label>
+            <input class="form-input" type="date" value="${ev.date||''}" onchange="updateEvent(${ev.id},'date',this.value)" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Door Open</label>
+            <input class="form-input" value="${ev.time||''}" onchange="updateEvent(${ev.id},'time',this.value)" placeholder="21:00 WIB" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Entry</label>
+            <input class="form-input" value="${ev.entry||''}" onchange="updateEvent(${ev.id},'entry',this.value)" placeholder="Free Entry / TBA" />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Venue Name</label>
+            <input class="form-input" value="${ev.venue||''}" onchange="updateEvent(${ev.id},'venue',this.value)" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">City</label>
+            <input class="form-input" value="${ev.city||''}" onchange="updateEvent(${ev.id},'city',this.value)" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Description</label>
+          <textarea class="form-textarea" onchange="updateEvent(${ev.id},'description',this.value)">${ev.description||''}</textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Lineup</label>
+          <div class="tags-container">
+            ${(ev.lineup||[]).map(m => `<div class="tag-pill">${m}<button class="tag-pill-del" onclick="removeLineup(${ev.id},'${m}')">✕</button></div>`).join('')}
+          </div>
+          <div class="tag-input-row">
+            <select class="form-input" id="lineup-sel-${ev.id}">
+              ${MEMBERS.map(m => `<option value="${m}">${m}</option>`).join('')}
+            </select>
+            <button class="btn btn-outline" onclick="addLineup(${ev.id})">Add</button>
+          </div>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-gold" onclick="saveEvent(${ev.id})">💾 Save to Live Site</button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  async function addEvent() {
+    setStatus('Creating event...');
+    const newEv = { name: 'New Event', date: '', time: '21:00', venue: '', city: 'Yogyakarta', tag: 'Club Night', entry: 'Free Entry', description: '', lineup: [] };
+    const result = await sbInsert('events', newEv);
+    if (result && result[0]) {
+      data.events.push(result[0]);
+      renderEvents();
+      setStatus('Event created ✓');
+    }
+  }
+
+  async function saveEvent(id) {
+    const ev = data.events.find(e => e.id === id);
+    if (!ev) return;
+    setStatus('Saving...');
+    await sbUpdate('events', id, {
+      name: ev.name, date: ev.date, time: ev.time,
+      venue: ev.venue, city: ev.city, tag: ev.tag,
+      entry: ev.entry, description: ev.description, lineup: ev.lineup
+    });
+    setStatus('Saved to live site ✓ — visible immediately!');
+  }
+
+  async function deleteEvent(id) {
+    if (!confirm('Delete this event from the live site?')) return;
+    await sbDelete('events', id);
+    data.events = data.events.filter(e => e.id !== id);
+    renderEvents();
+    setStatus('Event deleted ✓');
+  }
+
+  function updateEvent(id, field, value) {
+    const ev = data.events.find(e => e.id === id);
+    if (ev) { ev[field] = value; save(); }
+  }
+
+  function addLineup(id) {
+    const sel = document.getElementById('lineup-sel-' + id);
+    const ev = data.events.find(e => e.id === id);
+    if (ev && !(ev.lineup||[]).includes(sel.value)) {
+      if (!ev.lineup) ev.lineup = [];
+      ev.lineup.push(sel.value); save(); renderEvents();
+    }
+  }
+
+  function removeLineup(id, member) {
+    const ev = data.events.find(e => e.id === id);
+    if (ev) { ev.lineup = (ev.lineup||[]).filter(m => m !== member); save(); renderEvents(); }
+  }
+
+  // ── MEMBERS ──
+  function renderMembers() {
+    const grid = document.getElementById('member-grid');
+    grid.innerHTML = data.members.map(m => `
+      <div class="member-card" onclick="editMember('${m.id}', this)">
+        <div class="member-card-name">${m.name}</div>
+        <div class="member-card-role">${m.role}</div>
+      </div>
+    `).join('');
+    document.getElementById('member-editor').innerHTML = '';
+  }
+
+  function editMember(id, card) {
+    document.querySelectorAll('.member-card').forEach(c => c.classList.remove('active'));
+    card.classList.add('active');
+    const m = data.members.find(x => x.id === id);
+    document.getElementById('member-editor').innerHTML = `
+      <div class="card">
+        <div class="card-title">Editing · ${m.name}</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Stage Name</label>
+            <input class="form-input" value="${m.name}" onchange="updateMember('${id}','name',this.value)" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Real Name</label>
+            <input class="form-input" value="${m.realname}" onchange="updateMember('${id}','realname',this.value)" />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Role</label>
+            <input class="form-input" value="${m.role}" onchange="updateMember('${id}','role',this.value)" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Tagline</label>
+            <input class="form-input" value="${m.tagline}" onchange="updateMember('${id}','tagline',this.value)" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">About</label>
+          <textarea class="form-textarea" onchange="updateMember('${id}','about',this.value)">${m.about}</textarea>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-gold" onclick="alert('Changes saved! Go to Export to download the updated file.')">Save Changes</button>
+        </div>
+      </div>
+    `;
+  }
+
+  function updateMember(id, field, value) {
+    const m = data.members.find(x => x.id === id);
+    if (m) { m[field] = value; save(); }
+  }
+
+  // ── RECAP PHOTOS ──
+  function renderRecap() {
+    const list = document.getElementById('recap-list');
+    list.innerHTML = data.recapEvents.map(ev => `
+      <div class="photo-event-section">
+        <div class="photo-event-name">${ev.name} · ${ev.date} · ${ev.venue}</div>
+        <div class="photo-grid">
+          ${ev.photos.map((p, i) => `
+            <div class="photo-thumb">
+              <img src="${p}" />
+              <button class="photo-thumb-del" onclick="deletePhoto(${ev.id},${i})">✕</button>
+            </div>
+          `).join('')}
+          <label class="photo-add" title="Add photo">
+            +
+            <input type="file" accept="image/*" multiple style="display:none" onchange="addPhotos(${ev.id}, this)" />
+          </label>
+        </div>
+      </div>
+    `).join('') + `
+      <button class="add-btn" onclick="addRecapEvent()">+ Add New Event Gallery</button>
+    `;
+  }
+
+  function addPhotos(id, input) {
+    const ev = data.recapEvents.find(e => e.id === id);
+    const files = Array.from(input.files);
+    let loaded = 0;
+    files.forEach(file => {
+      const reader = new FileReader();
+      reader.onload = e => {
+        ev.photos.push(e.target.result);
+        loaded++;
+        if (loaded === files.length) { save(); renderRecap(); }
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  function deletePhoto(evId, idx) {
+    const ev = data.recapEvents.find(e => e.id === evId);
+    ev.photos.splice(idx, 1);
+    save(); renderRecap();
+  }
+
+  function addRecapEvent() {
+    const name = prompt('Event name:');
+    if (!name) return;
+    const date = prompt('Date (e.g. 21 June 2026):');
+    const venue = prompt('Venue:');
+    data.recapEvents.push({ id: Date.now(), name, date: date||'', venue: venue||'', photos: [] });
+    save(); renderRecap();
+  }
+
+  function exportFile(filename) {
+    alert(`"${filename}.html" is already live on your site!\n\nEvents update automatically via Supabase — no need to re-upload HTML files for event changes.\n\nOnly re-upload HTML files if you change design or layout.`);
+  }
+</script>
+
+</body>
+</html>

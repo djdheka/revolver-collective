@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Upcoming Events – Revolver Collective</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Oswald:wght@300;400;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --gold: #c9a84c;
+      --black: #070707;
+      --white: #f0ede6;
+    }
+
+    body {
+      background: var(--black);
+      color: var(--white);
+      font-family: 'Oswald', sans-serif;
+      min-height: 100dvh;
+    }
+
+    /* ── NAV ── */
+    .nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 9000;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 40px;
+      height: 70px;
+      background: rgba(7,7,7,0.88);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(201,168,76,0.12);
+    }
+    .nav-logo { text-decoration: none; }
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 36px;
+      list-style: none;
+    }
+    .nav-links > li > a {
+      font-family: 'Oswald', sans-serif;
+      font-weight: 400;
+      font-size: 15px;
+      letter-spacing: 3px;
+      color: rgba(240,237,230,0.5);
+      text-decoration: none;
+      text-transform: uppercase;
+      transition: color 0.3s;
+    }
+    .nav-links > li > a:hover { color: var(--gold); }
+    .nav-dropdown { position: relative; }
+    .nav-dropdown > a::after { content: ' ▾'; font-size: 9px; opacity: 0.5; }
+    .nav-dropdown-menu {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: -35px;
+      background: rgba(10,9,8,0.97);
+      border: 1px solid rgba(201,168,76,0.15);
+      width: 160px;
+      padding: 8px 0;
+    }
+    .nav-dropdown:hover .nav-dropdown-menu { display: block; }
+    .nav-dropdown-menu a {
+      display: block;
+      padding: 10px 16px;
+      font-family: 'Oswald', sans-serif;
+      font-size: 10px;
+      letter-spacing: 3px;
+      color: rgba(240,237,230,0.45);
+      text-decoration: none;
+      text-transform: uppercase;
+      transition: color 0.2s, background 0.2s;
+    }
+    .nav-dropdown-menu a:hover { color: var(--gold); background: rgba(201,168,76,0.05); }
+
+    /* ── PAGE HEADER ── */
+    .page-header {
+      padding: 120px 40px 60px;
+      text-align: center;
+      border-bottom: 1px solid rgba(201,168,76,0.1);
+    }
+    .page-header-label {
+      font-size: 10px;
+      letter-spacing: 6px;
+      color: var(--gold);
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+    .page-header-title {
+      font-family: 'Anton', sans-serif;
+      font-size: clamp(36px, 6vw, 72px);
+      letter-spacing: 6px;
+      text-transform: uppercase;
+      color: var(--white);
+    }
+    .page-header-rule {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 200px;
+      margin: 24px auto 0;
+    }
+    .page-header-rule::before, .page-header-rule::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+    }
+    .page-header-rule::before { background: linear-gradient(to right, transparent, var(--gold)); }
+    .page-header-rule::after  { background: linear-gradient(to left,  transparent, var(--gold)); }
+    .page-header-rule-diamond {
+      width: 5px; height: 5px;
+      background: var(--gold);
+      transform: rotate(45deg);
+      margin: 0 10px;
+      flex-shrink: 0;
+    }
+
+    /* ── EVENTS LIST ── */
+    .events-list {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 60px 40px 100px;
+      display: flex;
+      flex-direction: column;
+      gap: 60px;
+    }
+
+    /* ── EVENT BLOCK ── */
+    .event-block {
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      gap: 0;
+      border: 1px solid rgba(201,168,76,0.15);
+      position: relative;
+      overflow: hidden;
+      transition: border-color 0.3s;
+    }
+    .event-block:hover { border-color: rgba(201,168,76,0.4); }
+    .event-block::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(to right, transparent, var(--gold), transparent);
+    }
+
+    /* LEFT: date panel */
+    .event-date-panel {
+      background: rgba(201,168,76,0.04);
+      border-right: 1px solid rgba(201,168,76,0.15);
+      padding: 40px 32px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .event-day {
+      font-family: 'Anton', sans-serif;
+      font-size: 80px;
+      color: var(--gold);
+      line-height: 1;
+      letter-spacing: 2px;
+    }
+    .event-month-year {
+      font-size: 11px;
+      letter-spacing: 5px;
+      color: rgba(255,255,255,0.4);
+      text-transform: uppercase;
+      margin-top: 6px;
+    }
+    .event-time {
+      margin-top: 32px;
+      font-size: 10px;
+      letter-spacing: 3px;
+      color: rgba(255,255,255,0.35);
+      text-transform: uppercase;
+    }
+    .event-time span {
+      display: block;
+      font-size: 16px;
+      letter-spacing: 2px;
+      color: var(--white);
+      margin-top: 4px;
+    }
+    .event-tag {
+      display: inline-block;
+      margin-top: 24px;
+      font-size: 8px;
+      letter-spacing: 3px;
+      color: var(--gold);
+      text-transform: uppercase;
+      border: 1px solid rgba(201,168,76,0.35);
+      padding: 5px 12px;
+      align-self: flex-start;
+    }
+
+    /* RIGHT: info panel */
+    .event-info-panel {
+      padding: 40px 40px 40px 40px;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+    .event-name {
+      font-family: 'Anton', sans-serif;
+      font-size: clamp(28px, 4vw, 48px);
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: var(--white);
+      line-height: 1.1;
+    }
+    .event-desc {
+      font-size: 11px;
+      letter-spacing: 2px;
+      line-height: 2;
+      color: rgba(255,255,255,0.45);
+      text-transform: uppercase;
+      max-width: 480px;
+    }
+
+    /* venue + map */
+    .event-venue-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 32px;
+    }
+    .event-venue-info { flex: 1; }
+    .event-venue-label {
+      font-size: 9px;
+      letter-spacing: 4px;
+      color: var(--gold);
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+    .event-venue-name {
+      font-size: 16px;
+      letter-spacing: 2px;
+      color: var(--white);
+      text-transform: uppercase;
+    }
+    .event-venue-address {
+      font-size: 10px;
+      letter-spacing: 2px;
+      color: rgba(255,255,255,0.4);
+      text-transform: uppercase;
+      margin-top: 4px;
+    }
+    .event-map {
+      width: 500px;
+      height: 360px;
+      border: 1px solid rgba(201,168,76,0.2);
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    .event-map iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+    .event-directions {
+      display: inline-block;
+      margin-top: 10px;
+      font-size: 8px;
+      letter-spacing: 3px;
+      color: var(--gold);
+      text-transform: uppercase;
+      text-decoration: none;
+      border-bottom: 1px solid rgba(201,168,76,0.3);
+      padding-bottom: 2px;
+      transition: border-color 0.3s;
+    }
+    .event-directions:hover { border-color: var(--gold); }
+
+    /* lineup */
+    .event-lineup-label {
+      font-size: 9px;
+      letter-spacing: 4px;
+      color: var(--gold);
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+    .event-lineup {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+    }
+    .event-gunslinger {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      text-decoration: none;
+    }
+    .event-gunslinger img {
+      width: 140px;
+      height: 190px;
+      object-fit: cover;
+      object-position: top center;
+      filter: grayscale(0.3);
+      transition: filter 0.3s;
+    }
+    .event-gunslinger:hover img { filter: grayscale(0); }
+    .event-gunslinger-name {
+      font-size: 8px;
+      letter-spacing: 3px;
+      color: rgba(255,255,255,0.6);
+      text-transform: uppercase;
+      transition: color 0.3s;
+    }
+    .event-gunslinger:hover .event-gunslinger-name { color: var(--gold); }
+
+    /* ticket */
+    .event-ticket-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-top: 1px solid rgba(201,168,76,0.1);
+      padding-top: 24px;
+    }
+    .event-ticket-info { }
+    .event-ticket-label {
+      font-size: 9px;
+      letter-spacing: 4px;
+      color: rgba(255,255,255,0.35);
+      text-transform: uppercase;
+    }
+    .event-ticket-price {
+      font-family: 'Anton', sans-serif;
+      font-size: 22px;
+      color: var(--gold);
+      letter-spacing: 2px;
+      margin-top: 4px;
+    }
+    .event-cta {
+      font-family: 'Oswald', sans-serif;
+      font-size: 10px;
+      letter-spacing: 4px;
+      color: var(--black);
+      text-transform: uppercase;
+      background: var(--gold);
+      padding: 12px 28px;
+      text-decoration: none;
+      transition: background 0.3s, color 0.3s;
+    }
+    .event-cta:hover { background: var(--white); }
+
+    /* ── FOOTER ── */
+    footer {
+      border-top: 1px solid rgba(201,168,76,0.1);
+      text-align: center;
+      padding: 32px 40px;
+      font-size: 9px;
+      letter-spacing: 4px;
+      color: rgba(255,255,255,0.2);
+      text-transform: uppercase;
+    }
+
+    @media (max-width: 800px) {
+      .event-block { grid-template-columns: 1fr; }
+      .event-date-panel { border-right: none; border-bottom: 1px solid rgba(201,168,76,0.15); }
+      .event-venue-row { flex-direction: column; }
+      .event-map { width: 100%; }
+      .events-list { padding: 40px 24px 80px; }
+      .nav { padding: 0 20px; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="nav">
+    <a class="nav-logo" href="index.html">
+      <img src="REVOLVER_NEW__PUTIH_.png" alt="Revolver Collective" style="height:32px; display:block;" />
+    </a>
+    <ul class="nav-links">
+      <li><a href="index.html#top">Home</a></li>
+      <li><a href="index.html#members">Members</a></li>
+      <li class="nav-dropdown">
+        <a href="#">Events</a>
+        <div class="nav-dropdown-menu">
+          <a href="upcoming-events.html">Upcoming Events</a>
+          <a href="recap-photo.html">Recap Photo</a>
+        </div>
+      </li>
+      <li><a href="index.html#about">About</a></li>
+      <li><a href="index.html#contact">Contact</a></li>
+    </ul>
+  </nav>
+
+  <div class="page-header">
+    <div class="page-header-label">Revolver Collective</div>
+    <div class="page-header-title">Upcoming Events</div>
+    <div class="page-header-rule"><div class="page-header-rule-diamond"></div></div>
+  </div>
+
+  <div class="events-list" id="events-list">
+    <div style="text-align:center;padding:60px;font-size:10px;letter-spacing:3px;color:rgba(255,255,255,0.3);">LOADING EVENTS...</div>
+  </div>
+
+  <footer>
+    © 2026 Revolver Collective &nbsp;·&nbsp; Yogyakarta, Indonesia
+  </footer>
+
+  <script>
+    const SUPABASE_URL = 'https://bglpsruvpscbupltihzs.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJnbHBzcnV2cHNjYnVwbHRpaHpzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE1MzkzMjgsImV4cCI6MjA5NzExNTMyOH0.C2d3XtZdE2XSoSKVIDnJU1OQng5tuv_e9Ld8i3vM53E';
+
+    const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    const MEMBERS_IMAGES = { Dheka: 'images/dheka.png', DUVM: 'images/duvm.png', Rellion: 'images/rellion.png', Divent: 'images/divent.png', Ravenz: 'images/ravenz.png', Wizzkey: 'images/wizzkey.png' };
+    const MEMBERS_LINKS = { Dheka: 'dheka.html', DUVM: 'duvm.html', Rellion: 'rellion.html', Divent: 'divent.html', Ravenz: 'ravenz.html', Wizzkey: 'wizzkey.html' };
+
+    async function loadEvents() {
+      try {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/events?order=date.asc`, {
+          headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+        });
+        const events = await res.json();
+        const list = document.getElementById('events-list');
+
+        if (!events.length) {
+          list.innerHTML = '<div style="text-align:center;padding:60px;font-size:10px;letter-spacing:3px;color:rgba(255,255,255,0.3);">NO UPCOMING EVENTS</div>';
+          return;
+        }
+
+        list.innerHTML = events.map(ev => {
+          const d = new Date(ev.date);
+          const day = d.getDate().toString().padStart(2,'0');
+          const monthYear = MONTHS[d.getMonth()] + ' ' + d.getFullYear();
+          const lineup = (ev.lineup || []).map(m => `
+            <a class="event-gunslinger" href="${MEMBERS_LINKS[m] || '#'}">
+              <img src="${MEMBERS_IMAGES[m] || 'images/dheka.png'}" alt="${m}" />
+              <span class="event-gunslinger-name">${m}</span>
+            </a>`).join('');
+
+          return `
+          <div class="event-block">
+            <div class="event-date-panel">
+              <div>
+                <div class="event-day">${day}</div>
+                <div class="event-month-year">${monthYear}</div>
+                <div class="event-time">Door Open<span>${ev.time || '21:00'} WIB</span></div>
+                <span class="event-tag">${ev.tag || ''}</span>
+              </div>
+            </div>
+            <div class="event-info-panel">
+              <div class="event-name">${ev.name}</div>
+              <div class="event-desc">${ev.description || ''}</div>
+              <div class="event-venue-row">
+                <div class="event-venue-info">
+                  <div class="event-venue-label">Venue</div>
+                  <div class="event-venue-name">${ev.venue}</div>
+                  <div class="event-venue-address">${ev.city}, Indonesia</div>
+                  <a class="event-directions" href="https://maps.google.com/?q=${encodeURIComponent(ev.venue + ' ' + ev.city)}" target="_blank" rel="noopener">↗ Get Directions</a>
+                </div>
+                <div class="event-map">
+                  <iframe src="https://www.google.com/maps/embed/v1/search?key=AIzaSyD-9tSrke72PouQMnMX-a7eZSW0jkFMBWY&q=${encodeURIComponent(ev.venue + ' ' + ev.city)}" allowfullscreen loading="eager" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                </div>
+              </div>
+              <div>
+                <div class="event-lineup-label">Lineup</div>
+                <div class="event-lineup">${lineup}</div>
+              </div>
+              <div class="event-ticket-row">
+                <div class="event-ticket-info">
+                  <div class="event-ticket-label">Entry</div>
+                  <div class="event-ticket-price">${ev.entry || 'TBA'}</div>
+                </div>
+                <a class="event-cta" href="https://www.instagram.com/rvlvr.collective/" target="_blank" rel="noopener">More Info</a>
+              </div>
+            </div>
+          </div>`;
+        }).join('');
+
+      } catch(e) {
+        console.error('Failed to load events:', e);
+        document.getElementById('events-list').innerHTML = '<div style="text-align:center;padding:60px;font-size:10px;letter-spacing:3px;color:rgba(255,255,255,0.3);">FAILED TO LOAD EVENTS</div>';
+      }
+    }
+
+    loadEvents();
+  </script>
+</body>
+</html>

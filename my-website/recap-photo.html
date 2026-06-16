@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Recap Photo – Revolver Collective</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Oswald:wght@300;400;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --gold: #c9a84c;
+      --black: #070707;
+      --white: #f0ede6;
+    }
+
+    body {
+      background: var(--black);
+      color: var(--white);
+      font-family: 'Oswald', sans-serif;
+      min-height: 100dvh;
+    }
+
+    /* ── NAV ── */
+    .nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 9000;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 40px;
+      height: 70px;
+      background: rgba(7,7,7,0.88);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(201,168,76,0.12);
+    }
+    .nav-logo { text-decoration: none; }
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 36px;
+      list-style: none;
+    }
+    .nav-links > li > a {
+      font-family: 'Oswald', sans-serif;
+      font-weight: 400;
+      font-size: 15px;
+      letter-spacing: 3px;
+      color: rgba(240,237,230,0.5);
+      text-decoration: none;
+      text-transform: uppercase;
+      transition: color 0.3s;
+    }
+    .nav-links > li > a:hover { color: var(--gold); }
+    .nav-dropdown { position: relative; }
+    .nav-dropdown > a::after { content: ' ▾'; font-size: 9px; opacity: 0.5; }
+    .nav-dropdown-menu {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: -35px;
+      background: rgba(10,9,8,0.97);
+      border: 1px solid rgba(201,168,76,0.15);
+      width: 160px;
+      padding: 8px 0;
+    }
+    .nav-dropdown:hover .nav-dropdown-menu { display: block; }
+    .nav-dropdown-menu a {
+      display: block;
+      padding: 10px 16px;
+      font-family: 'Oswald', sans-serif;
+      font-size: 10px;
+      letter-spacing: 3px;
+      color: rgba(240,237,230,0.45);
+      text-decoration: none;
+      text-transform: uppercase;
+      transition: color 0.2s, background 0.2s;
+    }
+    .nav-dropdown-menu a:hover { color: var(--gold); background: rgba(201,168,76,0.05); }
+
+    /* ── PAGE HEADER ── */
+    .page-header {
+      padding: 120px 40px 60px;
+      text-align: center;
+      border-bottom: 1px solid rgba(201,168,76,0.1);
+    }
+    .page-header-label {
+      font-size: 10px;
+      letter-spacing: 6px;
+      color: var(--gold);
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+    .page-header-title {
+      font-family: 'Anton', sans-serif;
+      font-size: clamp(36px, 6vw, 72px);
+      letter-spacing: 6px;
+      text-transform: uppercase;
+      color: var(--white);
+    }
+    .page-header-rule {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 200px;
+      margin: 24px auto 0;
+    }
+    .page-header-rule::before, .page-header-rule::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+    }
+    .page-header-rule::before { background: linear-gradient(to right, transparent, var(--gold)); }
+    .page-header-rule::after  { background: linear-gradient(to left,  transparent, var(--gold)); }
+    .page-header-rule-diamond {
+      width: 5px; height: 5px;
+      background: var(--gold);
+      transform: rotate(45deg);
+      margin: 0 10px;
+      flex-shrink: 0;
+    }
+
+    /* ── GALLERY WRAPPER ── */
+    .gallery-wrapper {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 60px 40px 100px;
+    }
+
+    /* ── EVENT SECTION ── */
+    .event-section {
+      margin-bottom: 80px;
+    }
+    .event-section-header {
+      display: flex;
+      align-items: baseline;
+      gap: 20px;
+      margin-bottom: 28px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid rgba(201,168,76,0.15);
+    }
+    .event-section-name {
+      font-family: 'Anton', sans-serif;
+      font-size: 28px;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: var(--white);
+    }
+    .event-section-date {
+      font-size: 10px;
+      letter-spacing: 4px;
+      color: var(--gold);
+      text-transform: uppercase;
+    }
+    .event-section-venue {
+      font-size: 10px;
+      letter-spacing: 3px;
+      color: rgba(255,255,255,0.3);
+      text-transform: uppercase;
+      margin-left: auto;
+    }
+
+    /* ── MASONRY GRID ── */
+    .masonry {
+      columns: 3;
+      column-gap: 8px;
+    }
+    .masonry-item {
+      break-inside: avoid;
+      margin-bottom: 8px;
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+    }
+    .masonry-item img {
+      width: 100%;
+      display: block;
+      transition: transform 0.5s ease, filter 0.4s ease;
+      filter: brightness(0.85);
+    }
+    .masonry-item:hover img {
+      transform: scale(1.04);
+      filter: brightness(1);
+    }
+    .masonry-item-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(0,0,0,0.5) 0%, transparent 50%);
+      opacity: 0;
+      transition: opacity 0.4s;
+    }
+    .masonry-item:hover .masonry-item-overlay { opacity: 1; }
+
+    /* ── LIGHTBOX ── */
+    .lightbox {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      background: rgba(0,0,0,0.95);
+      align-items: center;
+      justify-content: center;
+    }
+    .lightbox.active { display: flex; }
+    .lightbox-img {
+      max-width: 90vw;
+      max-height: 90dvh;
+      object-fit: contain;
+    }
+    .lightbox-close {
+      position: absolute;
+      top: 24px;
+      right: 32px;
+      font-family: 'Oswald', sans-serif;
+      font-size: 12px;
+      letter-spacing: 4px;
+      color: rgba(255,255,255,0.5);
+      cursor: pointer;
+      text-transform: uppercase;
+      transition: color 0.3s;
+    }
+    .lightbox-close:hover { color: var(--gold); }
+    .lightbox-prev, .lightbox-next {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 24px;
+      color: rgba(255,255,255,0.3);
+      cursor: pointer;
+      padding: 20px;
+      transition: color 0.3s;
+      user-select: none;
+    }
+    .lightbox-prev { left: 20px; }
+    .lightbox-next { right: 20px; }
+    .lightbox-prev:hover, .lightbox-next:hover { color: var(--gold); }
+    .lightbox-counter {
+      position: absolute;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 9px;
+      letter-spacing: 4px;
+      color: rgba(255,255,255,0.3);
+      text-transform: uppercase;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      border-top: 1px solid rgba(201,168,76,0.1);
+      text-align: center;
+      padding: 32px 40px;
+      font-size: 9px;
+      letter-spacing: 4px;
+      color: rgba(255,255,255,0.2);
+      text-transform: uppercase;
+    }
+
+    @media (max-width: 800px) {
+      .masonry { columns: 2; }
+      .gallery-wrapper { padding: 40px 20px 80px; }
+      .nav { padding: 0 20px; }
+      .event-section-header { flex-wrap: wrap; }
+      .event-section-venue { margin-left: 0; }
+    }
+    @media (max-width: 480px) {
+      .masonry { columns: 1; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="nav">
+    <a class="nav-logo" href="index.html">
+      <img src="REVOLVER_NEW__PUTIH_.png" alt="Revolver Collective" style="height:32px; display:block;" />
+    </a>
+    <ul class="nav-links">
+      <li><a href="index.html#top">Home</a></li>
+      <li><a href="index.html#members">Members</a></li>
+      <li class="nav-dropdown">
+        <a href="#">Events</a>
+        <div class="nav-dropdown-menu">
+          <a href="upcoming-events.html">Upcoming Events</a>
+          <a href="recap-photo.html">Recap Photo</a>
+        </div>
+      </li>
+      <li><a href="index.html#about">About</a></li>
+      <li><a href="index.html#contact">Contact</a></li>
+    </ul>
+  </nav>
+
+  <div class="page-header">
+    <div class="page-header-label">Revolver Collective</div>
+    <div class="page-header-title">Recap Photo</div>
+    <div class="page-header-rule"><div class="page-header-rule-diamond"></div></div>
+  </div>
+
+  <div class="gallery-wrapper">
+
+    <!-- EVENT 1 -->
+    <div class="event-section">
+      <div class="event-section-header">
+        <div class="event-section-name">Night Frequency</div>
+        <div class="event-section-date">21 June 2026</div>
+        <div class="event-section-venue">Liquid Bar & Resto, Yogyakarta</div>
+      </div>
+      <div class="masonry" id="gallery-1">
+        <div class="masonry-item" onclick="openLightbox(0, 0)">
+          <img src="https://picsum.photos/seed/nf1/600/800" alt="Night Frequency" />
+          <div class="masonry-item-overlay"></div>
+        </div>
+        <div class="masonry-item" onclick="openLightbox(0, 1)">
+          <img src="https://picsum.photos/seed/nf2/600/400" alt="Night Frequency" />
+          <div class="masonry-item-overlay"></div>
+        </div>
+        <div class="masonry-item" onclick="openLightbox(0, 2)">
+          <img src="https://picsum.photos/seed/nf3/600/700" alt="Night Frequency" />
+          <div class="masonry-item-overlay"></div>
+        </div>
+        <div class="masonry-item" onclick="openLightbox(0, 3)">
+          <img src="https://picsum.photos/seed/nf4/600/500" alt="Night Frequency" />
+          <div class="masonry-item-overlay"></div>
+        </div>
+        <div class="masonry-item" onclick="openLightbox(0, 4)">
+          <img src="https://picsum.photos/seed/nf5/600/900" alt="Night Frequency" />
+          <div class="masonry-item-overlay"></div>
+        </div>
+        <div class="masonry-item" onclick="openLightbox(0, 5)">
+          <img src="https://picsum.photos/seed/nf6/600/600" alt="Night Frequency" />
+          <div class="masonry-item-overlay"></div>
+        </div>
+        <div class="masonry-item" onclick="openLightbox(0, 6)">
+          <img src="https://picsum.photos/seed/nf7/600/450" alt="Night Frequency" />
+          <div class="masonry-item-overlay"></div>
+        </div>
+        <div class="masonry-item" onclick="openLightbox(0, 7)">
+          <img src="https://picsum.photos/seed/nf8/600/750" alt="Night Frequency" />
+          <div class="masonry-item-overlay"></div>
+        </div>
+        <div class="masonry-item" onclick="openLightbox(0, 8)">
+          <img src="https://picsum.photos/seed/nf9/600/500" alt="Night Frequency" />
+          <div class="masonry-item-overlay"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- EVENT 2 -->
+    <div class="event-section">
+      <div class="event-section-header">
+        <div class="event-section-name">Gunslinger Sessions</div>
+        <div class="event-section-date">05 July 2026</div>
+        <div class="event-section-venue">Five Seven, Yogyakarta</div>
+      </div>
+      <div class="masonry" id="gallery-2">
+        <div class="masonry-item" onclick="openLightbox(1, 0)">
+          <img src="https://picsum.photos/seed/gs1/600/700" alt="Gunslinger Sessions" />
+          <div class="masonry-item-overlay"></div>
+        </div>
+        <div class="masonry-item" onclick="openLightbox(1, 1)">
+          <img src="https://picsum.photos/seed/gs2/600/500" alt="Gunslinger Sessions" />
+          <div class="masonry-item-overlay"></div>
+        </div>
+        <div class="masonry-item" onclick="openLightbox(1, 2)">
+          <img src="https://picsum.photos/seed/gs3/600/800" alt="Gunslinger Sessions" />
+          <div class="masonry-item-overlay"></div>
+        </div>
+        <div class="masonry-item" onclick="openLightbox(1, 3)">
+          <img src="https://picsum.photos/seed/gs4/600/600" alt="Gunslinger Sessions" />
+          <div class="masonry-item-overlay"></div>
+        </div>
+        <div class="masonry-item" onclick="openLightbox(1, 4)">
+          <img src="https://picsum.photos/seed/gs5/600/450" alt="Gunslinger Sessions" />
+          <div class="masonry-item-overlay"></div>
+        </div>
+        <div class="masonry-item" onclick="openLightbox(1, 5)">
+          <img src="https://picsum.photos/seed/gs6/600/900" alt="Gunslinger Sessions" />
+          <div class="masonry-item-overlay"></div>
+        </div>
+        <div class="masonry-item" onclick="openLightbox(1, 6)">
+          <img src="https://picsum.photos/seed/gs7/600/550" alt="Gunslinger Sessions" />
+          <div class="masonry-item-overlay"></div>
+        </div>
+        <div class="masonry-item" onclick="openLightbox(1, 7)">
+          <img src="https://picsum.photos/seed/gs8/600/700" alt="Gunslinger Sessions" />
+          <div class="masonry-item-overlay"></div>
+        </div>
+        <div class="masonry-item" onclick="openLightbox(1, 8)">
+          <img src="https://picsum.photos/seed/gs9/600/400" alt="Gunslinger Sessions" />
+          <div class="masonry-item-overlay"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- EVENT 3 -->
+    <div class="event-section">
+      <div class="event-section-header">
+        <div class="event-section-name">Bass & Gold</div>
+        <div class="event-section-date">19 July 2026</div>
+        <div class="event-section-venue">Bounty Discotheque, Bali</div>
+      </div>
+      <div class="masonry" id="gallery-3">
+        <div class="masonry-item" onclick="openLightbox(2, 0)">
+          <img src="https://picsum.photos/seed/bg1/600/600" alt="Bass & Gold" />
+          <div class="masonry-item-overlay"></div>
+        </div>
+        <div class="masonry-item" onclick="openLightbox(2, 1)">
+          <img src="https://picsum.photos/seed/bg2/600/800" alt="Bass & Gold" />
+          <div class="masonry-item-overlay"></div>
+        </div>
+        <div class="masonry-item" onclick="openLightbox(2, 2)">
+          <img src="https://picsum.photos/seed/bg3/600/500" alt="Bass & Gold" />
+          <div class="masonry-item-overlay"></div>
+        </div>
+        <div class="masonry-item" onclick="openLightbox(2, 3)">
+          <img src="https://picsum.photos/seed/bg4/600/700" alt="Bass & Gold" />
+          <div class="masonry-item-overlay"></div>
+        </div>
+        <div class="masonry-item" onclick="openLightbox(2, 4)">
+          <img src="https://picsum.photos/seed/bg5/600/900" alt="Bass & Gold" />
+          <div class="masonry-item-overlay"></div>
+        </div>
+        <div class="masonry-item" onclick="openLightbox(2, 5)">
+          <img src="https://picsum.photos/seed/bg6/600/450" alt="Bass & Gold" />
+          <div class="masonry-item-overlay"></div>
+        </div>
+        <div class="masonry-item" onclick="openLightbox(2, 6)">
+          <img src="https://picsum.photos/seed/bg7/600/650" alt="Bass & Gold" />
+          <div class="masonry-item-overlay"></div>
+        </div>
+        <div class="masonry-item" onclick="openLightbox(2, 7)">
+          <img src="https://picsum.photos/seed/bg8/600/500" alt="Bass & Gold" />
+          <div class="masonry-item-overlay"></div>
+        </div>
+        <div class="masonry-item" onclick="openLightbox(2, 8)">
+          <img src="https://picsum.photos/seed/bg9/600/750" alt="Bass & Gold" />
+          <div class="masonry-item-overlay"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- LIGHTBOX -->
+  <div class="lightbox" id="lightbox" onclick="closeLightbox(event)">
+    <div class="lightbox-close" onclick="closeLightbox()">✕ Close</div>
+    <div class="lightbox-prev" onclick="event.stopPropagation(); navigate(-1)">‹</div>
+    <img class="lightbox-img" id="lightbox-img" src="" alt="" />
+    <div class="lightbox-next" onclick="event.stopPropagation(); navigate(1)">›</div>
+    <div class="lightbox-counter" id="lightbox-counter"></div>
+  </div>
+
+  <footer>
+    © 2026 Revolver Collective &nbsp;·&nbsp; Yogyakarta, Indonesia
+  </footer>
+
+  <script>
+    const galleries = [
+      [...document.querySelectorAll('#gallery-1 img')].map(i => i.src),
+      [...document.querySelectorAll('#gallery-2 img')].map(i => i.src),
+      [...document.querySelectorAll('#gallery-3 img')].map(i => i.src),
+    ];
+
+    let currentGallery = 0;
+    let currentIndex = 0;
+
+    function openLightbox(gallery, index) {
+      currentGallery = gallery;
+      currentIndex = index;
+      updateLightbox();
+      document.getElementById('lightbox').classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeLightbox(e) {
+      if (e && e.target !== document.getElementById('lightbox') && !e.target.classList.contains('lightbox-close')) return;
+      document.getElementById('lightbox').classList.remove('active');
+      document.body.style.overflow = '';
+    }
+
+    function navigate(dir) {
+      const imgs = galleries[currentGallery];
+      currentIndex = (currentIndex + dir + imgs.length) % imgs.length;
+      updateLightbox();
+    }
+
+    function updateLightbox() {
+      const imgs = galleries[currentGallery];
+      document.getElementById('lightbox-img').src = imgs[currentIndex];
+      document.getElementById('lightbox-counter').textContent = (currentIndex + 1) + ' / ' + imgs.length;
+    }
+
+    document.addEventListener('keydown', e => {
+      if (!document.getElementById('lightbox').classList.contains('active')) return;
+      if (e.key === 'ArrowLeft') navigate(-1);
+      if (e.key === 'ArrowRight') navigate(1);
+      if (e.key === 'Escape') { document.getElementById('lightbox').classList.remove('active'); document.body.style.overflow = ''; }
+    });
+  </script>
+
+</body>
+</html>

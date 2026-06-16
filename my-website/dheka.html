@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dheka – Revolver Collective</title>
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Oswald:wght@300;400;600;700&family=Inter:wght@300;400&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --gold: #ffd700;
+      --gold-dim: #8a6e2f;
+      --white: #f0ede6;
+      --black: #070707;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--black);
+      color: var(--white);
+      font-family: 'Inter', sans-serif;
+      overflow-x: hidden;
+    }
+
+    /* Grain */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      pointer-events: none;
+      opacity: 0.055;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
+      background-size: 180px 180px;
+      mix-blend-mode: overlay;
+    }
+
+    /* ── VENUE COLLAGE BACKGROUND ── */
+    .hero-collage {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      background-image: url('dheka/dheka_background.png');
+      background-size: cover;
+      background-position: center top;
+      opacity: 0.9;
+    }
+
+    /* Scratch lines */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      z-index: 9998;
+      pointer-events: none;
+      background-image:
+        linear-gradient(87deg, transparent 48%, rgba(255,255,255,0.012) 49%, rgba(255,255,255,0.012) 50%, transparent 51%),
+        linear-gradient(91deg, transparent 30%, rgba(255,255,255,0.008) 31%, rgba(255,255,255,0.008) 32%, transparent 33%);
+    }
+
+    /* ── NAV ── */
+    .nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 9000;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 40px;
+      height: 56px;
+      background: rgba(7,7,7,0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(201,168,76,0.15);
+    }
+    .nav-logo {
+      font-family: 'Anton', sans-serif;
+      font-size: 16px;
+      letter-spacing: 4px;
+      color: var(--white);
+      text-decoration: none;
+    }
+    .nav-logo span { color: var(--gold); }
+    .nav-back {
+      font-family: 'Oswald', sans-serif;
+      font-size: 11px;
+      letter-spacing: 3px;
+      color: rgba(255,255,255,0.9);
+      text-decoration: none;
+      text-transform: uppercase;
+      transition: color 0.3s;
+    }
+    .nav-back:hover { color: var(--gold); }
+    .nav-back::before { content: '← '; }
+
+    /* ── HERO ── */
+    .hero {
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      align-items: flex-end;
+      overflow: hidden;
+      padding-top: 56px;
+    }
+
+    .hero-photo {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      object-position: top center;
+      filter: drop-shadow(0 0 0px rgba(255,215,0,0));
+      transition: transform 0.5s ease, filter 0.5s ease;
+    }
+
+    .photo-hover-zone:hover ~ .hero-photo,
+    .photo-hover-zone:hover + .hero-photo {
+      transform: scale(1.04);
+      filter: drop-shadow(0 0 28px rgba(255,215,0,0.6));
+    }
+
+    /* Invisible hover zone over photo */
+    .photo-hover-zone {
+      position: absolute;
+      top: 56px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 55%;
+      height: 90%;
+      z-index: 4;
+      cursor: pointer;
+    }
+    .photo-hover-zone:hover ~ img.hero-photo {
+      transform: scale(1.04);
+    }
+
+    .hero-overlay {
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(to top, rgba(7,7,7,1) 0%, rgba(7,7,7,0.95) 15%, transparent 35%),
+        linear-gradient(to right, rgba(7,7,7,0.7) 0%, rgba(7,7,7,0.2) 45%, transparent 70%);
+    }
+
+    /* Gold accent line left */
+    .hero::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 56px; bottom: 0;
+      width: 3px;
+      background: linear-gradient(180deg, transparent 0%, var(--gold) 30%, var(--gold) 70%, transparent 100%);
+      opacity: 0.4;
+      z-index: 3;
+    }
+
+    .hero-scratch {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 2;
+    }
+    .hero-scratch::before {
+      content: '';
+      position: absolute;
+      top: -10%; left: 35%;
+      width: 1px; height: 130%;
+      background: linear-gradient(180deg, transparent, rgba(255,255,255,0.06) 50%, transparent);
+      transform: rotate(-5deg);
+    }
+    .hero-scratch::after {
+      content: '';
+      position: absolute;
+      top: 20%; right: 20%;
+      width: 1px; height: 70%;
+      background: linear-gradient(180deg, transparent, rgba(255,255,255,0.04) 50%, transparent);
+      transform: rotate(3deg);
+    }
+
+
+
+    .hero-content {
+      position: relative;
+      z-index: 3;
+      padding: 60px 60px 70px 120px;
+      max-width: 680px;
+    }
+
+    .hero-collective {
+      font-family: 'Oswald', sans-serif;
+      font-size: 9px;
+      letter-spacing: 6px;
+      color: var(--gold);
+      text-transform: uppercase;
+      margin-bottom: 14px;
+      opacity: 0.8;
+    }
+
+    .hero-role {
+      font-family: 'Oswald', sans-serif;
+      font-weight: 300;
+      font-size: 11px;
+      letter-spacing: 5px;
+      color: rgba(255,255,255,0.9);
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    .hero-name-img {
+      display: block;
+      width: clamp(210px, 35vw, 480px);
+      filter: drop-shadow(2px 2px 0 rgba(0,0,0,0.9)) drop-shadow(0 0 40px rgba(255,215,0,0.1));
+      margin-bottom: 4px;
+    }
+
+    .hero-realname {
+      font-family: 'Oswald', sans-serif;
+      font-weight: 300;
+      font-size: 12px;
+      letter-spacing: 5px;
+      color: rgba(255,255,255,0.9);
+      text-transform: uppercase;
+      margin-top: 14px;
+      padding-left: 20px;
+    }
+
+    /* Gold rule */
+    .hero-rule {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      margin: 22px 0 18px;
+      width: 180px;
+      padding-left: 20px;
+    }
+    .hero-rule::before, .hero-rule::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+    }
+    .hero-rule::before { background: linear-gradient(to right, transparent, var(--gold)); }
+    .hero-rule::after { background: linear-gradient(to left, transparent, var(--gold)); }
+    .hero-rule-diamond {
+      width: 5px; height: 5px;
+      background: var(--gold);
+      transform: rotate(45deg);
+      margin: 0 8px;
+      flex-shrink: 0;
+    }
+
+    .hero-tagline {
+      font-family: 'Oswald', sans-serif;
+      font-size: 12px;
+      letter-spacing: 5px;
+      color: var(--gold);
+      text-transform: uppercase;
+      font-style: italic;
+      padding-left: 20px;
+    }
+
+    /* About wrapper — flush left */
+    .about-wrapper {
+      padding: 60px 40px 0 52px;
+      max-width: 620px;
+    }
+
+    /* 3-col: About | Genres | Skills */
+    .three-col-wrapper {
+      padding: 60px 40px 0;
+    }
+    .three-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 0 40px;
+      align-items: start;
+    }
+    .three-col > div {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+    .col-top { padding-bottom: 60px; }
+    .col-bottom { padding-top: 0; }
+
+    /* Skills vertical list for 3-col */
+    .skills-grid-v {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+    }
+    .skills-grid-v .skill-item {
+      padding: 8px 12px;
+      text-align: left;
+    }
+
+    /* Spacer between top and bottom sections in each column */
+    .col-spacer { height: 40px; }
+    .col-spacer-lg { height: 120px; }
+    .col-spacer-xl { height: 160px; }
+
+    /* ── CONTENT ── */
+    .content {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 80px 40px;
+    }
+
+    .section { margin-bottom: 80px; }
+
+    /* About section left-aligned */
+    .about-section {
+      max-width: 580px;
+      margin-left: 0;
+      margin-right: auto;
+      padding-left: 0;
+    }
+
+    .section-label {
+      font-family: 'Oswald', sans-serif;
+      font-size: 16px;
+      letter-spacing: 6px;
+      color: var(--gold);
+      text-transform: uppercase;
+      margin-bottom: 28px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .section-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(to right, rgba(201,168,76,0.3), transparent);
+    }
+
+    .about-text {
+      font-size: 15px;
+      line-height: 2.1;
+      color: rgba(255,255,255,0.9);
+      max-width: 580px;
+      border-left: 2px solid rgba(201,168,76,0.3);
+      padding-left: 24px;
+    }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 60px;
+    }
+
+    /* Genres */
+    .genres-list { display: flex; flex-wrap: wrap; gap: 8px; }
+    .genre-tag {
+      font-family: 'Oswald', sans-serif;
+      font-size: 10px;
+      letter-spacing: 3px;
+      color: rgba(255,255,255,0.9);
+      text-transform: uppercase;
+      border: 1px solid rgba(255,255,255,0.08);
+      padding: 7px 14px;
+      transition: border-color 0.3s, color 0.3s;
+    }
+    .genre-tag:hover { border-color: var(--gold); color: var(--gold); }
+
+    /* Experience */
+    .experience-list {
+      list-style: none;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0 24px;
+    }
+    .experience-list li {
+      font-size: 11px;
+      letter-spacing: 1px;
+      color: rgba(255,255,255,0.9);
+      text-transform: uppercase;
+      padding: 7px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+    }
+    .experience-list li::before { content: '— '; color: var(--gold); opacity: 0.4; }
+
+    /* Skills */
+    .skills-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 10px;
+    }
+    .skill-item {
+      border: 1px solid rgba(255,255,255,0.06);
+      padding: 18px 8px;
+      text-align: center;
+      transition: border-color 0.3s, background 0.3s;
+      position: relative;
+      overflow: hidden;
+    }
+    .skill-item::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: var(--gold);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .skill-item:hover { border-color: rgba(201,168,76,0.25); background: rgba(201,168,76,0.03); }
+    .skill-item:hover::before { opacity: 0.5; }
+    .skill-name {
+      font-family: 'Oswald', sans-serif;
+      font-size: 9px;
+      letter-spacing: 2px;
+      color: rgba(255,255,255,0.9);
+      text-transform: uppercase;
+    }
+
+    /* ── SOCIAL + QR ── */
+    .social-links { display: flex; flex-direction: column; gap: 12px; }
+    .social-link {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      text-decoration: none;
+      border: 1px solid rgba(255,255,255,0.07);
+      transition: border-color 0.3s, background 0.3s;
+      overflow: hidden;
+    }
+    .social-link:hover {
+      border-color: rgba(201,168,76,0.35);
+      background: rgba(201,168,76,0.04);
+    }
+    .social-link-left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex: 1;
+      padding: 14px 16px;
+    }
+    .social-link-platform {
+      font-family: 'Oswald', sans-serif;
+      font-size: 9px;
+      letter-spacing: 4px;
+      color: var(--gold);
+      text-transform: uppercase;
+      min-width: 80px;
+    }
+    .social-link-handle {
+      font-size: 11px;
+      color: rgba(255,255,255,0.9);
+      letter-spacing: 1px;
+    }
+    .social-link-qr {
+      width: 56px;
+      height: 56px;
+      object-fit: cover;
+      flex-shrink: 0;
+      filter: invert(1) opacity(0.5);
+      transition: opacity 0.3s;
+    }
+    .social-link:hover .social-link-qr { filter: invert(1) opacity(0.8); }
+
+    /* ── CONTACT FORM ── */
+    .contact-form { display: flex; flex-direction: column; gap: 14px; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .form-group { display: flex; flex-direction: column; gap: 7px; }
+    .form-label {
+      font-family: 'Oswald', sans-serif;
+      font-size: 8px;
+      letter-spacing: 4px;
+      color: var(--gold);
+      text-transform: uppercase;
+    }
+    .form-input, .form-textarea, .form-select {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-bottom: 1px solid rgba(201,168,76,0.2);
+      color: var(--white);
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      padding: 12px 14px;
+      outline: none;
+      transition: border-color 0.3s, background 0.3s;
+      width: 100%;
+    }
+    .form-input:focus, .form-textarea:focus, .form-select:focus {
+      border-color: rgba(201,168,76,0.5);
+      background: rgba(255,255,255,0.05);
+    }
+    .form-select option { background: #0d0c0b; }
+    .form-textarea { resize: vertical; min-height: 110px; }
+    .form-submit {
+      font-family: 'Anton', sans-serif;
+      font-size: 13px;
+      letter-spacing: 5px;
+      color: var(--black);
+      background: var(--gold);
+      border: none;
+      padding: 16px 36px;
+      text-transform: uppercase;
+      cursor: pointer;
+      align-self: flex-start;
+      transition: opacity 0.3s, transform 0.2s;
+    }
+    .form-submit:hover { opacity: 0.85; transform: translateY(-1px); }
+
+    /* ── FOOTER ── */
+    .footer {
+      text-align: center;
+      padding: 44px 24px;
+      border-top: 1px solid rgba(255,255,255,0.05);
+      position: relative;
+    }
+    .footer::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 20%; right: 20%;
+      height: 1px;
+      background: linear-gradient(to right, transparent, var(--gold-dim), transparent);
+      opacity: 0.4;
+    }
+    .footer-collective {
+      font-family: 'Oswald', sans-serif;
+      font-size: 8px;
+      letter-spacing: 6px;
+      color: rgba(255,255,255,0.9);
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+    .footer-back {
+      font-family: 'Oswald', sans-serif;
+      font-size: 10px;
+      letter-spacing: 5px;
+      color: rgba(255,255,255,0.9);
+      text-transform: uppercase;
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+    .footer-back:hover { color: var(--gold); }
+    .footer-back::before { content: '← '; }
+
+
+    @media (max-width: 768px) {
+
+      /* Switch to mobile background */
+      .hero-collage {
+        background-image: url('dheka/dheka_background_mobile.png');
+        background-position: center top;
+        background-size: cover;
+      }
+
+      /* NAV */
+      .nav { padding: 0 20px; }
+      .nav-back { font-size: 9px; letter-spacing: 2px; }
+
+      /* HERO — full screen with background */
+      .hero {
+        min-height: 100dvh;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: flex-end;
+        padding-top: 56px;
+        position: relative;
+      }
+
+      /* Photo: positioned in the black center area */
+      .hero-photo {
+        position: absolute !important;
+        inset: unset !important;
+        top: 20% !important;
+        left: 4% !important;
+        transform: none !important;
+        width: 90% !important;
+        height: auto !important;
+        object-fit: contain !important;
+        object-position: center !important;
+        display: block !important;
+        margin: 0 !important;
+        z-index: 2 !important;
+        filter: drop-shadow(0 0 20px rgba(255,215,0,0.45)) !important;
+        animation: none !important;
+      }
+
+      .photo-hover-zone { display: none; }
+
+      /* Content: bottom left corner */
+      .hero-content {
+        position: relative !important;
+        z-index: 3;
+        padding: 0 20px 40px !important;
+        max-width: 100% !important;
+        width: 100%;
+        margin-top: auto;
+      }
+
+      /* Font name: left aligned */
+      .hero-name-img {
+        width: clamp(140px, 55vw, 260px) !important;
+        margin: 0 0 10px 0 !important;
+        display: block;
+      }
+
+      .hero-collective { font-size: 9px; letter-spacing: 3px; }
+      .hero-role { font-size: 9px; letter-spacing: 2px; margin-top: 4px; }
+      .hero-realname { font-size: 10px; letter-spacing: 3px; padding-left: 0 !important; margin-top: 10px; }
+      .hero-rule { padding-left: 0 !important; margin: 12px 0 10px; }
+      .hero-tagline { font-size: 10px; letter-spacing: 3px; padding-left: 0 !important; }
+
+      /* CONTENT */
+      .content { padding: 40px 20px 60px; }
+      .three-col-wrapper { padding: 40px 20px 0; }
+      .three-col {
+        grid-template-columns: 1fr !important;
+        gap: 0 !important;
+      }
+      .col-top { padding-bottom: 32px; }
+      .col-bottom { padding-bottom: 32px; }
+
+      /* SKILLS */
+      .skills-grid-v { grid-template-columns: repeat(2, 1fr) !important; }
+
+      /* EXPERIENCE */
+      .experience-list { grid-template-columns: 1fr !important; }
+
+      /* GENRES */
+      .genres-list { gap: 6px; }
+      .genre-tag { font-size: 8px; padding: 5px 10px; }
+
+      /* SOCIAL LINKS */
+      .social-link { padding: 14px 16px; }
+      .social-link-platform { font-size: 8px; letter-spacing: 3px; min-width: 70px; }
+      .social-link-handle { font-size: 11px; }
+      .social-link-qr { width: 48px; height: 48px; }
+
+      /* BOOKING FORM */
+      .form-row { grid-template-columns: 1fr !important; }
+
+      /* SECTION LABEL */
+      .section-label { font-size: 9px; letter-spacing: 4px; }
+    }
+
+    /* Desktop — static glow on hover only, no animation */
+    @media (min-width: 769px) {
+      .hero-photo {
+        animation: none !important;
+        filter: drop-shadow(0 0 0px rgba(255,215,0,0)) !important;
+        transition: filter 0.4s ease, transform 0.5s ease !important;
+      }
+      .photo-hover-zone:hover ~ .hero-photo,
+      .photo-hover-zone:hover + .hero-photo {
+        filter: drop-shadow(0 0 24px rgba(255,215,0,0.55)) !important;
+        transform: scale(1.04) !important;
+      }
+    }
+
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav class="nav">
+    <a class="nav-logo" href="index.html"><img src="REVOLVER_NEW__PUTIH_.png" alt="Revolver Collective" style="height:32px; display:block;" /></a>
+    <a class="nav-back" href="index.html">Back to Collective</a>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-collage"></div>
+    <div class="photo-hover-zone"></div>
+    <img class="hero-photo" src="images/dheka.png" alt="Dheka" />
+    <div class="hero-overlay"></div>
+    <div class="hero-scratch"></div>
+    <div class="hero-content">
+      <div class="hero-collective">01 / 06 &nbsp;·&nbsp; Revolver Collective</div>
+      <div class="hero-role">Open Format DJ &nbsp;·&nbsp; Club · Event · Wedding · Festival</div>
+      <img class="hero-name-img" src="dheka/dheka_font.png" alt="Dheka" />
+      <div class="hero-realname">Mahardika Saputra</div>
+      <div class="hero-rule"><div class="hero-rule-diamond"></div></div>
+      <div class="hero-tagline">Live the Moment. Feel the Beat.</div>
+    </div>
+  </section>
+
+  <!-- CONTENT -->
+
+  <!-- ABOUT / GENRES / SKILLS — top row -->
+  <div class="three-col-wrapper">
+    <div class="three-col">
+
+      <!-- COL 1 TOP: ABOUT -->
+      <div class="col-top">
+        <div class="section-label">About</div>
+        <p class="about-text">Known for energetic performances and crowd-focused music selection, Dheka brings a dynamic atmosphere to every event. Combining modern electronic sounds, clean transitions, and engaging performance energy, his goal is to create unforgettable nightlife experiences that keep audiences moving all night.</p>
+      </div>
+
+      <!-- COL 2 TOP: GENRES -->
+      <div class="col-top">
+        <div class="section-label">Genres</div>
+        <div class="genres-list">
+          <span class="genre-tag">RnB Hiphop</span>
+          <span class="genre-tag">Amapiano</span>
+          <span class="genre-tag">House</span>
+          <span class="genre-tag">Progressive House</span>
+          <span class="genre-tag">Tech House</span>
+          <span class="genre-tag">Afro House</span>
+          <span class="genre-tag">Deep House</span>
+          <span class="genre-tag">Pop</span>
+          <span class="genre-tag">Indobounce</span>
+          <span class="genre-tag">Top 40</span>
+          <span class="genre-tag">EDM</span>
+        </div>
+      </div>
+
+      <!-- COL 3 TOP: SKILLS -->
+      <div class="col-top">
+        <div class="section-label">Skills</div>
+        <div class="skills-grid-v">
+          <div class="skill-item"><div class="skill-name">Beatmatching</div></div>
+          <div class="skill-item"><div class="skill-name">Crowd Reading</div></div>
+          <div class="skill-item"><div class="skill-name">Music Mixing</div></div>
+          <div class="skill-item"><div class="skill-name">Creative Mixing</div></div>
+          <div class="skill-item"><div class="skill-name">Playlist Curation</div></div>
+          <div class="skill-item"><div class="skill-name">Remix & Mashup</div></div>
+          <div class="skill-item"><div class="skill-name">Live Performance</div></div>
+          <div class="skill-item"><div class="skill-name">Rekordbox</div></div>
+          <div class="skill-item"><div class="skill-name">FL Studio</div></div>
+          <div class="skill-item"><div class="skill-name">Studio One</div></div>
+        </div>
+      </div>
+
+      <!-- COL 1 BOTTOM: EXPERIENCE -->
+      <div class="col-bottom">
+        <div class="section-label">Experience</div>
+        <ul class="experience-list">
+          <li>Terrace Club & Karaoke</li>
+          <li>Liquid Bar & Resto</li>
+          <li>Five Seven</li>
+          <li>C28 Malioboro</li>
+          <li>Sakapatat Beer House</li>
+          <li>Barley and Barrel</li>
+          <li>TIP TAP TOE</li>
+          <li>Bounty Discotheque Bali</li>
+          <li>Marriot Hotel Yogyakarta</li>
+          <li>Jambuluwuk Hotel</li>
+          <li>Fave Hotel Malioboro</li>
+          <li>Gaia Cosms Hotel</li>
+          <li>JRNY Coffee & Records</li>
+          <li>Jogja Expo Center</li>
+        </ul>
+      </div>
+
+      <!-- COL 2 BOTTOM: FIND ME -->
+      <div class="col-bottom">
+        <div class="section-label">Find Me</div>
+        <div class="social-links">
+          <a class="social-link" href="https://www.instagram.com/dj.dheka" target="_blank" rel="noopener">
+            <div class="social-link-left">
+              <span class="social-link-platform">Instagram</span>
+              <span class="social-link-handle">@dj.dheka</span>
+            </div>
+            <img class="social-link-qr" src="dheka/instagram_Dheka.png" alt="Instagram QR" />
+          </a>
+          <a class="social-link" href="https://soundcloud.com/mahardheka" target="_blank" rel="noopener">
+            <div class="social-link-left">
+              <span class="social-link-platform">Soundcloud</span>
+              <span class="social-link-handle">soundcloud.com/mahardheka</span>
+            </div>
+            <img class="social-link-qr" src="dheka/soundcloud_Dheka.png" alt="SoundCloud QR" />
+          </a>
+          <a class="social-link" href="https://www.mixcloud.com/DJMahardika/" target="_blank" rel="noopener">
+            <div class="social-link-left">
+              <span class="social-link-platform">Mixcloud</span>
+              <span class="social-link-handle">mixcloud.com/DJMahardika</span>
+            </div>
+            <img class="social-link-qr" src="dheka/mixcloud_Dheka.png" alt="Mixcloud QR" />
+          </a>
+          <a class="social-link" href="https://www.youtube.com/channel/UCcLRU817njkm9-BoytkD_3A" target="_blank" rel="noopener">
+            <div class="social-link-left">
+              <span class="social-link-platform">YouTube</span>
+              <span class="social-link-handle">Dheka Official</span>
+            </div>
+            <img class="social-link-qr" src="dheka/youtube_dheka.png" alt="YouTube QR" />
+          </a>
+        </div>
+      </div>
+
+      <!-- COL 3 BOTTOM: BOOK DHEKA -->
+      <div class="col-bottom">
+        <div class="section-label">Book Dheka</div>
+        <form class="contact-form" onsubmit="handleSubmit(event)">
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Your Name</label>
+              <input class="form-input" type="text" placeholder="Full name" required />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Your Instagram</label>
+              <input class="form-input" type="text" placeholder="@yourhandle" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Event Type</label>
+            <select class="form-select" required>
+              <option value="" disabled selected>Select event type</option>
+              <option>Club Night</option>
+              <option>Private Party</option>
+              <option>Wedding</option>
+              <option>Corporate Event</option>
+              <option>Festival</option>
+              <option>Cafe / Bar</option>
+              <option>Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Event Date</label>
+            <input class="form-input" type="date" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Message</label>
+            <textarea class="form-textarea" placeholder="Tell me about your event — venue, time, vibe..."></textarea>
+          </div>
+          <button class="form-submit" type="submit">Send Booking Request</button>
+        </form>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="content">
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="footer-collective">Revolver Collective · Yogyakarta</div>
+    <a class="footer-back" href="index.html">Back to Collective</a>
+  </footer>
+
+  <script>
+    function handleSubmit(e) {
+      e.preventDefault();
+      const btn = e.target.querySelector('.form-submit');
+      btn.textContent = 'Request Sent ✓';
+      btn.style.background = '#4a7c4e';
+      btn.style.color = '#fff';
+      btn.disabled = true;
+    }
+  </script>
+
+</body>
+</html>
