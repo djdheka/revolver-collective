@@ -412,13 +412,13 @@
         object-position: top center;
       }
 
-      .hamburger { display: flex; }
+      .hamburger { display: flex; z-index: 10000 !important; position: relative !important; }
       .nav-links {
         position: fixed;
         top: 0; left: 0; right: 0; bottom: 0;
         width: 100vw;
         height: 100vh;
-        background: #070707;
+        background: linear-gradient(160deg, #0d0a00 0%, #1c1400 35%, #2b1e00 65%, #0d0a00 100%);
         flex-direction: column;
         align-items: center;
         justify-content: center;
@@ -430,29 +430,23 @@
         display: flex;
         opacity: 0;
         pointer-events: none;
-        transition: opacity 0.35s ease;
+        transition: opacity 0.4s ease;
       }
       .nav-links.open { opacity: 1; pointer-events: all; }
       .nav-links > li { width: 100%; text-align: center; }
       .nav-links > li > a {
-        font-size: 26px;
-        letter-spacing: 5px;
-        padding: 16px 0;
+        font-size: 24px;
+        letter-spacing: 6px;
+        padding: 15px 0;
         display: block;
         color: #f0ede6;
         text-transform: uppercase;
         font-family: 'Anton', sans-serif;
+        border-bottom: 1px solid rgba(201,168,76,0.15);
+        transition: color 0.25s, letter-spacing 0.25s;
       }
-      .nav-links > li > a:hover { color: #c9a84c; }
-      .nav-dropdown { display: none !important; }
-      .mobile-only { display: block !important; }
-      .nav-links > li.mobile-only > a {
-        font-size: 14px !important;
-        letter-spacing: 4px !important;
-        padding: 8px 0 !important;
-        color: #c9a84c !important;
-        font-family: 'Oswald', sans-serif !important;
-      }
+      .nav-links > li:first-child > a { border-top: 1px solid rgba(201,168,76,0.15); }
+      .nav-links > li > a:hover { color: #c9a84c; letter-spacing: 8px; }
       .nav-dropdown-menu {
         position: static !important;
         display: block !important;
@@ -486,16 +480,9 @@
     </a>
     <ul class="nav-links" id="nav-links">
       <li><a href="index.html#top">Home</a></li>
+      <li><a href="upcoming-events.html">Upcoming Events</a></li>
+      <li><a href="recap-photo.html">Recap Photo</a></li>
       <li><a href="index.html#members">Members</a></li>
-      <li class="nav-dropdown">
-        <a href="#">Events</a>
-        <div class="nav-dropdown-menu">
-          <a href="upcoming-events.html">Upcoming Events</a>
-          <a href="recap-photo.html">Recap Photo</a>
-        </div>
-      </li>
-      <li class="mobile-only"><a href="upcoming-events.html">Upcoming Events</a></li>
-      <li class="mobile-only"><a href="recap-photo.html">Recap Photo</a></li>
       <li><a href="index.html#about">About</a></li>
       <li><a href="index.html#contact">Contact</a></li>
     </ul>
