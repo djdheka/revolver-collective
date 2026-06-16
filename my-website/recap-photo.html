@@ -271,7 +271,21 @@
       .event-section-header { flex-wrap: wrap; }
       .event-section-venue { margin-left: 0; }
 
-      .hamburger { display: flex; z-index: 10000 !important; position: relative !important; }
+      .hamburger {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        gap: 5px;
+        z-index: 10000 !important;
+        position: relative !important;
+        width: 36px;
+        height: 36px;
+        cursor: pointer;
+        background: none;
+        border: none;
+        padding: 0;
+      }
       .hamburger span {
         display: block;
         width: 22px;
