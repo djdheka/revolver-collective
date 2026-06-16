@@ -71,8 +71,7 @@
     .nav-dropdown:hover .nav-dropdown-menu { display: block; }
     .nav-dropdown-menu a {
       display: block;
-      padding: 10px 0;
-      text-align: center;
+      padding: 10px 16px;
       font-family: 'Oswald', sans-serif;
       font-size: 10px;
       letter-spacing: 3px;
@@ -413,7 +412,6 @@
         object-position: top center;
       }
 
-      /* Show hamburger, hide desktop nav links */
       .hamburger { display: flex; }
       .nav-links {
         position: fixed;
@@ -446,7 +444,7 @@
         font-family: 'Anton', sans-serif;
       }
       .nav-links > li > a:hover { color: #c9a84c; }
-      .nav-dropdown { display: block; }
+      .nav-dropdown { display: block !important; }
       .nav-dropdown-menu {
         position: static !important;
         display: block !important;
@@ -454,6 +452,8 @@
         box-shadow: none !important;
         border: none !important;
         padding: 0 !important;
+        width: 100vw !important;
+        left: 0 !important;
         text-align: center !important;
       }
       .nav-dropdown-menu a {
@@ -464,6 +464,8 @@
         text-align: center !important;
         background: none !important;
         font-family: 'Oswald', sans-serif !important;
+        width: 100% !important;
+        display: block !important;
       }
     }
   </style>
@@ -487,9 +489,7 @@
       <li><a href="index.html#about">About</a></li>
       <li><a href="index.html#contact">Contact</a></li>
     </ul>
-    <button class="hamburger" id="hamburger" onclick="toggleMenu()">
-      <span></span><span></span><span></span>
-    </button>
+    <button class="hamburger" id="hamburger" onclick="toggleMenu()"><span></span><span></span><span></span></button>
   </nav>
 
   <div class="page-header">
