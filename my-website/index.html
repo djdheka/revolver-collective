@@ -951,18 +951,29 @@
 
       .nav-links > li { width: 100%; text-align: center; }
       .nav-links > li > a {
-        font-size: 24px;
-        letter-spacing: 6px;
-        padding: 15px 0;
+        font-size: 26px;
+        letter-spacing: 5px;
+        padding: 16px 0;
         display: block;
         color: #f0ede6;
+        border-bottom: none;
         text-transform: uppercase;
         font-family: 'Anton', sans-serif;
-        border-bottom: 1px solid rgba(201,168,76,0.15);
-        transition: color 0.25s, letter-spacing 0.25s;
       }
-      .nav-links > li:first-child > a { border-top: 1px solid rgba(201,168,76,0.15); }
+      .nav-links > li.nav-logo-item { border: none !important; padding: 0 0 28px 0; }
+      .nav-links > li.nav-logo-item img { height: 50px; opacity: 0.9; display: block; margin: 0 auto; }
+      .nav-links > li > a { border-bottom: 1px solid rgba(201,168,76,0.15) !important; }
+      .nav-links > li:nth-child(2) > a { border-top: 1px solid rgba(201,168,76,0.15) !important; }
       .nav-links > li > a:hover { color: #c9a84c; letter-spacing: 8px; }
+      .nav-dropdown-menu a {
+        font-size: 14px;
+        letter-spacing: 4px;
+        padding: 8px 0;
+        display: block;
+        color: #c9a84c;
+        text-transform: uppercase;
+        font-family: 'Oswald', sans-serif;
+      }
       .hamburger {
         display: flex;
         flex-direction: column;
@@ -1081,10 +1092,18 @@
       <span></span><span></span><span></span>
     </button>
     <ul class="nav-links" id="nav-links">
+      <li class="nav-logo-item"><img src="REVOLVER_NEW__PUTIH_.png" alt="Revolver Collective" /></li>
       <li><a href="#top">Home</a></li>
-      <li><a href="upcoming-events.html">Upcoming Events</a></li>
-      <li><a href="recap-photo.html">Recap Photo</a></li>
       <li><a href="#members">Members</a></li>
+      <li class="nav-dropdown">
+        <a href="#">Events</a>
+        <div class="nav-dropdown-menu">
+          <a href="upcoming-events.html">Upcoming Events</a>
+          <a href="recap-photo.html">Recap Photo</a>
+        </div>
+      </li>
+      <li class="mobile-only"><a href="upcoming-events.html">Upcoming Events</a></li>
+      <li class="mobile-only"><a href="recap-photo.html">Recap Photo</a></li>
       <li><a href="#about">About</a></li>
       <li><a href="#contact">Contact</a></li>
     </ul>

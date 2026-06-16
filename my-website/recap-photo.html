@@ -260,12 +260,66 @@
       text-transform: uppercase;
     }
 
+    /* Hamburger - hidden on desktop */
+    .hamburger { display: none; }
+    .mobile-only { display: none; }
+
     @media (max-width: 800px) {
       .masonry { columns: 2; }
       .gallery-wrapper { padding: 40px 20px 80px; }
       .nav { padding: 0 20px; }
       .event-section-header { flex-wrap: wrap; }
       .event-section-venue { margin-left: 0; }
+
+      .hamburger { display: flex; z-index: 10000 !important; position: relative !important; }
+      .hamburger span {
+        display: block;
+        width: 22px;
+        height: 2px;
+        background: var(--white);
+        transition: all 0.3s ease;
+      }
+      .hamburger.open span:nth-child(1) { transform: rotate(45deg) translate(5px, 5px); }
+      .hamburger.open span:nth-child(2) { opacity: 0; }
+      .hamburger.open span:nth-child(3) { transform: rotate(-45deg) translate(5px, -5px); }
+
+      .nav-links {
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        width: 100vw;
+        height: 100vh;
+        background: linear-gradient(160deg, #0d0a00 0%, #1c1400 35%, #2b1e00 65%, #0d0a00 100%);
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 0;
+        z-index: 9999;
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: flex;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.4s ease;
+      }
+      .nav-links.open { opacity: 1; pointer-events: all; }
+      .nav-links > li { width: 100%; text-align: center; }
+      .nav-links > li > a {
+        font-size: 24px;
+        letter-spacing: 6px;
+        padding: 15px 0;
+        display: block;
+        color: #f0ede6;
+        text-transform: uppercase;
+        font-family: 'Anton', sans-serif;
+        border-bottom: 1px solid rgba(201,168,76,0.15);
+        transition: color 0.25s, letter-spacing 0.25s;
+      }
+      .nav-links > li.nav-logo-item { border: none !important; padding: 0 0 28px 0; }
+      .nav-links > li.nav-logo-item img { height: 50px; opacity: 0.9; display: block; margin: 0 auto; }
+      .nav-links > li:nth-child(2) > a { border-top: 1px solid rgba(201,168,76,0.15) !important; }
+      .nav-links > li > a:hover { color: #c9a84c; letter-spacing: 8px; }
+      .nav-dropdown { display: none; }
     }
     @media (max-width: 480px) {
       .masonry { columns: 1; }
@@ -278,16 +332,15 @@
     <a class="nav-logo" href="index.html">
       <img src="REVOLVER_NEW__PUTIH_.png" alt="Revolver Collective" style="height:32px; display:block;" />
     </a>
-    <ul class="nav-links">
+    <button class="hamburger" id="hamburger" onclick="toggleMenu()">
+      <span></span><span></span><span></span>
+    </button>
+    <ul class="nav-links" id="nav-links">
+      <li class="nav-logo-item"><img src="REVOLVER_NEW__PUTIH_.png" alt="Revolver Collective" /></li>
       <li><a href="index.html#top">Home</a></li>
+      <li><a href="upcoming-events.html">Upcoming Events</a></li>
+      <li><a href="recap-photo.html">Recap Photo</a></li>
       <li><a href="index.html#members">Members</a></li>
-      <li class="nav-dropdown">
-        <a href="#">Events</a>
-        <div class="nav-dropdown-menu">
-          <a href="upcoming-events.html">Upcoming Events</a>
-          <a href="recap-photo.html">Recap Photo</a>
-        </div>
-      </li>
       <li><a href="index.html#about">About</a></li>
       <li><a href="index.html#contact">Contact</a></li>
     </ul>
@@ -501,5 +554,19 @@
     });
   </script>
 
+<script>
+  function toggleMenu() {
+    const nav = document.getElementById('nav-links');
+    const btn = document.getElementById('hamburger');
+    nav.classList.toggle('open');
+    btn.classList.toggle('open');
+  }
+  document.querySelectorAll('.nav-links a').forEach(a => {
+    a.addEventListener('click', () => {
+      document.getElementById('nav-links').classList.remove('open');
+      document.getElementById('hamburger').classList.remove('open');
+    });
+  });
+</script>
 </body>
 </html>

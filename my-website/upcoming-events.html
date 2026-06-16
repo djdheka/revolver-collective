@@ -412,7 +412,7 @@
         object-position: top center;
       }
 
-      .hamburger { display: flex; z-index: 10000 !important; position: relative !important; }
+      .hamburger { display: flex; }
       .nav-links {
         position: fixed;
         top: 0; left: 0; right: 0; bottom: 0;
@@ -435,18 +435,28 @@
       .nav-links.open { opacity: 1; pointer-events: all; }
       .nav-links > li { width: 100%; text-align: center; }
       .nav-links > li > a {
-        font-size: 24px;
-        letter-spacing: 6px;
-        padding: 15px 0;
+        font-size: 26px;
+        letter-spacing: 5px;
+        padding: 16px 0;
         display: block;
         color: #f0ede6;
         text-transform: uppercase;
         font-family: 'Anton', sans-serif;
-        border-bottom: 1px solid rgba(201,168,76,0.15);
-        transition: color 0.25s, letter-spacing 0.25s;
       }
-      .nav-links > li:first-child > a { border-top: 1px solid rgba(201,168,76,0.15); }
+      .nav-links > li.nav-logo-item { border: none !important; padding: 0 0 28px 0; }
+      .nav-links > li.nav-logo-item img { height: 50px; opacity: 0.9; display: block; margin: 0 auto; }
+      .nav-links > li > a { border-bottom: 1px solid rgba(201,168,76,0.15) !important; }
+      .nav-links > li:nth-child(2) > a { border-top: 1px solid rgba(201,168,76,0.15) !important; }
       .nav-links > li > a:hover { color: #c9a84c; letter-spacing: 8px; }
+      .nav-dropdown { display: none !important; }
+      .mobile-only { display: block !important; }
+      .nav-links > li.mobile-only > a {
+        font-size: 14px !important;
+        letter-spacing: 4px !important;
+        padding: 8px 0 !important;
+        color: #c9a84c !important;
+        font-family: 'Oswald', sans-serif !important;
+      }
       .nav-dropdown-menu {
         position: static !important;
         display: block !important;
@@ -479,10 +489,18 @@
       <img src="REVOLVER_NEW__PUTIH_.png" alt="Revolver Collective" style="height:32px; display:block;" />
     </a>
     <ul class="nav-links" id="nav-links">
+      <li class="nav-logo-item"><img src="REVOLVER_NEW__PUTIH_.png" alt="Revolver Collective" /></li>
       <li><a href="index.html#top">Home</a></li>
-      <li><a href="upcoming-events.html">Upcoming Events</a></li>
-      <li><a href="recap-photo.html">Recap Photo</a></li>
       <li><a href="index.html#members">Members</a></li>
+      <li class="nav-dropdown">
+        <a href="#">Events</a>
+        <div class="nav-dropdown-menu">
+          <a href="upcoming-events.html">Upcoming Events</a>
+          <a href="recap-photo.html">Recap Photo</a>
+        </div>
+      </li>
+      <li class="mobile-only"><a href="upcoming-events.html">Upcoming Events</a></li>
+      <li class="mobile-only"><a href="recap-photo.html">Recap Photo</a></li>
       <li><a href="index.html#about">About</a></li>
       <li><a href="index.html#contact">Contact</a></li>
     </ul>
