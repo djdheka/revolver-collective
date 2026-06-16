@@ -390,10 +390,6 @@
     .hamburger.open span:nth-child(2) { opacity: 0; }
     .hamburger.open span:nth-child(3) { transform: rotate(-45deg) translate(5px, -5px); }
 
-    /* Hide hamburger on desktop */
-    .hamburger { display: none; }
-    .mobile-only { display: none; }
-
     @media (max-width: 800px) {
       .event-block { grid-template-columns: 1fr; }
       .event-date-panel { border-right: none; border-bottom: 1px solid rgba(201,168,76,0.15); }
@@ -416,10 +412,7 @@
         object-position: top center;
       }
 
-      /* Hide dropdown, show mobile-only flat links instead */
-      .nav-dropdown { display: none; }
-      .mobile-only { display: block; }
-      .hamburger { display: flex; z-index: 10000 !important; position: relative !important; }
+      .hamburger { display: flex; }
       .nav-links {
         position: fixed;
         top: 0; left: 0; right: 0; bottom: 0;
@@ -483,9 +476,6 @@
     <a class="nav-logo" href="index.html">
       <img src="REVOLVER_NEW__PUTIH_.png" alt="Revolver Collective" style="height:32px; display:block;" />
     </a>
-    <button class="hamburger" id="hamburger" onclick="toggleMenu()">
-      <span></span><span></span><span></span>
-    </button>
     <ul class="nav-links" id="nav-links">
       <li><a href="index.html#top">Home</a></li>
       <li><a href="index.html#members">Members</a></li>
@@ -496,13 +486,11 @@
           <a href="recap-photo.html">Recap Photo</a>
         </div>
       </li>
-      <li class="mobile-only"><a href="upcoming-events.html">Upcoming Events</a></li>
-      <li class="mobile-only"><a href="recap-photo.html">Recap Photo</a></li>
       <li><a href="index.html#about">About</a></li>
       <li><a href="index.html#contact">Contact</a></li>
     </ul>
+    <button class="hamburger" id="hamburger" onclick="toggleMenu()"><span></span><span></span><span></span></button>
   </nav>
-  <div class="nav-overlay" id="nav-overlay" onclick="toggleMenu()"></div>
 
   <div class="page-header">
     <div class="page-header-label">Revolver Collective</div>
@@ -598,19 +586,13 @@
   </script>
 <script>
   function toggleMenu() {
-    const nav = document.getElementById('nav-links');
-    const btn = document.getElementById('hamburger');
-    const overlay = document.getElementById('nav-overlay');
-    nav.classList.toggle('open');
-    btn.classList.toggle('open');
-    if (overlay) overlay.classList.toggle('open');
+    document.getElementById('nav-links').classList.toggle('open');
+    document.getElementById('hamburger').classList.toggle('open');
   }
   document.querySelectorAll('.nav-links a').forEach(a => {
     a.addEventListener('click', () => {
       document.getElementById('nav-links').classList.remove('open');
       document.getElementById('hamburger').classList.remove('open');
-      const overlay = document.getElementById('nav-overlay');
-      if (overlay) overlay.classList.remove('open');
     });
   });
 </script>
