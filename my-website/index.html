@@ -925,18 +925,18 @@
       .nav-links {
         position: fixed;
         inset: 0;
-        background: #070707;
+        background: #070707 !important;
         flex-direction: column;
         align-items: center;
         justify-content: center;
         gap: 0;
-        z-index: 8999;
+        z-index: 9000;
         list-style: none;
         padding: 0;
-        display: flex;
+        display: flex !important;
         opacity: 0;
         pointer-events: none;
-        transition: opacity 0.3s ease;
+        transition: opacity 0.35s ease;
       }
       .nav-links.open {
         opacity: 1;
@@ -995,6 +995,8 @@
       }
       .nav-dropdown.open .nav-dropdown-menu { display: block; }
       .nav-dropdown > a::after { display: none; }
+      .nav-dropdown { display: none; }
+      .mobile-only { display: block; }
 
       /* HERO */
       .hero { padding-top: 90px; }
@@ -1029,6 +1031,7 @@
 
     /* Hide hamburger on desktop */
     .hamburger { display: none; }
+    .mobile-only { display: none; }
 
     @media (max-width: 768px) {
       .hamburger { display: flex; z-index: 9001; position: relative; }
@@ -1071,6 +1074,8 @@
           <a href="recap-photo.html">Recap Photo</a>
         </div>
       </li>
+      <li class="mobile-only"><a href="upcoming-events.html">Upcoming Events</a></li>
+      <li class="mobile-only"><a href="recap-photo.html">Recap Photo</a></li>
       <li><a href="#about">About</a></li>
       <li><a href="#contact">Contact</a></li>
     </ul>
