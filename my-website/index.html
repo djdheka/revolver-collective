@@ -921,48 +921,43 @@
 
       /* NAV */
       .nav { padding: 0 20px; }
+      /* FULLSCREEN MENU OVERLAY */
       .nav-links {
         position: fixed;
-        top: 0; right: -100%; bottom: 0;
-        width: 75%;
-        max-width: 300px;
+        inset: 0;
         background: #070707;
-        border-left: 2px solid var(--gold);
         flex-direction: column;
-        align-items: flex-start;
+        align-items: center;
         justify-content: center;
-        gap: 8px;
+        gap: 0;
         z-index: 8999;
         list-style: none;
-        padding: 40px 32px;
-        transition: right 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        padding: 0;
         display: flex;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s ease;
       }
-      .nav-links.open { right: 0; }
-
-      /* Dim overlay behind sidebar */
-      .nav-overlay {
-        display: none;
-        position: fixed;
-        inset: 0;
-        background: rgba(0,0,0,0.6);
-        z-index: 8998;
+      .nav-links.open {
+        opacity: 1;
+        pointer-events: all;
       }
-      .nav-overlay.open { display: block; }
 
-      .nav-links > li { width: 100%; }
+      /* Hide dim overlay — not needed for fullscreen */
+      .nav-overlay { display: none !important; }
+
+      .nav-links > li { width: 100%; text-align: center; }
       .nav-links > li > a {
-        font-size: 16px;
-        letter-spacing: 4px;
-        padding: 14px 0;
+        font-size: 28px;
+        letter-spacing: 6px;
+        padding: 18px 0;
         display: block;
-        border-bottom: 1px solid rgba(201,168,76,0.08);
+        color: var(--white);
+        border-bottom: none;
+        text-transform: uppercase;
+        font-family: 'Anton', sans-serif;
       }
-      .nav-links > li:last-child > a { border-bottom: none; }
-      .nav-links > li > a {
-        font-size: 18px;
-        letter-spacing: 5px;
-      }
+      .nav-links > li > a:hover { color: var(--gold); }
       .hamburger {
         display: flex;
         flex-direction: column;
@@ -982,6 +977,8 @@
       .hamburger.open span:nth-child(1) { transform: rotate(45deg) translate(5px, 5px); }
       .hamburger.open span:nth-child(2) { opacity: 0; }
       .hamburger.open span:nth-child(3) { transform: rotate(-45deg) translate(5px, -5px); }
+      /* Keep hamburger on top of fullscreen menu */
+      .hamburger { z-index: 9001 !important; }
 
       /* Dropdown on mobile */
       .nav-dropdown-menu {
