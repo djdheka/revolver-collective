@@ -554,7 +554,7 @@
 
       /* HERO — full screen with background */
       .hero {
-        min-height: 100dvh;
+        min-height: 100svh;
         display: flex;
         flex-direction: column;
         align-items: flex-start;
@@ -567,7 +567,7 @@
       .hero-photo {
         position: absolute !important;
         inset: unset !important;
-        top: 80px !important;
+        top: 256px !important;
         left: 4% !important;
         transform: none !important;
         width: 90% !important;
@@ -845,21 +845,5 @@
     }
   </script>
 
-<script>
-  // Lock hero height on mobile to prevent iOS Safari address bar shift
-  function lockHeroHeight() {
-    if (window.innerWidth <= 768) {
-      var hero = document.querySelector('.hero');
-      if (hero) {
-        hero.style.height = window.innerHeight + 'px';
-        hero.style.minHeight = window.innerHeight + 'px';
-      }
-    }
-  }
-  lockHeroHeight();
-  window.addEventListener('orientationchange', function() {
-    setTimeout(lockHeroHeight, 300);
-  });
-</script>
 </body>
 </html>
