@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Admin – Revolver Collective</title>
   <link href="https://fonts.googleapis.com/css2?family=Anton&family=Oswald:wght@300;400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
@@ -115,6 +117,24 @@
     .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--gold); }
     .form-textarea { resize: vertical; min-height: 80px; }
     .form-select option { background: #1a1a1a; }
+
+    /* ── LOCATION PICKER ── */
+    .location-status {
+      font-size: 9px; letter-spacing: 2px; color: rgba(255,255,255,0.35);
+      text-transform: uppercase; margin-top: 6px;
+    }
+    .location-status.found { color: var(--gold); }
+    .location-status.error { color: #e05; }
+    .location-map-wrap {
+      margin-top: 10px; border: 1px solid var(--border); display: none;
+    }
+    .location-map-wrap.visible { display: block; }
+    .location-map { height: 240px; width: 100%; }
+    .location-map-hint {
+      font-size: 8px; letter-spacing: 2px; color: rgba(255,255,255,0.3);
+      text-transform: uppercase; padding: 8px 12px; background: #1a1a1a;
+      border-top: 1px solid var(--border);
+    }
 
     /* ── BUTTONS ── */
     .btn {
@@ -471,6 +491,18 @@
           </div>
         </div>
         <div class="form-group">
+          <button class="btn btn-outline" type="button" onclick="findVenueLocation(${ev.id})">📍 Find on Map</button>
+          <div class="location-status" id="loc-status-${ev.id}">${ev.lat ? `Location set (${parseFloat(ev.lat).toFixed(5)}, ${parseFloat(ev.lng).toFixed(5)})` : 'No location set yet'}</div>
+          <div class="location-map-wrap" id="loc-map-wrap-${ev.id}">
+            <div class="location-map" id="loc-map-${ev.id}"></div>
+            <div class="location-map-hint">Click anywhere on the map to move the pin, then press Use This Location</div>
+            <div class="btn-row" style="padding:10px 12px;">
+              <button class="btn btn-gold" type="button" onclick="confirmVenueLocation(${ev.id})">Use This Location</button>
+              <button class="btn btn-outline" type="button" onclick="closeVenueMap(${ev.id})">Cancel</button>
+            </div>
+          </div>
+        </div>
+        <div class="form-group">
           <label class="form-label">Description</label>
           <textarea class="form-textarea" onchange="updateEvent(${ev.id},'description',this.value)">${ev.description||''}</textarea>
         </div>
@@ -504,6 +536,97 @@
     }
   }
 
+  // ── VENUE LOCATION PICKER (Leaflet, no API key needed) ──
+  const locationMaps = {}; // id -> { map, marker }
+
+  async function findVenueLocation(id) {
+    const ev = data.events.find(e => e.id === id);
+    if (!ev) return;
+    const statusEl = document.getElementById(`loc-status-${id}`);
+    const query = `${ev.venue || ''}, ${ev.city || ''}, Indonesia`.trim();
+    if (!ev.venue) {
+      statusEl.textContent = 'Type a venue name first';
+      statusEl.className = 'location-status error';
+      return;
+    }
+    statusEl.textContent = 'Searching...';
+    statusEl.className = 'location-status';
+    try {
+      const res = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=1`);
+      const results = await res.json();
+      let lat = ev.lat ? parseFloat(ev.lat) : -7.7956;
+      let lng = ev.lng ? parseFloat(ev.lng) : 110.3695; // default: Yogyakarta center
+      if (results.length) {
+        lat = parseFloat(results[0].lat);
+        lng = parseFloat(results[0].lon);
+        statusEl.textContent = 'Found a match — confirm or click to adjust the pin';
+        statusEl.className = 'location-status found';
+      } else {
+        statusEl.textContent = 'No exact match — click the map to place the pin manually';
+        statusEl.className = 'location-status error';
+      }
+      openVenueMap(id, lat, lng);
+    } catch (err) {
+      console.error('Geocoding failed', err);
+      statusEl.textContent = 'Search failed — click the map to place the pin manually';
+      statusEl.className = 'location-status error';
+      openVenueMap(id, -7.7956, 110.3695);
+    }
+  }
+
+  function openVenueMap(id, lat, lng) {
+    const wrap = document.getElementById(`loc-map-wrap-${id}`);
+    wrap.classList.add('visible');
+
+    // Destroy any existing map instance for this event before re-creating
+    if (locationMaps[id]) {
+      locationMaps[id].map.remove();
+      delete locationMaps[id];
+    }
+
+    const map = L.map(`loc-map-${id}`).setView([lat, lng], 16);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap contributors',
+      maxZoom: 19
+    }).addTo(map);
+
+    const marker = L.marker([lat, lng], { draggable: true }).addTo(map);
+
+    map.on('click', (e) => {
+      marker.setLatLng(e.latlng);
+    });
+
+    locationMaps[id] = { map, marker };
+
+    // Leaflet needs a nudge to size correctly inside a freshly-shown container
+    setTimeout(() => map.invalidateSize(), 50);
+  }
+
+  function confirmVenueLocation(id) {
+    const entry = locationMaps[id];
+    if (!entry) return;
+    const { lat, lng } = entry.marker.getLatLng();
+    const ev = data.events.find(e => e.id === id);
+    if (ev) {
+      ev.lat = lat;
+      ev.lng = lng;
+      save();
+    }
+    const statusEl = document.getElementById(`loc-status-${id}`);
+    statusEl.textContent = `Location set (${lat.toFixed(5)}, ${lng.toFixed(5)})`;
+    statusEl.className = 'location-status found';
+    closeVenueMap(id);
+  }
+
+  function closeVenueMap(id) {
+    const wrap = document.getElementById(`loc-map-wrap-${id}`);
+    wrap.classList.remove('visible');
+    if (locationMaps[id]) {
+      locationMaps[id].map.remove();
+      delete locationMaps[id];
+    }
+  }
+
   async function saveEvent(id) {
     const ev = data.events.find(e => e.id === id);
     if (!ev) return;
@@ -511,7 +634,8 @@
     await sbUpdate('events', id, {
       name: ev.name, date: ev.date, time: ev.time,
       venue: ev.venue, city: ev.city, tag: ev.tag,
-      entry: ev.entry, description: ev.description, lineup: ev.lineup
+      entry: ev.entry, description: ev.description, lineup: ev.lineup,
+      lat: ev.lat || null, lng: ev.lng || null
     });
     setStatus('Saved to live site ✓ — visible immediately!');
   }
