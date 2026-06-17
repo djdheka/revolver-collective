@@ -45,15 +45,17 @@
       gap: 36px;
       list-style: none;
     }
+    .nav-logo-item { display: none; }
     .nav-links > li > a {
       font-family: 'Oswald', sans-serif;
       font-weight: 400;
-      font-size: 15px;
-      letter-spacing: 3px;
+      font-size: 13px;
+      letter-spacing: 2px;
       color: rgba(240,237,230,0.5);
       text-decoration: none;
       text-transform: uppercase;
       transition: color 0.3s;
+      white-space: nowrap;
     }
     .nav-links > li > a:hover { color: var(--gold); }
     .nav-dropdown { position: relative; }
@@ -443,7 +445,7 @@
         text-transform: uppercase;
         font-family: 'Anton', sans-serif;
       }
-      .nav-links > li.nav-logo-item { border: none !important; padding: 0 0 40px 0; }
+      .nav-links > li.nav-logo-item { display: list-item; border: none !important; padding: 0 0 40px 0; }
       .nav-links > li.nav-logo-item img { height: 100px; opacity: 0.9; display: block; margin: 0 auto; }
       .nav-links > li > a { border-bottom: 1px solid rgba(201,168,76,0.15) !important; }
       .nav-links > li:nth-child(2) > a { border-top: 1px solid rgba(201,168,76,0.15) !important; }
