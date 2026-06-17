@@ -554,7 +554,14 @@
         const res = await fetch(`${SUPABASE_URL}/rest/v1/events?order=date.asc`, {
           headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
         });
-        const events = await res.json();
+        const allEvents = await res.json();
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const events = allEvents.filter(ev => {
+          const d = new Date(ev.date);
+          d.setHours(0, 0, 0, 0);
+          return d >= today;
+        });
         const list = document.getElementById('events-list');
 
         if (!events.length) {
