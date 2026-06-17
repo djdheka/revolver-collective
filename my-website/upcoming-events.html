@@ -267,6 +267,19 @@
       height: 100%;
       border: none;
     }
+    .event-map-loading {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 24px;
+      font-size: 10px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.35);
+    }
     .event-directions {
       display: inline-block;
       margin-top: 10px;
@@ -541,7 +554,7 @@
           return;
         }
 
-        list.innerHTML = events.map(ev => {
+        list.innerHTML = events.map((ev, i) => {
           const d = new Date(ev.date);
           const day = d.getDate().toString().padStart(2,'0');
           const monthYear = MONTHS[d.getMonth()] + ' ' + d.getFullYear();
@@ -571,8 +584,8 @@
                   <div class="event-venue-address">${ev.city}, Indonesia</div>
                   <a class="event-directions" href="https://maps.google.com/?q=${encodeURIComponent(ev.venue + ' ' + ev.city)}" target="_blank" rel="noopener">↗ Get Directions</a>
                 </div>
-                <div class="event-map">
-                  <iframe src="https://www.google.com/maps/embed/v1/search?key=AIzaSyD-9tSrke72PouQMnMX-a7eZSW0jkFMBWY&q=${encodeURIComponent(ev.venue + ' ' + ev.city)}" allowfullscreen loading="eager" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                <div class="event-map" id="map-${i}" data-venue="${encodeURIComponent(ev.venue + ', ' + ev.city)}">
+                  <div class="event-map-loading">Loading map…</div>
                 </div>
               </div>
               <div>
@@ -590,10 +603,33 @@
           </div>`;
         }).join('');
 
+        loadMaps(events);
+
       } catch(e) {
         console.error('Failed to load events:', e);
         document.getElementById('events-list').innerHTML = '<div style="text-align:center;padding:60px;font-size:10px;letter-spacing:3px;color:rgba(255,255,255,0.3);">FAILED TO LOAD EVENTS</div>';
       }
+    }
+
+    async function loadMaps(events) {
+      events.forEach(async (ev, i) => {
+        const mapDiv = document.getElementById(`map-${i}`);
+        if (!mapDiv) return;
+        try {
+          const query = encodeURIComponent(ev.venue + ', ' + ev.city + ', Indonesia');
+          const res = await fetch(`https://nominatim.openstreetmap.org/search?q=${query}&format=json&limit=1`);
+          const results = await res.json();
+          if (!results.length) throw new Error('No geocoding result');
+          const lat = parseFloat(results[0].lat);
+          const lon = parseFloat(results[0].lon);
+          const d = 0.01;
+          const bbox = `${lon - d}%2C${lat - d}%2C${lon + d}%2C${lat + d}`;
+          mapDiv.innerHTML = `<iframe src="https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik&marker=${lat}%2C${lon}" allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>`;
+        } catch (err) {
+          console.error('Map load failed for', ev.venue, err);
+          mapDiv.innerHTML = '<div class="event-map-loading">Map unavailable — use Get Directions above</div>';
+        }
+      });
     }
 
     loadEvents();
