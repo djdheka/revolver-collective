@@ -83,9 +83,9 @@
 }
     
 
-    /* Logo image */
+    /* Logo image - hidden on desktop (duplicate logo), shown on mobile via media query override below */
     .hero-logo-img {
-      display: block;
+      display: none;
       width: clamp(280px, 60vw, 560px);
       margin: 60px auto 4px;
       position: relative;
@@ -919,12 +919,6 @@
     }
     /* ── MOBILE RESPONSIVE ── */
     @media (max-width: 768px) {
-
-      /* HERO VIDEO - full width on mobile, no side cropping */
-      .hero-video {
-        left: 0;
-        width: 100%;
-      }
 
       /* NAV */
       .nav { padding: 0 20px; }
