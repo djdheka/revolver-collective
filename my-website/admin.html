@@ -119,6 +119,19 @@
     .form-select option { background: #1a1a1a; }
 
     /* ── LOCATION PICKER ── */
+    .location-search-wrap { position: relative; }
+    .location-suggestions {
+      position: absolute; top: 100%; left: 0; right: 0; z-index: 50;
+      background: #1a1a1a; border: 1px solid var(--gold); border-top: none;
+      max-height: 220px; overflow-y: auto; display: none;
+    }
+    .location-suggestions.visible { display: block; }
+    .location-suggestion-item {
+      padding: 10px 14px; font-size: 11px; letter-spacing: 0.5px;
+      color: rgba(255,255,255,0.7); cursor: pointer; border-bottom: 1px solid var(--border);
+    }
+    .location-suggestion-item:last-child { border-bottom: none; }
+    .location-suggestion-item:hover { background: rgba(201,168,76,0.12); color: var(--gold); }
     .location-status {
       font-size: 9px; letter-spacing: 2px; color: rgba(255,255,255,0.35);
       text-transform: uppercase; margin-top: 6px;
@@ -129,7 +142,7 @@
       margin-top: 10px; border: 1px solid var(--border); display: none;
     }
     .location-map-wrap.visible { display: block; }
-    .location-map { height: 240px; width: 100%; }
+    .location-map { height: 420px; width: 100%; }
     .location-map-hint {
       font-size: 8px; letter-spacing: 2px; color: rgba(255,255,255,0.3);
       text-transform: uppercase; padding: 8px 12px; background: #1a1a1a;
@@ -449,6 +462,11 @@
     setStatus('Loaded from Supabase');
   }
 
+  document.addEventListener('click', (e) => {
+    if (e.target.closest('.location-search-wrap')) return;
+    document.querySelectorAll('.location-suggestions.visible').forEach(el => el.classList.remove('visible'));
+  });
+
   // ── EVENTS ──
   function renderEvents() {
     const list = document.getElementById('events-list');
@@ -491,7 +509,14 @@
           </div>
         </div>
         <div class="form-group">
-          <button class="btn btn-outline" type="button" onclick="findVenueLocation(${ev.id})">📍 Find on Map</button>
+          <label class="form-label">Search for Location</label>
+          <div class="location-search-wrap">
+            <input class="form-input" type="text" id="loc-search-${ev.id}" placeholder="Start typing a place name..." autocomplete="off" oninput="onLocationSearchInput(${ev.id}, this.value)" />
+            <div class="location-suggestions" id="loc-suggestions-${ev.id}"></div>
+          </div>
+          <div class="btn-row" style="margin-top:8px;">
+            <button class="btn btn-outline" type="button" onclick="findVenueLocation(${ev.id})">📍 Find on Map using Venue Name</button>
+          </div>
           <div class="location-status" id="loc-status-${ev.id}">${ev.lat ? `Location set (${parseFloat(ev.lat).toFixed(5)}, ${parseFloat(ev.lng).toFixed(5)})` : 'No location set yet'}</div>
           <div class="location-map-wrap" id="loc-map-wrap-${ev.id}">
             <div class="location-map" id="loc-map-${ev.id}"></div>
@@ -538,6 +563,56 @@
 
   // ── VENUE LOCATION PICKER (Leaflet, no API key needed) ──
   const locationMaps = {}; // id -> { map, marker }
+  const searchDebounceTimers = {}; // id -> timeout handle
+  const searchAbortControllers = {}; // id -> AbortController, to cancel stale requests
+
+  function onLocationSearchInput(id, value) {
+    clearTimeout(searchDebounceTimers[id]);
+    const suggestionsEl = document.getElementById(`loc-suggestions-${id}`);
+    if (!value || value.trim().length < 3) {
+      suggestionsEl.classList.remove('visible');
+      suggestionsEl.innerHTML = '';
+      return;
+    }
+    searchDebounceTimers[id] = setTimeout(() => fetchLocationSuggestions(id, value.trim()), 400);
+  }
+
+  async function fetchLocationSuggestions(id, query) {
+    const suggestionsEl = document.getElementById(`loc-suggestions-${id}`);
+    if (searchAbortControllers[id]) searchAbortControllers[id].abort();
+    const controller = new AbortController();
+    searchAbortControllers[id] = controller;
+    try {
+      const res = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=6&addressdetails=1`, { signal: controller.signal });
+      const results = await res.json();
+      if (!results.length) {
+        suggestionsEl.innerHTML = '<div class="location-suggestion-item" style="cursor:default;color:rgba(255,255,255,0.3);">No matches found</div>';
+        suggestionsEl.classList.add('visible');
+        return;
+      }
+      suggestionsEl.innerHTML = results.map((r, idx) =>
+        `<div class="location-suggestion-item" onclick="selectLocationSuggestion(${id}, ${idx})">${r.display_name}</div>`
+      ).join('');
+      suggestionsEl.dataset.results = JSON.stringify(results);
+      suggestionsEl.classList.add('visible');
+    } catch (err) {
+      if (err.name === 'AbortError') return; // a newer keystroke superseded this request
+      console.error('Suggestion search failed', err);
+    }
+  }
+
+  function selectLocationSuggestion(id, idx) {
+    const suggestionsEl = document.getElementById(`loc-suggestions-${id}`);
+    const results = JSON.parse(suggestionsEl.dataset.results || '[]');
+    const picked = results[idx];
+    if (!picked) return;
+    suggestionsEl.classList.remove('visible');
+    document.getElementById(`loc-search-${id}`).value = picked.display_name;
+    const statusEl = document.getElementById(`loc-status-${id}`);
+    statusEl.textContent = 'Location selected — confirm or adjust the pin';
+    statusEl.className = 'location-status found';
+    openVenueMap(id, parseFloat(picked.lat), parseFloat(picked.lon));
+  }
 
   async function findVenueLocation(id) {
     const ev = data.events.find(e => e.id === id);
