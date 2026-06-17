@@ -541,6 +541,14 @@
     const MEMBERS_IMAGES = { Dheka: 'images/dheka.png', DUVM: 'images/duvm.png', Rellion: 'images/rellion.png', Divent: 'images/divent.png', Ravenz: 'images/ravenz.png', Wizzkey: 'images/wizzkey.png' };
     const MEMBERS_LINKS = { Dheka: 'dheka.html', DUVM: 'duvm.html', Rellion: 'rellion.html', Divent: 'divent.html', Ravenz: 'ravenz.html', Wizzkey: 'wizzkey.html' };
 
+    // Known venues mapped to their verified full address, for more reliable map geocoding
+    // (the venue name stored in the event data is sometimes informal/shortened)
+    const VENUE_ADDRESSES = {
+      'Liquid Bar & Resto': 'Jl. Magelang KM.4,5 No.158, Yogyakarta, Indonesia',
+      'Sakapatat Beer Garden': 'Jl. Pakuningratan No.34, Cokrodiningratan, Jetis, Yogyakarta, Indonesia',
+      'Five Seven': 'Perumnas Seturan, Condongcatur, Depok, Sleman, Yogyakarta, Indonesia'
+    };
+
     async function loadEvents() {
       try {
         const res = await fetch(`${SUPABASE_URL}/rest/v1/events?order=date.asc`, {
@@ -615,8 +623,21 @@
       events.forEach(async (ev, i) => {
         const mapDiv = document.getElementById(`map-${i}`);
         if (!mapDiv) return;
+
+        // Prefer a precisely-pinned location saved via the admin panel
+        if (ev.lat && ev.lng) {
+          const lat = parseFloat(ev.lat);
+          const lon = parseFloat(ev.lng);
+          const d = 0.01;
+          const bbox = `${lon - d}%2C${lat - d}%2C${lon + d}%2C${lat + d}`;
+          mapDiv.innerHTML = `<iframe src="https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik&marker=${lat}%2C${lon}" allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>`;
+          return;
+        }
+
+        // Fall back to live geocoding (using a known precise address if available)
         try {
-          const query = encodeURIComponent(ev.venue + ', ' + ev.city + ', Indonesia');
+          const knownAddress = VENUE_ADDRESSES[ev.venue];
+          const query = encodeURIComponent(knownAddress || (ev.venue + ', ' + ev.city + ', Indonesia'));
           const res = await fetch(`https://nominatim.openstreetmap.org/search?q=${query}&format=json&limit=1`);
           const results = await res.json();
           if (!results.length) throw new Error('No geocoding result');
