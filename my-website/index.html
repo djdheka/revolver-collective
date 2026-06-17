@@ -65,6 +65,7 @@
       text-align: center;
       background: var(--black);
       overflow: hidden;
+      min-height: 640px;
     }
 
     /* 3D video — ambient background */
@@ -1028,8 +1029,9 @@
       }
 
       /* HERO */
-      .hero { padding-top: 90px; }
+      .hero { padding-top: 90px; min-height: auto; }
       .hero-logo-img { display: block !important; width: clamp(200px, 80vw, 380px) !important; margin: 20px auto 4px !important; }
+      .hero-video { left: 0; width: 100%; }
       .hero-eyebrow { font-size: 8px; letter-spacing: 6px; }
       .hero-tagline { font-size: 11px; letter-spacing: 8px; }
       .hero-location { font-size: 8px; letter-spacing: 4px; }
