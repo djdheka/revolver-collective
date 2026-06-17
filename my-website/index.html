@@ -65,6 +65,10 @@
       text-align: center;
       background: var(--black);
       overflow: hidden;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
     }
 
     /* 3D video — ambient background */
@@ -83,10 +87,10 @@
 }
     
 
-    /* Logo image - hidden on desktop (duplicate logo), shown on mobile via media query override below */
+    /* Logo image - shown centered on desktop, overlapping the gold video logo (matches mobile treatment) */
     .hero-logo-img {
-      display: none;
-      width: clamp(280px, 60vw, 560px);
+      display: block;
+      width: clamp(280px, 30vw, 480px);
       margin: 60px auto 4px;
       position: relative;
       z-index: 1;
