@@ -83,9 +83,9 @@
 }
     
 
-    /* Logo image */
+    /* Logo image - hidden on desktop, shown on mobile only */
     .hero-logo-img {
-      display: block;
+      display: none;
       width: clamp(280px, 60vw, 560px);
       margin: 60px auto 4px;
       position: relative;
@@ -850,12 +850,13 @@
     .nav-links > li > a {
       font-family: 'Oswald', sans-serif;
       font-weight: 400;
-      font-size: 15px;
-      letter-spacing: 3px;
+      font-size: 13px;
+      letter-spacing: 2px;
       color: rgba(240,237,230,0.5);
       text-decoration: none;
       text-transform: uppercase;
       transition: color 0.3s;
+      white-space: nowrap;
     }
     .nav-links > li > a:hover { color: var(--gold); }
     .nav-dropdown { position: relative; }
@@ -1027,7 +1028,7 @@
 
       /* HERO */
       .hero { padding-top: 90px; }
-      .hero-logo-img { width: clamp(200px, 80vw, 380px) !important; margin: 20px auto 4px !important; }
+      .hero-logo-img { display: block !important; width: clamp(200px, 80vw, 380px) !important; margin: 20px auto 4px !important; }
       .hero-eyebrow { font-size: 8px; letter-spacing: 6px; }
       .hero-tagline { font-size: 11px; letter-spacing: 8px; }
       .hero-location { font-size: 8px; letter-spacing: 4px; }
