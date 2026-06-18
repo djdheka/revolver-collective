@@ -1040,9 +1040,9 @@
 
       /* EVENTS GRID */
       .events-grid {
-        grid-template-columns: repeat(3, 1fr) !important;
-        gap: 6px !important;
-        justify-content: center !important;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 6px;
+        justify-content: center;
       }
       .events-grid .event-date { font-size: 26px; }
       .events-grid .event-name { font-size: 11px; }
@@ -1408,10 +1408,17 @@
         } else {
           // Mobile: let CSS handle 3-col layout, but center when fewer cards
           if (events.length < 3) {
-            grid.style.gridTemplateColumns = `repeat(${events.length}, minmax(0, 120px))`;
-            grid.style.justifyContent = 'center';
+            const cardW = 120;
+            const gap = 6;
+            const totalW = events.length * cardW + (events.length - 1) * gap;
+            grid.style.gridTemplateColumns = `repeat(${events.length}, ${cardW}px)`;
+            grid.style.width = totalW + 'px';
+            grid.style.margin = '0 auto';
+            grid.style.justifyContent = '';
           } else {
             grid.style.gridTemplateColumns = '';
+            grid.style.width = '';
+            grid.style.margin = '';
             grid.style.justifyContent = '';
           }
         }
