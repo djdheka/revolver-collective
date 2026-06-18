@@ -506,6 +506,11 @@
       transition: opacity 0.3s, transform 0.2s;
     }
     .form-submit:hover { opacity: 0.85; transform: translateY(-1px); }
+    .form-status {
+      font-size: 12px;
+      letter-spacing: 0.5px;
+      min-height: 16px;
+    }
 
     /* ── FOOTER ── */
     .footer {
@@ -796,16 +801,20 @@
           <div class="form-row">
             <div class="form-group">
               <label class="form-label">Your Name</label>
-              <input class="form-input" type="text" placeholder="Full name" required />
+              <input class="form-input" type="text" name="name" placeholder="Full name" required />
             </div>
             <div class="form-group">
               <label class="form-label">Your Instagram</label>
-              <input class="form-input" type="text" placeholder="@yourhandle" />
+              <input class="form-input" type="text" name="instagram" placeholder="@yourhandle" />
             </div>
           </div>
           <div class="form-group">
+            <label class="form-label">Your Email</label>
+            <input class="form-input" type="email" name="email" placeholder="you@example.com" />
+          </div>
+          <div class="form-group">
             <label class="form-label">Event Type</label>
-            <select class="form-select" required>
+            <select class="form-select" name="event_type" required>
               <option value="" disabled selected>Select event type</option>
               <option>Club Night</option>
               <option>Private Party</option>
@@ -818,12 +827,13 @@
           </div>
           <div class="form-group">
             <label class="form-label">Event Date</label>
-            <input class="form-input" type="date" required />
+            <input class="form-input" type="date" name="event_date" required />
           </div>
           <div class="form-group">
             <label class="form-label">Message</label>
-            <textarea class="form-textarea" placeholder="Tell me about your event — venue, time, vibe..."></textarea>
+            <textarea class="form-textarea" name="message" placeholder="Tell me about your event — venue, time, vibe..."></textarea>
           </div>
+          <div class="form-status" aria-live="polite"></div>
           <button class="form-submit" type="submit">Send Booking Request</button>
         </form>
       </div>
@@ -843,11 +853,53 @@
   <script>
     function handleSubmit(e) {
       e.preventDefault();
-      const btn = e.target.querySelector('.form-submit');
-      btn.textContent = 'Request Sent ✓';
-      btn.style.background = '#4a7c4e';
-      btn.style.color = '#fff';
+      const form = e.target;
+      const btn = form.querySelector('.form-submit');
+      const status = form.querySelector('.form-status');
+
+      const emailVal = form.querySelector('[name="email"]').value.trim();
+      const instaVal = form.querySelector('[name="instagram"]').value.trim();
+      if (!emailVal && !instaVal) {
+        status.textContent = 'Please add your email or Instagram so Dheka can reply to you.';
+        status.style.color = '#e06c6c';
+        return;
+      }
+
+      const formData = new FormData(form);
+      formData.append('access_key', 'YOUR_WEB3FORMS_ACCESS_KEY_HERE');
+      formData.append('subject', 'New Booking Request — Dheka (Revolver Collective)');
+      formData.append('from_name', 'Revolver Collective Website');
+
       btn.disabled = true;
+      btn.textContent = 'Sending...';
+      status.textContent = '';
+      status.style.color = '';
+
+      fetch('https://api.web3forms.com/submit', {
+        method: 'POST',
+        headers: { 'Accept': 'application/json' },
+        body: formData
+      })
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            btn.textContent = 'Request Sent ✓';
+            btn.style.background = '#4a7c4e';
+            btn.style.color = '#fff';
+            form.reset();
+          } else {
+            btn.disabled = false;
+            btn.textContent = 'Send Booking Request';
+            status.textContent = 'Something went wrong — please try again or DM Dheka directly.';
+            status.style.color = '#e06c6c';
+          }
+        })
+        .catch(() => {
+          btn.disabled = false;
+          btn.textContent = 'Send Booking Request';
+          status.textContent = 'Could not send — check your connection and try again.';
+          status.style.color = '#e06c6c';
+        });
     }
   </script>
 
