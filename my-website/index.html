@@ -284,7 +284,6 @@
       padding: 4px 10px;
     }
     @media (max-width: 720px) {
-      .events-grid { grid-template-columns: 1fr; }
       .events-section { padding: 40px 24px; }
     }
 
@@ -665,6 +664,9 @@
       letter-spacing: 2px;
       color: var(--white);
       text-transform: uppercase;
+      overflow-wrap: break-word;
+      word-break: break-all;
+      min-width: 0;
     }
     @media (max-width: 720px) {
       .contact-section { padding: 60px 24px; }
@@ -1038,8 +1040,17 @@
       .hero-location { font-size: 8px; letter-spacing: 4px; }
 
       /* EVENTS GRID */
-      .events-grid { grid-template-columns: 1fr; gap: 12px; }
-      .events-section { padding: 10px 20px 40px; }
+      .events-grid {
+        grid-template-columns: repeat(3, 1fr) !important;
+        gap: 6px !important;
+        justify-content: center !important;
+      }
+      .events-grid .event-date { font-size: 26px; }
+      .events-grid .event-name { font-size: 11px; }
+      .events-grid .event-venue { font-size: 9px; }
+      .events-grid .event-tag { font-size: 8px; letter-spacing: 1px; padding: 3px 6px; }
+      .events-grid .event-card { padding: 10px 10px; }
+      .events-section { padding: 10px 8px 40px; }
 
       /* MEMBER GRID */
       .member-grid { grid-template-columns: repeat(2, 1fr) !important; }
@@ -1385,21 +1396,19 @@
           return;
         }
 
-        grid.style.gridTemplateColumns = 'repeat(3, 1fr)';
-        grid.style.justifyContent = '';
-
-        // Card positions: 1 event → center col, 2 events → cols 1+2 centered, 3 → natural
-        const colPositions = {
-          1: [2],
-          2: [1, 2],
-          3: [1, 2, 3]
-        };
-        const positions = colPositions[Math.min(events.length, 3)] || [1, 2, 3];
-
-        // For 1 or 2 events, shrink grid to fit and center it
-        if (events.length < 3) {
-          grid.style.gridTemplateColumns = `repeat(${events.length}, minmax(0, 353px))`;
-          grid.style.justifyContent = 'center';
+        // On mobile, CSS handles the grid — don't override with inline styles
+        const isMobile = window.innerWidth <= 768;
+        if (!isMobile) {
+          // Desktop: center 1 or 2 cards, full row for 3
+          grid.style.gridTemplateColumns = 'repeat(3, 1fr)';
+          grid.style.justifyContent = '';
+          if (events.length < 3) {
+            grid.style.gridTemplateColumns = `repeat(${events.length}, minmax(0, 353px))`;
+            grid.style.justifyContent = 'center';
+          }
+        } else {
+          grid.style.gridTemplateColumns = '';
+          grid.style.justifyContent = '';
         }
 
         grid.innerHTML = events.map((ev, i) => {
