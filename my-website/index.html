@@ -1372,17 +1372,21 @@
         const allEvents = await res.json();
         const today = new Date();
         today.setHours(0, 0, 0, 0);
-        const events = allEvents.filter(ev => {
+        const allUpcoming = allEvents.filter(ev => {
           const d = new Date(ev.date);
           d.setHours(0, 0, 0, 0);
           return d >= today;
         });
+        const events = allUpcoming.slice(0, 3);
         const grid = document.getElementById('events-grid');
 
         if (!events.length) {
           grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;font-size:10px;letter-spacing:3px;color:rgba(255,255,255,0.3);">NO UPCOMING EVENTS</div>';
           return;
         }
+
+        const cols = Math.min(events.length, 3);
+        grid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
 
         grid.innerHTML = events.map((ev, i) => {
           const d = new Date(ev.date);
