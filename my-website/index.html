@@ -1406,8 +1406,14 @@
             grid.style.justifyContent = 'center';
           }
         } else {
-          grid.style.gridTemplateColumns = '';
-          grid.style.justifyContent = '';
+          // Mobile: let CSS handle 3-col layout, but center when fewer cards
+          if (events.length < 3) {
+            grid.style.gridTemplateColumns = `repeat(${events.length}, minmax(0, 120px))`;
+            grid.style.justifyContent = 'center';
+          } else {
+            grid.style.gridTemplateColumns = '';
+            grid.style.justifyContent = '';
+          }
         }
 
         grid.innerHTML = events.map((ev, i) => {
