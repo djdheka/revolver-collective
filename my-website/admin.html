@@ -559,7 +559,7 @@
           </div>
         </div>
         <div class="btn-row">
-          <button class="btn btn-gold" onclick="saveEvent(${ev.id})">💾 Save to Live Site</button>
+          <button class="btn btn-gold" onclick="saveEvent(${ev.id}, this)">💾 Save to Live Site</button>
         </div>
       </div>
     `).join('');
@@ -838,18 +838,46 @@
     }
   }
 
-  async function saveEvent(id) {
+  async function saveEvent(id, btn) {
     const ev = data.events.find(e => e.id === id);
     if (!ev) return;
+
+    btn.disabled = true;
+    btn.style.background = 'rgba(255,255,255,0.15)';
+    btn.style.color = 'rgba(255,255,255,0.5)';
+    btn.textContent = 'Saving…';
     setStatus('Saving...');
-    await sbUpdate('events', id, {
-      name: ev.name, date: ev.date, time: ev.time,
-      venue: ev.venue, city: ev.city, tag: ev.tag,
-      entry: ev.entry, description: ev.description, lineup: ev.lineup,
-      lat: ev.lat || null, lng: ev.lng || null
-    });
-    renderArchive();
-    setStatus('Saved to live site ✓ — visible immediately!');
+
+    try {
+      await sbUpdate('events', id, {
+        name: ev.name, date: ev.date, time: ev.time,
+        venue: ev.venue, city: ev.city, tag: ev.tag,
+        entry: ev.entry, description: ev.description, lineup: ev.lineup,
+        lat: ev.lat || null, lng: ev.lng || null
+      });
+      renderArchive();
+      btn.style.background = '#3a7d44';
+      btn.style.color = '#fff';
+      btn.textContent = '✓ Saved!';
+      setStatus('Saved to live site ✓ — visible immediately!');
+      setTimeout(() => {
+        btn.disabled = false;
+        btn.style.background = '';
+        btn.style.color = '';
+        btn.textContent = '💾 Save to Live Site';
+      }, 2000);
+    } catch (err) {
+      btn.style.background = '#8b2020';
+      btn.style.color = '#fff';
+      btn.textContent = '✗ Failed — try again';
+      setStatus('Save failed — check connection');
+      setTimeout(() => {
+        btn.disabled = false;
+        btn.style.background = '';
+        btn.style.color = '';
+        btn.textContent = '💾 Save to Live Site';
+      }, 2500);
+    }
   }
 
   async function deleteEvent(id) {
