@@ -545,25 +545,35 @@
       .nav { padding: 0 20px; }
       .nav-back { font-size: 9px; letter-spacing: 2px; }
 
-      /* HERO — stack layout on mobile */
+      /* HERO — full screen with background */
       .hero {
-        min-height: 100dvh;
+        min-height: 100svh;
         display: flex;
         flex-direction: column;
         align-items: flex-start;
+        justify-content: flex-end;
         padding-top: 56px;
+        position: relative;
       }
 
-      /* Photo: centered, takes top portion */
+      /* Photo: positioned in the black center area */
       .hero-photo {
-        position: relative !important;
-        inset: auto !important;
-        width: 100% !important;
-        height: 65vw !important;
+        position: absolute !important;
+        inset: unset !important;
+        top: 90px !important;
+        left: 4% !important;
+        transform: none !important;
+        width: 90% !important;
+        height: auto !important;
         object-fit: contain !important;
-        object-position: center top !important;
-        display: block;
-        margin: 0 auto;
+        object-position: center !important;
+        display: block !important;
+        margin: 0 !important;
+        z-index: 2 !important;
+        filter: drop-shadow(0 0 20px rgba(255,215,0,0.45)) !important;
+        animation: none !important;
+        -webkit-mask-image: linear-gradient(to bottom, black 0%, black 82%, transparent 97%) !important;
+        mask-image: linear-gradient(to bottom, black 0%, black 82%, transparent 97%) !important;
       }
 
       .photo-hover-zone { display: none; }
@@ -579,8 +589,8 @@
 
       /* Font name: left aligned, smaller */
       .hero-name-img {
-        width: clamp(160px, 65vw, 300px) !important;
-        margin: 0 0 12px 0 !important;
+        width: clamp(140px, 55vw, 260px) !important;
+        margin: 0 0 10px 0 !important;
         display: block;
       }
 
