@@ -332,20 +332,9 @@
       text-decoration: none;
       overflow: hidden;
       cursor: pointer;
-      background: #0a0908;
+      background: linear-gradient(160deg, #2b1e00 0%, #4a3500 35%, #5c4200 65%, #2b1e00 100%),
+        repeating-linear-gradient(91deg, transparent 0%, transparent 4%, rgba(255,255,255,0.05) 4.3%, transparent 4.6%, transparent 100%);
       aspect-ratio: 2 / 3;
-    }
-
-    /* Gold striped tint — always visible, matches the mobile nav menu background */
-    .member-card::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      z-index: 1;
-      background: linear-gradient(160deg, rgba(13,10,0,0.55) 0%, rgba(28,20,0,0.4) 35%, rgba(43,30,0,0.5) 65%, rgba(13,10,0,0.6) 100%),
-        repeating-linear-gradient(91deg, transparent 0%, transparent 4%, rgba(255,255,255,0.025) 4.3%, transparent 4.6%, transparent 100%);
-      mix-blend-mode: overlay;
-      pointer-events: none;
     }
 
     /* Photo */
