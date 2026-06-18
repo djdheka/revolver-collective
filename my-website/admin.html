@@ -7,6 +7,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Anton&family=Oswald:wght@300;400;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
@@ -253,6 +254,7 @@
       <div class="sidebar-section">Content</div>
       <button class="sidebar-item active" onclick="showPage('events', this)">📅 Events</button>
       <button class="sidebar-item" onclick="showPage('recap', this)">📸 Recap Photos</button>
+      <button class="sidebar-item" onclick="showPage('archive', this)">🗄 Archive</button>
       <div class="sidebar-section">Members</div>
       <button class="sidebar-item" onclick="showPage('members', this)">👤 Member Info</button>
       <div class="sidebar-section">Export</div>
@@ -278,6 +280,18 @@
         <div class="page-subtitle">Manage photo galleries by event</div>
 
         <div id="recap-list"></div>
+      </div>
+
+      <!-- ARCHIVE PAGE -->
+      <div class="page" id="page-archive">
+        <div class="page-title">Archive</div>
+        <div class="page-subtitle">Past events — automatically moved here once their date has passed</div>
+
+        <div class="btn-row" style="margin-bottom:20px;">
+          <button class="btn btn-gold" onclick="downloadArchivePDF('all')">⬇ Download All as PDF</button>
+        </div>
+
+        <div id="archive-list"></div>
       </div>
 
       <!-- MEMBERS PAGE -->
@@ -459,6 +473,7 @@
     renderEvents();
     renderMembers();
     renderRecap();
+    renderArchive();
     setStatus('Loaded from Supabase');
   }
 
@@ -550,6 +565,126 @@
     `).join('');
   }
 
+  // ── ARCHIVE ──
+  function isPastEvent(ev) {
+    if (!ev.date) return false;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const d = new Date(ev.date);
+    d.setHours(0, 0, 0, 0);
+    return d < today;
+  }
+
+  function getPastEvents() {
+    return data.events
+      .filter(isPastEvent)
+      .sort((a, b) => new Date(b.date) - new Date(a.date)); // most recent first
+  }
+
+  function formatEventDate(dateStr) {
+    if (!dateStr) return 'Date TBA';
+    const d = new Date(dateStr);
+    const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    return `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
+  }
+
+  function renderArchive() {
+    const list = document.getElementById('archive-list');
+    const pastEvents = getPastEvents();
+    if (!pastEvents.length) {
+      list.innerHTML = '<div style="font-size:11px;letter-spacing:2px;color:rgba(255,255,255,0.3);text-transform:uppercase;padding:20px 0;">No past events yet</div>';
+      return;
+    }
+    list.innerHTML = pastEvents.map(ev => `
+      <div class="card">
+        <div class="card-title">${ev.name || 'Untitled Event'}</div>
+        <div style="font-size:11px;letter-spacing:1px;color:rgba(255,255,255,0.5);line-height:1.8;margin-bottom:14px;">
+          ${formatEventDate(ev.date)}<br/>
+          ${ev.venue || ''}${ev.venue && ev.city ? ', ' : ''}${ev.city || ''}<br/>
+          Lineup: ${(ev.lineup || []).join(', ') || '—'}
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-outline" onclick="downloadArchivePDF('${ev.id}')">⬇ Download PDF</button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function downloadArchivePDF(target) {
+    const { jsPDF } = window.jspdf;
+    const events = target === 'all' ? getPastEvents() : getPastEvents().filter(e => String(e.id) === String(target));
+    if (!events.length) { setStatus('No past events to export'); return; }
+
+    const doc = new jsPDF({ unit: 'pt', format: 'a4' });
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const marginX = 56;
+    let y = 70;
+
+    events.forEach((ev, idx) => {
+      if (idx > 0) {
+        doc.addPage();
+        y = 70;
+      }
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(20);
+      doc.text('REVOLVER COLLECTIVE', marginX, y);
+      y += 18;
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(150);
+      doc.text('EVENT ARCHIVE RECORD', marginX, y);
+      doc.setTextColor(0);
+      y += 40;
+
+      doc.setDrawColor(201, 168, 76);
+      doc.setLineWidth(1);
+      doc.line(marginX, y, pageWidth - marginX, y);
+      y += 36;
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(22);
+      doc.text(ev.name || 'Untitled Event', marginX, y);
+      y += 34;
+
+      const fields = [
+        ['Date', formatEventDate(ev.date)],
+        ['Door Open', ev.time ? `${ev.time} WIB` : '—'],
+        ['Venue', ev.venue || '—'],
+        ['City', ev.city || '—'],
+        ['Tag', ev.tag || '—'],
+        ['Entry', ev.entry || '—'],
+        ['Lineup', (ev.lineup || []).join(', ') || '—'],
+      ];
+
+      doc.setFontSize(11);
+      fields.forEach(([label, value]) => {
+        doc.setFont('helvetica', 'bold');
+        doc.text(label.toUpperCase(), marginX, y);
+        doc.setFont('helvetica', 'normal');
+        const lines = doc.splitTextToSize(value, pageWidth - marginX * 2 - 120);
+        doc.text(lines, marginX + 120, y);
+        y += Math.max(20, lines.length * 16);
+      });
+
+      if (ev.description) {
+        y += 14;
+        doc.setFont('helvetica', 'bold');
+        doc.text('DESCRIPTION', marginX, y);
+        y += 18;
+        doc.setFont('helvetica', 'normal');
+        const descLines = doc.splitTextToSize(ev.description, pageWidth - marginX * 2);
+        doc.text(descLines, marginX, y);
+      }
+    });
+
+    const filename = target === 'all'
+      ? `revolver-collective-archive-${new Date().toISOString().slice(0,10)}.pdf`
+      : `revolver-collective-${(events[0].name || 'event').toLowerCase().replace(/[^a-z0-9]+/g, '-')}.pdf`;
+    doc.save(filename);
+    setStatus('PDF downloaded ✓');
+  }
+
   async function addEvent() {
     setStatus('Creating event...');
     const newEv = { name: 'New Event', date: '', time: '21:00', venue: '', city: 'Yogyakarta', tag: 'Club Night', entry: 'Free Entry', description: '', lineup: [] };
@@ -557,6 +692,7 @@
     if (result && result[0]) {
       data.events.push(result[0]);
       renderEvents();
+      renderArchive();
       setStatus('Event created ✓');
     }
   }
@@ -712,6 +848,7 @@
       entry: ev.entry, description: ev.description, lineup: ev.lineup,
       lat: ev.lat || null, lng: ev.lng || null
     });
+    renderArchive();
     setStatus('Saved to live site ✓ — visible immediately!');
   }
 
@@ -720,6 +857,7 @@
     await sbDelete('events', id);
     data.events = data.events.filter(e => e.id !== id);
     renderEvents();
+    renderArchive();
     setStatus('Event deleted ✓');
   }
 
