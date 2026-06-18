@@ -434,6 +434,7 @@
     document.querySelectorAll('.sidebar-item').forEach(b => b.classList.remove('active'));
     document.getElementById('page-' + page).classList.add('active');
     btn.classList.add('active');
+    if (page === 'recap') loadRecap();
   }
 
   // ── DATA ──
@@ -472,8 +473,8 @@
     if (sbEvents && !sbEvents.error) data.events = sbEvents;
     renderEvents();
     renderMembers();
-    renderRecap();
     renderArchive();
+    // Recap loaded on demand when tab is opened
     setStatus('Loaded from Supabase');
   }
 
@@ -963,58 +964,156 @@
     if (m) { m[field] = value; save(); }
   }
 
-  // ── RECAP PHOTOS ──
+  // ── RECAP PHOTOS (Supabase) ──
+  let recapGalleries = [];
+
+  async function loadRecap() {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/recap_galleries?order=sort_order.asc,created_at.desc`, { headers: sbHeaders });
+    recapGalleries = await res.json();
+    renderRecap();
+  }
+
   function renderRecap() {
     const list = document.getElementById('recap-list');
-    list.innerHTML = data.recapEvents.map(ev => `
-      <div class="photo-event-section">
-        <div class="photo-event-name">${ev.name} · ${ev.date} · ${ev.venue}</div>
-        <div class="photo-grid">
-          ${ev.photos.map((p, i) => `
-            <div class="photo-thumb">
-              <img src="${p}" />
-              <button class="photo-thumb-del" onclick="deletePhoto(${ev.id},${i})">✕</button>
-            </div>
-          `).join('')}
-          <label class="photo-add" title="Add photo">
-            +
-            <input type="file" accept="image/*" multiple style="display:none" onchange="addPhotos(${ev.id}, this)" />
-          </label>
+    if (!Array.isArray(recapGalleries) || recapGalleries.length === 0) {
+      list.innerHTML = `
+        <div style="color:rgba(255,255,255,0.4);font-size:11px;letter-spacing:2px;margin-bottom:20px;">NO GALLERIES YET</div>
+        <button class="add-btn" onclick="addRecapEvent()">+ Add New Event Gallery</button>
+      `;
+      return;
+    }
+    list.innerHTML = recapGalleries.map(ev => {
+      const photos = parsePhotos(ev.photos);
+      return `
+        <div class="photo-event-section" id="recap-ev-${ev.id}">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px;">
+            <div class="photo-event-name" style="flex:1">${ev.event_name}${ev.event_date ? ' · ' + ev.event_date : ''}${ev.venue ? ' · ' + ev.venue : ''}</div>
+            <button class="btn" style="font-size:10px;padding:4px 10px;background:rgba(255,80,80,0.15);color:#f55;border:1px solid rgba(255,80,80,0.3)" onclick="deleteRecapEvent(${ev.id})">✕ Delete Gallery</button>
+          </div>
+          <div class="photo-grid" id="photo-grid-${ev.id}">
+            ${photos.map((p, i) => `
+              <div class="photo-thumb">
+                <img src="${p}" />
+                <button class="photo-thumb-del" onclick="deleteRecapPhoto(${ev.id}, ${i})">✕</button>
+              </div>
+            `).join('')}
+            <label class="photo-add" title="Add photos (drag & drop or click)" id="drop-zone-${ev.id}"
+              ondragover="event.preventDefault();this.style.borderColor='var(--gold)'"
+              ondragleave="this.style.borderColor=''"
+              ondrop="handleDrop(event, ${ev.id})">
+              +
+              <input type="file" accept="image/*" multiple style="display:none" onchange="uploadPhotos(${ev.id}, this.files)" />
+            </label>
+          </div>
+          <div id="upload-status-${ev.id}" style="font-size:10px;letter-spacing:1px;color:var(--gold);min-height:16px;margin-top:4px;"></div>
         </div>
-      </div>
-    `).join('') + `
+      `;
+    }).join('') + `
       <button class="add-btn" onclick="addRecapEvent()">+ Add New Event Gallery</button>
     `;
   }
 
-  function addPhotos(id, input) {
-    const ev = data.recapEvents.find(e => e.id === id);
-    const files = Array.from(input.files);
-    let loaded = 0;
-    files.forEach(file => {
-      const reader = new FileReader();
-      reader.onload = e => {
-        ev.photos.push(e.target.result);
-        loaded++;
-        if (loaded === files.length) { save(); renderRecap(); }
-      };
-      reader.readAsDataURL(file);
+  function parsePhotos(raw) {
+    if (!raw) return [];
+    if (Array.isArray(raw)) return raw;
+    try { return JSON.parse(raw); } catch { return []; }
+  }
+
+  function handleDrop(e, evId) {
+    e.preventDefault();
+    document.getElementById('drop-zone-' + evId).style.borderColor = '';
+    const files = e.dataTransfer.files;
+    if (files.length) uploadPhotos(evId, files);
+  }
+
+  async function uploadPhotos(evId, files) {
+    const statusEl = document.getElementById('upload-status-' + evId);
+    const fileArr = Array.from(files);
+    statusEl.textContent = `Uploading 0 / ${fileArr.length}...`;
+    const ev = recapGalleries.find(e => e.id === evId);
+    const currentPhotos = parsePhotos(ev.photos);
+    let done = 0;
+
+    for (const file of fileArr) {
+      const ext = file.name.split('.').pop();
+      const filename = `${evId}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+      const uploadRes = await fetch(
+        `${SUPABASE_URL}/storage/v1/object/recap-photos/${filename}`,
+        { method: 'POST', headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': file.type }, body: file }
+      );
+      if (uploadRes.ok) {
+        const url = `${SUPABASE_URL}/storage/v1/object/public/recap-photos/${filename}`;
+        currentPhotos.push(url);
+        done++;
+        statusEl.textContent = `Uploading ${done} / ${fileArr.length}...`;
+      }
+    }
+
+    await fetch(`${SUPABASE_URL}/rest/v1/recap_galleries?id=eq.${evId}`, {
+      method: 'PATCH',
+      headers: { ...sbHeaders, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+      body: JSON.stringify({ photos: JSON.stringify(currentPhotos) })
     });
+
+    ev.photos = JSON.stringify(currentPhotos);
+    statusEl.textContent = `✓ ${done} photo${done !== 1 ? 's' : ''} uploaded`;
+    setTimeout(() => { statusEl.textContent = ''; }, 3000);
+    renderRecap();
   }
 
-  function deletePhoto(evId, idx) {
-    const ev = data.recapEvents.find(e => e.id === evId);
-    ev.photos.splice(idx, 1);
-    save(); renderRecap();
+  async function deleteRecapPhoto(evId, idx) {
+    const ev = recapGalleries.find(e => e.id === evId);
+    const photos = parsePhotos(ev.photos);
+    const url = photos[idx];
+    // Delete from storage
+    const path = url.split('/object/public/recap-photos/')[1];
+    if (path) {
+      await fetch(`${SUPABASE_URL}/storage/v1/object/recap-photos/${path}`, {
+        method: 'DELETE', headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+      });
+    }
+    photos.splice(idx, 1);
+    await fetch(`${SUPABASE_URL}/rest/v1/recap_galleries?id=eq.${evId}`, {
+      method: 'PATCH',
+      headers: { ...sbHeaders, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+      body: JSON.stringify({ photos: JSON.stringify(photos) })
+    });
+    ev.photos = JSON.stringify(photos);
+    renderRecap();
   }
 
-  function addRecapEvent() {
+  async function deleteRecapEvent(evId) {
+    if (!confirm('Delete this entire gallery and all its photos?')) return;
+    const ev = recapGalleries.find(e => e.id === evId);
+    const photos = parsePhotos(ev.photos);
+    for (const url of photos) {
+      const path = url.split('/object/public/recap-photos/')[1];
+      if (path) {
+        await fetch(`${SUPABASE_URL}/storage/v1/object/recap-photos/${path}`, {
+          method: 'DELETE', headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+        });
+      }
+    }
+    await fetch(`${SUPABASE_URL}/rest/v1/recap_galleries?id=eq.${evId}`, {
+      method: 'DELETE', headers: sbHeaders
+    });
+    recapGalleries = recapGalleries.filter(e => e.id !== evId);
+    renderRecap();
+  }
+
+  async function addRecapEvent() {
     const name = prompt('Event name:');
     if (!name) return;
-    const date = prompt('Date (e.g. 21 June 2026):');
-    const venue = prompt('Venue:');
-    data.recapEvents.push({ id: Date.now(), name, date: date||'', venue: venue||'', photos: [] });
-    save(); renderRecap();
+    const date = prompt('Date (e.g. 21 June 2026):') || '';
+    const venue = prompt('Venue:') || '';
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/recap_galleries`, {
+      method: 'POST',
+      headers: { ...sbHeaders, 'Content-Type': 'application/json', 'Prefer': 'return=representation' },
+      body: JSON.stringify({ event_name: name, event_date: date, venue, photos: '[]', sort_order: 0 })
+    });
+    const [newEv] = await res.json();
+    recapGalleries.unshift(newEv);
+    renderRecap();
   }
 
   function exportFile(filename) {
