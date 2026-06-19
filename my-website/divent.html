@@ -435,6 +435,7 @@
       gap: 14px;
       flex: 1;
       padding: 14px 16px;
+      min-width: 0;
     }
     .social-link-platform {
       font-family: 'Oswald', sans-serif;
@@ -448,6 +449,9 @@
       font-size: 11px;
       color: rgba(255,255,255,0.9);
       letter-spacing: 1px;
+      overflow-wrap: break-word;
+      word-break: break-all;
+      min-width: 0;
     }
     .social-link-qr {
       width: 56px;
@@ -746,6 +750,13 @@
               <span class="social-link-handle">D1VENTTT</span>
             </div>
             <img class="social-link-qr" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMYAAADGCAIAAAAG+WgKAAADr0lEQVR4nO3d224VIQBAUWv8/1+u705jCNlcpl3ruc452h0iAYZfvwAAAAAAAIA3+Rj5oc/Pz9Xf4z8+Poa+5D/mvvPOz5r79Pt/F783fA9+FEkRkxQxSRGTFLE/c39sbmY0Ym5Gc3Z+93zOyM/MPfnptt+FUYqYpIhJipikiEmK2OSM7+mNa2rV3G1uprbOzt/Fk1GKmKSISYqYpIhJilg247vNurnk3M/cP0+sGKWISYqYpIhJipikiH3bGd/Tuj2TO+eJ9zNKEZMUMUkRkxQxSRHLZny3zU2q2dPITK36u+98A8w6RilikiImKWKSIiYpYpMzvrNvjHwa2TP5tPMc37r1u9t+F0YpYpIiJilikiImKWJ3LcwN2vkmzJHnPFV7QW9bOR1hlCImKWKSIiYpYpIiNnkf39ya2pzb1sLW3Zp39j4+7+rkUpIiJilikiImKWKT/8nfOe/YuR+y2rF5m3U3Dz4ZpYhJipikiEmKmKSITa7xffGgjStx6/ZwVvO7nTOs2xiliEmKmKSISYqYpIhluzrnnD2RN2Ln/syz742p/lWNUsQkRUxSxCRFTFLEts743jh7GnH/7eo7V2mNUsQkRUxSxCRFTFLEXrnGN/fkp7PnAXdyjo8XkxQxSRGTFDFJEcvO8X3x6GWrbGfX1G77rNvubTdKEZMUMUkRkxQxSRGbvIH9/jW+6rNu29F6dmfsCKMUMUkRkxQxSRGTFLFserVz12K1xrdudWznm1LOvl/0yShFTFLEJEVMUsQkRey62xnm3DbffOOTqzmpUYqYpIhJipikiEmKWPbmlp1vy7z/3NzOFb2RTx95jjU+LiUpYpIiJilikiI2eY7vaeeOxHV7ONfNJdd9w9tulDBKEZMUMUkRkxQxSRFbuMZXOXsib87Zc4VPO98AY5QiJilikiImKWKSInby8N20dat1Z29OP/te0BFmfBwgKWKSIiYpYpIitvA+vspt+yHnnrzzPOC69bsRRilikiImKWKSIiYpYofv43sama3snCtV5wrP7jvduVJplCImKWKSIiYpYpIilr255ey6UqWaqVXn+NatrjrHx2tIipikiEmKmKSIZTO+s+6/6eC2WyfWMUoRkxQxSRGTFDFJEfsmM76ndSf75tbvqs/aye0MXEFSxCRFTFLEJEUsu52hsu6zbnvD57o56bozjCOMUsQkRUxSxCRFTFLEXvmuzp23GOy8WX7nDtIn7+rkUpIiJilikiImKQAAAAAAAIAf7S8Pcwhzl+fLMwAAAABJRU5ErkJggg==" alt="SoundCloud QR" />
+          </a>
+          <a class="social-link" href="https://www.tiktok.com/@diventtt?_r=1&_t=ZS-97LiWxclylj" target="_blank" rel="noopener">
+            <div class="social-link-left">
+              <span class="social-link-platform">TikTok</span>
+              <span class="social-link-handle">@diventtt</span>
+            </div>
+            <img class="social-link-qr" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMYAAADGCAIAAAAG+WgKAAAEz0lEQVR4nO3d0Y7rJhSG0U7V93/l07vqyJHikv1BkqO1rh2bmfxCOMDm59evX39B5+93N4A/jUgREyliIkVMpIiJFDGRIiZSxESKmEgR++f2ip+fnwPt+M/qBNFq8x7vf7nD5YL8z7/9A5+35/b63W7bo5ciJlLERIqYSBG7H55f5OurVkeX+ej1+Xh8Ppq+XHB7/bA9b/+C9FLERIqYSBETKWLLw/OL+Y/Xw0fMfzte/fX8csHw1/bV+7/gwHf0O70UMZEiJlLERIqYSBGbvvF9vuEMxur6qnl7vp1eiphIERMpYiJF7PuG5/ny/uGUzuGPf/7oXi9FTKSIiRQxkSI2HZ6fHy1+3XaAi+GP7y84/B3ppYiJFDGRIiZSxESK2PIb3+FqRo9Wd7AM3d5/dQP7avs/vNzUI70UMZEiJlLERIrY/fD88xfoXByegTlfr3bYgN30UsREiphIERMpYiJF7GdYMffPOw/j8A1XCx7P23NLyTI+i0gREyliIkVsul4qL780r7Dbvk/kFYsvbv+Bc6v/geE3qJciJlLERIqYSBHbfuDH6nB+/sThj7/5/dvtDLfefh64XoqYSBETKWIiRUykiN2vl5o+oF4PlL+wrN5w9/Xt41544ur9L/RSxESKmEgREyli27czzLcnDEeXu7cD7N7AvrsBq/9ww3NOEyliIkVMpIj15/Hl4/fhbt3b64flXN++m/n8CSLP6aWIiRQxkSImUsREitjpisIvbHh/fsHuCZ/z9Z+Gb7hvn/DRSxETKWIiRUykiC2vl7rI60vdOlx+Ka+Ptfu8vPnrgvKvfBaRIiZSxESK2Pt3G6/aXZ/p+d1y8/bn9aguVt9X9FLERIqYSBETKWIiRWz6xjd/H9m9//rt9asuDs/P5E/0xsdpIkVMpIiJFLHtEzLX520+TuP2DvkG9qWn33789g4HJnCsl+KziBQxkSImUsT67QxLH/8/d3h+w3y5z/OPP94h/zE6b/C8SUv0UsREiphIERMpYiJFbPsJ7G+foNi9gWR4h3w+ZFX+yqmXIiZSxESKmEgRm57Hd3v9xQtjz/ZAwPPHay/d7dYLj9u9gOxCL0VMpIiJFDGRIvYFv563999dr3a1Pfn2hFV+PefTiRQxkSImUsREilh/AvvF7evD7h0yeQGtwwcU3soXnD2/wIQMp4kUMZEiJlLEpsPz+XzL7tFlvl5qdf1Wu73iBYdPVNRLERMpYiJFTKSInS7/+oJPK7e6qt2wcH4/yGoD9FLERIqYSBETKWIiRex+QubAjMHvbhdUDdf3PH788Bad1Y/fanf4PDIhw5uJFDGRIiZSxPr6Usst2LzBfPeBHKt3OFyP6oUnOvCDzyJSxESKmEgREyli20uWXeTzD/kjhgeUzyd8njcgnx+zQ4ZPJ1LERIqYSBHbXl/q8w3Pt8jnZ4Yb5OctXGrPI70UMZEiJlLERIrY9w3P89Ho8+tX60XN27P68WGFrby+rV6KmEgREyliIkVMpIhtryg8d7ik2O4Jmd0FAVbXP+Xt0UsREyliIkVMpIgtD88Pl5t6fOLqAXzzCY1he9qnP1pdULW7YoBeiphIERMpYiJF7AsO/OC76KWIiRQxkSImUsREiphIERMpYiJFTKSIiRSxfwGM/OyjehdW4AAAAABJRU5ErkJggg==" alt="TikTok QR" />
           </a>
         </div>
       </div>
