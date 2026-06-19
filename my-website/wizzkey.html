@@ -436,6 +436,7 @@
       gap: 14px;
       flex: 1;
       padding: 14px 16px;
+      min-width: 0;
     }
     .social-link-platform {
       font-family: 'Oswald', sans-serif;
@@ -449,6 +450,9 @@
       font-size: 11px;
       color: rgba(255,255,255,0.9);
       letter-spacing: 1px;
+      overflow-wrap: break-word;
+      word-break: break-all;
+      min-width: 0;
     }
     .social-link-qr {
       width: 56px;
@@ -738,6 +742,13 @@
               <span class="social-link-handle">@waskito_awp</span>
             </div>
             <img class="social-link-qr" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMYAAADGCAIAAAAG+WgKAAAD2UlEQVR4nO3d0W7UOhRA0faK///l8n4jIcvaPs7AWs/tTIAti6M48dcXAAAAAAAA8Em+V37o5+fn9HX8wff3/y/yeT3Pn3la+VPsfdfez6yoPqey8vf838B18E+RFDFJEZMUMUkR+7X3ayv/89+zN9GszFznrnlFNZPuffKeveuxShGTFDFJEZMUMUkR25z4nianlXPT08p3VXcY3zapVddjlSImKWKSIiYpYpIilk18k6rpqdozeW6/6CeyShGTFDFJEZMUMUkR+8iJb29S2/utyftlf8cMaJUiJilikiImKWKSIpZNfG97Su45PU3uxnz/+1XOsUoRkxQxSRGTFDFJEduc+O5ONHtT2Ll9lXff53n33+LJKkVMUsQkRUxSxCRF7PM2DX6dnHGqu2N7u0z/DlYpYpIiJilikiImKWJL9/iq+1OTp9RNPkk3eZft3N7Uakq1ShGTFDFJEZMUMUkRe90J7JPn1lUzztv2VT5Nzr9WKWKSIiYpYpIiJili2Qns555lO3eWenXPsfr2FdUVntt3apUiJilikiImKWKSIpbd4zt3B23leibPQD+38/PcBOoeHx9MUsQkRUxSxCRFbHRX5+SOzcq5d2xOvrll8k0yVilikiImKWKSIiYpYtnQcW7qufvUXrUT9WnyXuHe5+x9slWKmKSISYqYpIhJitjB8/j2Zq67b8s8d9LfueupzpqvWKWISYqYpIhJipikiG0OApMzxd2z7e7e47u7n9abW3gFSRGTFDFJEZMUsew8vr3P2XNunprcjbn3d7j3XZMTulWKmKSISYqYpIhJitjSxDd5GsLkHs7JvY4r9v5c1c7PilWKmKSISYqYpIhJitjle3zn3q+y5+7zgOdUs/YKqxQxSRGTFDFJEZMUsdF3dZ7bCzp593Dyabu3nWm4wipFTFLEJEVMUsQkRezgm1sm56DJN6VM7judZOLjpSRFTFLEJEVMUsTe9SDborftmazeEvO2N+Q8OY+PCyRFTFLEJEVMUsQ2n+ObNLkb8233E/c+ecW5edMqRUxSxCRFTFLEJEVs8wT2u6fvPVVT4d2dqHdPHrSrk5eSFDFJEZMUMUkR25z4ns5Nanu/NTk9vX9/pnd18sEkRUxSxCRFTFLEsolv0t17YdVuzD2TJ7Dv/ZZVipikiEmKmKSISYrYR058e6q7kOee49vb5zk5za2wShGTFDFJEZMUMUkRyya+ybdlvu3c9pXvWvmZc1PY5JtCrVLEJEVMUsQkRUxSxDYnvrtv76zufN29p1a5ezLFk1WKmKSISYqYpIhJCgAAAAAAAOCf9hsrhQuUozmyWQAAAABJRU5ErkJggg==" alt="Instagram QR" />
+          </a>
+          <a class="social-link" href="https://on.soundcloud.com/ASMyBDoYHB5yGvx4aw" target="_blank" rel="noopener">
+            <div class="social-link-left">
+              <span class="social-link-platform">Soundcloud</span>
+              <span class="social-link-handle">soundcloud.com/wizzkey</span>
+            </div>
+            <img class="social-link-qr" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMYAAADGAQAAAACh4MLwAAAB4ElEQVR4nO2YQYrcQAxFX0UFnl22WQRkmIP0xQZmQp9sDjKgukUbZH4W5Sab6SFZjNKQGIyN/6KE9L/05Sbev/YvNwD4dxAUAHm8JXgCeBbGJilMFjjescClLM3O1h4AvA9FOgN+tJd7qE+fj71ny8e3nkPstRFcEV8CoDvjU89551JIinTAcZMpXcpSjt5GWmsrWCT2uq0MRmu9MjuSpEO5rlAcX/5+dlBIS4CFKR0sAC+sHIoLixQSbiGlm5Knugg6fI1vLVdLje+Pbx0MfIn7mD/b6cEt9nU/9QHSvlrsayV74QJuwjU7v6cXshfFhYvPnjKnkOL5XvQjaSr66HvgZ51Ls7NoESjycAZQnZ2tbQ3ayV67KyzS+yjssB/WZ3JHSp85MiVWWR8tcSH9en66xZPXMmTyNF1hwi2ynCE3YxO+RAKSSTocbun8USy6zh08XfFcqeAv+HZiwBI5LHJAO7X1E875cwRJmp4Fjl3Ez5XcQQFLpOO/HIrFc6mCD/VIspAU0jlqN7CbyGitNQajj+3E6OzrfjpHtfefd5Ik0vk+vP/0lrO7hCJ98vel2t3G9ExXh2BROn9mBNOjYLJIoFA/v8GdxDSrVOwtj+1wb3NrTjodKPTX7f/frw+Qn7GfnFqrFHoxAAAAAElFTkSuQmCC" alt="SoundCloud QR" />
           </a>
         </div>
       </div>
