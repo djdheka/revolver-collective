@@ -486,7 +486,12 @@
   // ── EVENTS ──
   function renderEvents() {
     const list = document.getElementById('events-list');
-    list.innerHTML = data.events.map(ev => `
+    const upcomingEvents = data.events.filter(ev => !isPastEvent(ev));
+    if (!upcomingEvents.length) {
+      list.innerHTML = '<div style="font-size:11px;letter-spacing:2px;color:rgba(255,255,255,0.3);text-transform:uppercase;padding:20px 0;">No upcoming events — past events have moved to Archive</div>';
+      return;
+    }
+    list.innerHTML = upcomingEvents.map(ev => `
       <div class="card" id="ev-${ev.id}">
         <div class="card-title">Event · ${ev.name}</div>
         <button class="card-delete" onclick="deleteEvent(${ev.id})">✕ Delete</button>
