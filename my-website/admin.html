@@ -242,6 +242,18 @@
   </div>
 </div>
 
+<!-- SET PASSWORD SCREEN (shown when arriving via an invite link) -->
+<div id="setpw-screen" style="display:none; align-items:center; justify-content:center; min-height:100dvh; flex-direction:column; gap:24px;">
+  <div class="login-title">Revolver Admin</div>
+  <div class="login-sub">Welcome — Set Your Password</div>
+  <div class="login-box">
+    <input class="login-input" type="password" id="setpw-input" placeholder="New password (min 8 characters)" autocomplete="new-password" onkeydown="if(event.key==='Enter')document.getElementById('setpw-confirm').focus()" />
+    <input class="login-input" type="password" id="setpw-confirm" placeholder="Confirm password" autocomplete="new-password" onkeydown="if(event.key==='Enter')setNewPassword()" />
+    <button class="login-btn" onclick="setNewPassword()">Set Password & Continue</button>
+    <div class="login-error" id="setpw-error">Passwords don't match, or are under 8 characters</div>
+  </div>
+</div>
+
 <!-- ADMIN SCREEN -->
 <div id="admin-screen">
   <nav class="admin-nav">
@@ -373,6 +385,11 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
+  // Capture this BEFORE creating the Supabase client below — the client reads and
+  // clears this hash almost immediately, so we need our own copy first to tell
+  // "someone just clicked an invite link" apart from "a normal returning visit."
+  const arrivedViaInviteOrRecovery = window.location.hash.includes('type=invite') || window.location.hash.includes('type=recovery');
+
   // ── SUPABASE ──
   const SUPABASE_URL = 'https://bglpsruvpscbupltihzs.supabase.co';
   const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJnbHBzcnV2cHNjYnVwbHRpaHpzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE1MzkzMjgsImV4cCI6MjA5NzExNTMyOH0.C2d3XtZdE2XSoSKVIDnJU1OQng5tuv_e9Ld8i3vM53E';
@@ -433,6 +450,7 @@
     await sb.auth.signOut();
     currentSession = null;
     document.getElementById('login-screen').style.display = 'flex';
+    document.getElementById('setpw-screen').style.display = 'none';
     document.getElementById('admin-screen').style.display = 'none';
     document.getElementById('email-input').value = '';
     document.getElementById('pw-input').value = '';
@@ -440,17 +458,50 @@
 
   function showAdminScreen() {
     document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('setpw-screen').style.display = 'none';
     document.getElementById('admin-screen').style.display = 'block';
   }
 
-  // If there's already a valid logged-in session (from a previous visit), skip
-  // straight to the admin screen instead of asking to log in again every time.
+  function showSetPasswordScreen() {
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('admin-screen').style.display = 'none';
+    document.getElementById('setpw-screen').style.display = 'flex';
+  }
+
+  // Used right after someone clicks an invite (or password reset) link — they're
+  // technically logged in at this point via the link itself, but have no usable
+  // password yet, so we ask them to set one before letting them into the panel.
+  async function setNewPassword() {
+    const pw = document.getElementById('setpw-input').value;
+    const confirm = document.getElementById('setpw-confirm').value;
+    if (pw.length < 8 || pw !== confirm) {
+      document.getElementById('setpw-error').style.display = 'block';
+      return;
+    }
+    const { error } = await sb.auth.updateUser({ password: pw });
+    if (error) {
+      document.getElementById('setpw-error').textContent = error.message;
+      document.getElementById('setpw-error').style.display = 'block';
+      return;
+    }
+    document.getElementById('setpw-error').style.display = 'none';
+    showAdminScreen();
+    init();
+  }
+
+  // If there's already a valid logged-in session, decide where to send them:
+  // a fresh invite/recovery link → set-password screen; a normal returning
+  // visit → straight into the admin panel without asking to log in again.
   (async () => {
     const { data: { session } } = await sb.auth.getSession();
     if (session) {
       currentSession = session;
-      showAdminScreen();
-      init();
+      if (arrivedViaInviteOrRecovery) {
+        showSetPasswordScreen();
+      } else {
+        showAdminScreen();
+        init();
+      }
     }
   })();
 
