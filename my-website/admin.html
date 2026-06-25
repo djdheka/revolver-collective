@@ -1009,7 +1009,7 @@
           <div class="photo-grid" id="photo-grid-${ev.id}">
             ${photos.map((p, i) => `
               <div class="photo-thumb">
-                <img src="${cdnUrl(p)}" />
+                <img src="${cdnUrl(p, 300)}" />
                 <button class="photo-thumb-del" onclick="deleteRecapPhoto(${ev.id}, ${i})">✕</button>
               </div>
             `).join('')}
@@ -1046,11 +1046,12 @@
   const CLOUDINARY_CLOUD_NAME = 'dd5szi7ji';
   const CLOUDINARY_UPLOAD_PRESET = 'recap_photos';
 
-  // Inserts f_auto,q_auto into a Cloudinary URL for automatic format/compression.
-  // Leaves old Supabase Storage URLs untouched.
-  function cdnUrl(url) {
-    if (url && url.includes('res.cloudinary.com') && url.includes('/upload/') && !url.includes('/upload/f_auto')) {
-      return url.replace('/upload/', '/upload/f_auto,q_auto/');
+  // Inserts Cloudinary transforms: f_auto,q_auto for format/quality, plus a width
+  // cap so the full-resolution camera original isn't sent to a small preview thumb.
+  function cdnUrl(url, width) {
+    if (url && url.includes('res.cloudinary.com') && url.includes('/upload/')) {
+      const transform = width ? `f_auto,q_auto,c_limit,w_${width}` : 'f_auto,q_auto';
+      return url.replace('/upload/', `/upload/${transform}/`);
     }
     return url;
   }

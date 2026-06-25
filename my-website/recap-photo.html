@@ -400,11 +400,14 @@
       try { return JSON.parse(raw); } catch { return []; }
     }
 
-    // Inserts f_auto,q_auto into a Cloudinary URL for automatic format/compression.
-    // Leaves old Supabase Storage URLs untouched.
-    function cdnUrl(url) {
-      if (url && url.includes('res.cloudinary.com') && url.includes('/upload/') && !url.includes('/upload/f_auto')) {
-        return url.replace('/upload/', '/upload/f_auto,q_auto/');
+    // Inserts Cloudinary transforms: f_auto,q_auto for format/quality, plus a width
+    // cap so the full-resolution camera original (often 3000-4000px wide) isn't sent
+    // to a screen that only displays it at a few hundred px. This is the main lever
+    // for file size — format/quality alone barely helps if dimensions stay huge.
+    function cdnUrl(url, width) {
+      if (url && url.includes('res.cloudinary.com') && url.includes('/upload/')) {
+        const transform = width ? `f_auto,q_auto,c_limit,w_${width}` : 'f_auto,q_auto';
+        return url.replace('/upload/', `/upload/${transform}/`);
       }
       return url;
     }
@@ -437,7 +440,7 @@
               <div class="masonry">
                 ${photos.map((p, i) => `
                   <div class="masonry-item" onclick="openLightbox(${gi}, ${i})">
-                    <img src="${cdnUrl(p)}" alt="${ev.event_name}" loading="lazy" />
+                    <img src="${cdnUrl(p, 900)}" alt="${ev.event_name}" loading="lazy" />
                     <div class="masonry-item-overlay"></div>
                   </div>
                 `).join('')}
@@ -472,7 +475,7 @@
 
     function updateLightbox() {
       const imgs = galleries[currentGallery];
-      document.getElementById('lightbox-img').src = cdnUrl(imgs[currentIndex]);
+      document.getElementById('lightbox-img').src = cdnUrl(imgs[currentIndex], 1600);
       document.getElementById('lightbox-counter').textContent = (currentIndex + 1) + ' / ' + imgs.length;
     }
 
