@@ -400,6 +400,15 @@
       try { return JSON.parse(raw); } catch { return []; }
     }
 
+    // Inserts f_auto,q_auto into a Cloudinary URL for automatic format/compression.
+    // Leaves old Supabase Storage URLs untouched.
+    function cdnUrl(url) {
+      if (url && url.includes('res.cloudinary.com') && url.includes('/upload/') && !url.includes('/upload/f_auto')) {
+        return url.replace('/upload/', '/upload/f_auto,q_auto/');
+      }
+      return url;
+    }
+
     async function loadGalleries() {
       const wrapper = document.getElementById('gallery-wrapper');
       try {
@@ -428,7 +437,7 @@
               <div class="masonry">
                 ${photos.map((p, i) => `
                   <div class="masonry-item" onclick="openLightbox(${gi}, ${i})">
-                    <img src="${p}" alt="${ev.event_name}" loading="lazy" />
+                    <img src="${cdnUrl(p)}" alt="${ev.event_name}" loading="lazy" />
                     <div class="masonry-item-overlay"></div>
                   </div>
                 `).join('')}
@@ -463,7 +472,7 @@
 
     function updateLightbox() {
       const imgs = galleries[currentGallery];
-      document.getElementById('lightbox-img').src = imgs[currentIndex];
+      document.getElementById('lightbox-img').src = cdnUrl(imgs[currentIndex]);
       document.getElementById('lightbox-counter').textContent = (currentIndex + 1) + ' / ' + imgs.length;
     }
 

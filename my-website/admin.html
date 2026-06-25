@@ -1007,7 +1007,7 @@
           <div class="photo-grid" id="photo-grid-${ev.id}">
             ${photos.map((p, i) => `
               <div class="photo-thumb">
-                <img src="${p}" />
+                <img src="${cdnUrl(p)}" />
                 <button class="photo-thumb-del" onclick="deleteRecapPhoto(${ev.id}, ${i})">✕</button>
               </div>
             `).join('')}
@@ -1040,6 +1040,19 @@
     if (files.length) uploadPhotos(evId, files);
   }
 
+  // Cloudinary config (recap photos now upload here instead of Supabase Storage)
+  const CLOUDINARY_CLOUD_NAME = 'dd5szi7ji';
+  const CLOUDINARY_UPLOAD_PRESET = 'recap_photos';
+
+  // Inserts f_auto,q_auto into a Cloudinary URL for automatic format/compression.
+  // Leaves old Supabase Storage URLs untouched.
+  function cdnUrl(url) {
+    if (url && url.includes('res.cloudinary.com') && url.includes('/upload/') && !url.includes('/upload/f_auto')) {
+      return url.replace('/upload/', '/upload/f_auto,q_auto/');
+    }
+    return url;
+  }
+
   async function uploadPhotos(evId, files) {
     const statusEl = document.getElementById('upload-status-' + evId);
     const fileArr = Array.from(files);
@@ -1049,17 +1062,22 @@
     let done = 0;
 
     for (const file of fileArr) {
-      const ext = file.name.split('.').pop();
-      const filename = `${evId}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
-      const uploadRes = await fetch(
-        `${SUPABASE_URL}/storage/v1/object/recap-photos/${filename}`,
-        { method: 'POST', headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': file.type }, body: file }
-      );
-      if (uploadRes.ok) {
-        const url = `${SUPABASE_URL}/storage/v1/object/public/recap-photos/${filename}`;
-        currentPhotos.push(url);
-        done++;
-        statusEl.textContent = `Uploading ${done} / ${fileArr.length}...`;
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+      try {
+        const uploadRes = await fetch(
+          `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,
+          { method: 'POST', body: formData }
+        );
+        const result = await uploadRes.json();
+        if (result.secure_url) {
+          currentPhotos.push(result.secure_url);
+          done++;
+          statusEl.textContent = `Uploading ${done} / ${fileArr.length}...`;
+        }
+      } catch (err) {
+        console.error('Cloudinary upload failed:', err);
       }
     }
 
@@ -1079,12 +1097,16 @@
     const ev = recapGalleries.find(e => e.id === evId);
     const photos = parsePhotos(ev.photos);
     const url = photos[idx];
-    // Delete from storage
-    const path = url.split('/object/public/recap-photos/')[1];
-    if (path) {
-      await fetch(`${SUPABASE_URL}/storage/v1/object/recap-photos/${path}`, {
-        method: 'DELETE', headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
-      });
+    // Only legacy Supabase Storage photos can be deleted from storage this way.
+    // Cloudinary photos (unsigned preset) just get removed from the gallery list;
+    // the file stays on Cloudinary, which is harmless and low-cost.
+    if (url && url.includes('/storage/v1/object/public/recap-photos/')) {
+      const path = url.split('/object/public/recap-photos/')[1];
+      if (path) {
+        await fetch(`${SUPABASE_URL}/storage/v1/object/recap-photos/${path}`, {
+          method: 'DELETE', headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+        });
+      }
     }
     photos.splice(idx, 1);
     await fetch(`${SUPABASE_URL}/rest/v1/recap_galleries?id=eq.${evId}`, {
@@ -1101,11 +1123,13 @@
     const ev = recapGalleries.find(e => e.id === evId);
     const photos = parsePhotos(ev.photos);
     for (const url of photos) {
-      const path = url.split('/object/public/recap-photos/')[1];
-      if (path) {
-        await fetch(`${SUPABASE_URL}/storage/v1/object/recap-photos/${path}`, {
-          method: 'DELETE', headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
-        });
+      if (url && url.includes('/storage/v1/object/public/recap-photos/')) {
+        const path = url.split('/object/public/recap-photos/')[1];
+        if (path) {
+          await fetch(`${SUPABASE_URL}/storage/v1/object/recap-photos/${path}`, {
+            method: 'DELETE', headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+          });
+        }
       }
     }
     await fetch(`${SUPABASE_URL}/rest/v1/recap_galleries?id=eq.${evId}`, {
