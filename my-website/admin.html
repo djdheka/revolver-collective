@@ -235,9 +235,10 @@
   <div class="login-title">Revolver Admin</div>
   <div class="login-sub">Restricted Access</div>
   <div class="login-box">
-    <input class="login-input" type="password" id="pw-input" placeholder="Enter password" onkeydown="if(event.key==='Enter')login()" />
+    <input class="login-input" type="email" id="email-input" placeholder="Email" autocomplete="username" onkeydown="if(event.key==='Enter')login()" />
+    <input class="login-input" type="password" id="pw-input" placeholder="Password" autocomplete="current-password" onkeydown="if(event.key==='Enter')login()" />
     <button class="login-btn" onclick="login()">Unlock</button>
-    <div class="login-error" id="login-error">Incorrect password</div>
+    <div class="login-error" id="login-error">Incorrect email or password</div>
   </div>
 </div>
 
@@ -370,63 +371,88 @@
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
   // ── SUPABASE ──
   const SUPABASE_URL = 'https://bglpsruvpscbupltihzs.supabase.co';
   const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJnbHBzcnV2cHNjYnVwbHRpaHpzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE1MzkzMjgsImV4cCI6MjA5NzExNTMyOH0.C2d3XtZdE2XSoSKVIDnJU1OQng5tuv_e9Ld8i3vM53E';
 
-  const sbHeaders = {
-    'apikey': SUPABASE_KEY,
-    'Authorization': `Bearer ${SUPABASE_KEY}`,
-    'Content-Type': 'application/json',
-    'Prefer': 'return=representation'
-  };
+  // Real Supabase Auth client. Used for login + to track the current session's
+  // access token, which is what makes RLS treat this admin panel as "authenticated"
+  // rather than just an anonymous visitor.
+  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  let currentSession = null;
+  sb.auth.onAuthStateChange((_event, session) => { currentSession = session; });
+
+  function sbHeaders() {
+    return {
+      'apikey': SUPABASE_KEY,
+      'Authorization': `Bearer ${currentSession ? currentSession.access_token : SUPABASE_KEY}`,
+      'Content-Type': 'application/json',
+      'Prefer': 'return=representation'
+    };
+  }
 
   async function sbGet(table) {
-    const r = await fetch(`${SUPABASE_URL}/rest/v1/${table}?order=date.asc`, { headers: sbHeaders });
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/${table}?order=date.asc`, { headers: sbHeaders() });
     return r.json();
   }
   async function sbInsert(table, obj) {
-    const r = await fetch(`${SUPABASE_URL}/rest/v1/${table}`, { method: 'POST', headers: sbHeaders, body: JSON.stringify(obj) });
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/${table}`, { method: 'POST', headers: sbHeaders(), body: JSON.stringify(obj) });
     return r.json();
   }
   async function sbUpdate(table, id, obj) {
-    const r = await fetch(`${SUPABASE_URL}/rest/v1/${table}?id=eq.${id}`, { method: 'PATCH', headers: sbHeaders, body: JSON.stringify(obj) });
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/${table}?id=eq.${id}`, { method: 'PATCH', headers: sbHeaders(), body: JSON.stringify(obj) });
     return r.json();
   }
   async function sbDelete(table, id) {
-    await fetch(`${SUPABASE_URL}/rest/v1/${table}?id=eq.${id}`, { method: 'DELETE', headers: sbHeaders });
+    await fetch(`${SUPABASE_URL}/rest/v1/${table}?id=eq.${id}`, { method: 'DELETE', headers: sbHeaders() });
   }
 
   function setStatus(msg) {
     document.getElementById('status-msg').textContent = msg + ' · ' + new Date().toLocaleTimeString();
   }
 
-  // ── PASSWORD ──
-  const PW_HASH = 'b6a38e768db28e72536969eac41dcf47bc058921fd4f7aa97525997f704bb010';
-
-  async function sha256(str) {
-    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
-    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
-  }
-
+  // ── AUTH (Supabase) ──
   async function login() {
+    const email = document.getElementById('email-input').value.trim();
     const pw = document.getElementById('pw-input').value;
-    const hash = await sha256(pw);
-    if (hash === PW_HASH) {
-      document.getElementById('login-screen').style.display = 'none';
-      document.getElementById('admin-screen').style.display = 'block';
-      init();
-    } else {
+    const { data: authData, error } = await sb.auth.signInWithPassword({ email, password: pw });
+    if (error) {
+      document.getElementById('login-error').textContent = 'Incorrect email or password';
       document.getElementById('login-error').style.display = 'block';
+      return;
     }
+    currentSession = authData.session;
+    document.getElementById('login-error').style.display = 'none';
+    showAdminScreen();
+    init();
   }
 
-  function logout() {
+  async function logout() {
+    await sb.auth.signOut();
+    currentSession = null;
     document.getElementById('login-screen').style.display = 'flex';
     document.getElementById('admin-screen').style.display = 'none';
+    document.getElementById('email-input').value = '';
     document.getElementById('pw-input').value = '';
   }
+
+  function showAdminScreen() {
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('admin-screen').style.display = 'block';
+  }
+
+  // If there's already a valid logged-in session (from a previous visit), skip
+  // straight to the admin screen instead of asking to log in again every time.
+  (async () => {
+    const { data: { session } } = await sb.auth.getSession();
+    if (session) {
+      currentSession = session;
+      showAdminScreen();
+      init();
+    }
+  })();
 
   // ── NAV ──
   function showPage(page, btn) {
@@ -982,7 +1008,7 @@
   let recapGalleries = [];
 
   async function loadRecap() {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/recap_galleries?order=sort_order.asc,created_at.desc`, { headers: sbHeaders });
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/recap_galleries?order=sort_order.asc,created_at.desc`, { headers: sbHeaders() });
     recapGalleries = await res.json();
     renderRecap();
   }
@@ -1097,7 +1123,7 @@
 
     await fetch(`${SUPABASE_URL}/rest/v1/recap_galleries?id=eq.${evId}`, {
       method: 'PATCH',
-      headers: { ...sbHeaders, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+      headers: { ...sbHeaders(), 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
       body: JSON.stringify({ photos: JSON.stringify(photos) })
     });
 
@@ -1137,7 +1163,7 @@
 
     await fetch(`${SUPABASE_URL}/rest/v1/recap_galleries?id=eq.${evId}`, {
       method: 'PATCH',
-      headers: { ...sbHeaders, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+      headers: { ...sbHeaders(), 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
       body: JSON.stringify({ photos: JSON.stringify(currentPhotos) })
     });
 
@@ -1158,14 +1184,14 @@
       const path = url.split('/object/public/recap-photos/')[1];
       if (path) {
         await fetch(`${SUPABASE_URL}/storage/v1/object/recap-photos/${path}`, {
-          method: 'DELETE', headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+          method: 'DELETE', headers: sbHeaders()
         });
       }
     }
     photos.splice(idx, 1);
     await fetch(`${SUPABASE_URL}/rest/v1/recap_galleries?id=eq.${evId}`, {
       method: 'PATCH',
-      headers: { ...sbHeaders, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+      headers: { ...sbHeaders(), 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
       body: JSON.stringify({ photos: JSON.stringify(photos) })
     });
     ev.photos = JSON.stringify(photos);
@@ -1181,13 +1207,13 @@
         const path = url.split('/object/public/recap-photos/')[1];
         if (path) {
           await fetch(`${SUPABASE_URL}/storage/v1/object/recap-photos/${path}`, {
-            method: 'DELETE', headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+            method: 'DELETE', headers: sbHeaders()
           });
         }
       }
     }
     await fetch(`${SUPABASE_URL}/rest/v1/recap_galleries?id=eq.${evId}`, {
-      method: 'DELETE', headers: sbHeaders
+      method: 'DELETE', headers: sbHeaders()
     });
     recapGalleries = recapGalleries.filter(e => e.id !== evId);
     renderRecap();
@@ -1200,7 +1226,7 @@
     const venue = prompt('Venue:') || '';
     const res = await fetch(`${SUPABASE_URL}/rest/v1/recap_galleries`, {
       method: 'POST',
-      headers: { ...sbHeaders, 'Content-Type': 'application/json', 'Prefer': 'return=representation' },
+      headers: { ...sbHeaders(), 'Content-Type': 'application/json', 'Prefer': 'return=representation' },
       body: JSON.stringify({ event_name: name, event_date: date, venue, photos: '[]', sort_order: 0 })
     });
     const [newEv] = await res.json();
