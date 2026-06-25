@@ -1381,13 +1381,23 @@
           headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
         });
         const allEvents = await res.json();
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        const allUpcoming = allEvents.filter(ev => {
-          const d = new Date(ev.date);
-          d.setHours(0, 0, 0, 0);
-          return d >= today;
-        });
+        // Same "is this event over?" rule as the admin panel: an event counts as
+        // past once it's 03:00 WIB the day AFTER the event date (Yogyakarta club
+        // nights run past midnight). Using local-browser midnight here instead
+        // would make events disappear at a different time for every visitor
+        // depending on their own timezone, out of sync with the admin panel.
+        function getNowInWIB() {
+          const wibString = new Date().toLocaleString('en-US', { timeZone: 'Asia/Jakarta' });
+          return new Date(wibString);
+        }
+        function isPastEvent(ev) {
+          if (!ev.date) return false;
+          const cutoff = new Date(ev.date + 'T00:00:00');
+          cutoff.setDate(cutoff.getDate() + 1);
+          cutoff.setHours(3, 0, 0, 0);
+          return getNowInWIB() >= cutoff;
+        }
+        const allUpcoming = allEvents.filter(ev => !isPastEvent(ev));
         const events = allUpcoming.slice(0, 3);
         const grid = document.getElementById('events-grid');
 
