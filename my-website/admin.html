@@ -998,10 +998,12 @@
     }
     list.innerHTML = recapGalleries.map(ev => {
       const photos = parsePhotos(ev.photos);
+      const legacyCount = photos.filter(p => p && p.includes('/storage/v1/object/public/recap-photos/')).length;
       return `
         <div class="photo-event-section" id="recap-ev-${ev.id}">
           <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px;">
             <div class="photo-event-name" style="flex:1">${ev.event_name}${ev.event_date ? ' · ' + ev.event_date : ''}${ev.venue ? ' · ' + ev.venue : ''}</div>
+            ${legacyCount > 0 ? `<button class="btn" style="font-size:10px;padding:4px 10px;background:rgba(255,200,0,0.15);color:var(--gold);border:1px solid rgba(255,200,0,0.3)" onclick="migrateGallery(${ev.id})">⚡ Speed Up (${legacyCount})</button>` : ''}
             <button class="btn" style="font-size:10px;padding:4px 10px;background:rgba(255,80,80,0.15);color:#f55;border:1px solid rgba(255,80,80,0.3)" onclick="deleteRecapEvent(${ev.id})">✕ Delete Gallery</button>
           </div>
           <div class="photo-grid" id="photo-grid-${ev.id}">
@@ -1051,6 +1053,57 @@
       return url.replace('/upload/', '/upload/f_auto,q_auto/');
     }
     return url;
+  }
+
+  // One-click migration of a gallery's old Supabase Storage photos to Cloudinary.
+  // Downloads each legacy photo, re-uploads it to Cloudinary, swaps the URL in place.
+  // Old Supabase Storage files are left untouched (not deleted) — harmless to leave behind.
+  async function migrateGallery(evId) {
+    const statusEl = document.getElementById('upload-status-' + evId);
+    const ev = recapGalleries.find(e => e.id === evId);
+    const photos = parsePhotos(ev.photos);
+    const legacyIndexes = photos
+      .map((p, i) => ({ p, i }))
+      .filter(x => x.p && x.p.includes('/storage/v1/object/public/recap-photos/'));
+
+    if (!legacyIndexes.length) return;
+    if (!confirm(`Speed up ${legacyIndexes.length} old photo${legacyIndexes.length !== 1 ? 's' : ''} in "${ev.event_name}"? This moves them to Cloudinary so they load faster on the live site.`)) return;
+
+    let done = 0;
+    statusEl.textContent = `Speeding up 0 / ${legacyIndexes.length}...`;
+
+    for (const { p, i } of legacyIndexes) {
+      try {
+        const imgRes = await fetch(p);
+        const blob = await imgRes.blob();
+        const formData = new FormData();
+        formData.append('file', blob);
+        formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+        const uploadRes = await fetch(
+          `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,
+          { method: 'POST', body: formData }
+        );
+        const result = await uploadRes.json();
+        if (result.secure_url) {
+          photos[i] = result.secure_url;
+          done++;
+          statusEl.textContent = `Speeding up ${done} / ${legacyIndexes.length}...`;
+        }
+      } catch (err) {
+        console.error('Migration failed for photo:', p, err);
+      }
+    }
+
+    await fetch(`${SUPABASE_URL}/rest/v1/recap_galleries?id=eq.${evId}`, {
+      method: 'PATCH',
+      headers: { ...sbHeaders, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+      body: JSON.stringify({ photos: JSON.stringify(photos) })
+    });
+
+    ev.photos = JSON.stringify(photos);
+    statusEl.textContent = `✓ ${done} photo${done !== 1 ? 's' : ''} sped up`;
+    setTimeout(() => { statusEl.textContent = ''; }, 3000);
+    renderRecap();
   }
 
   async function uploadPhotos(evId, files) {
