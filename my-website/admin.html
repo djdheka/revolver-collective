@@ -174,6 +174,19 @@
     }
     .add-btn:hover { border-color: var(--gold); }
 
+    /* ── MIXTAPE PREVIEW ── */
+    .yt-preview {
+      width: 180px; aspect-ratio: 16/9;
+      background: #1a1a1a; border: 1px solid var(--border);
+      overflow: hidden; margin-top: 4px;
+    }
+    .yt-preview img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .yt-preview-empty {
+      display: flex; align-items: center; justify-content: center; height: 100%;
+      font-size: 8px; letter-spacing: 2px; color: rgba(255,255,255,0.25);
+      text-transform: uppercase; text-align: center; padding: 8px;
+    }
+
     /* ── EXPORT ── */
     .export-section { background: var(--panel); border: 1px solid var(--border); padding: 24px; margin-top: 32px; }
     .export-title { font-size: 10px; letter-spacing: 4px; color: var(--gold); text-transform: uppercase; margin-bottom: 16px; }
@@ -271,6 +284,7 @@
       <div class="sidebar-section">Content</div>
       <button class="sidebar-item active" onclick="showPage('events', this)">📅 Events</button>
       <button class="sidebar-item" onclick="showPage('recap', this)">📸 Recap Photos</button>
+      <button class="sidebar-item" onclick="showPage('mixtapes', this)">🎬 Mixtapes</button>
       <button class="sidebar-item" onclick="showPage('archive', this)">🗄 Archive</button>
       <div class="sidebar-section">Members</div>
       <button class="sidebar-item" onclick="showPage('members', this)">👤 Member Info</button>
@@ -297,6 +311,16 @@
         <div class="page-subtitle">Manage photo galleries by event</div>
 
         <div id="recap-list"></div>
+      </div>
+
+      <!-- MIXTAPES PAGE -->
+      <div class="page" id="page-mixtapes">
+        <div class="page-title">Mixtapes</div>
+        <div class="page-subtitle">Add a title and a YouTube link — it plays directly on the Mixtape page, no redirect</div>
+
+        <button class="add-btn" onclick="addMixtape()">+ Add New Mixtape</button>
+
+        <div id="mixtapes-list"></div>
       </div>
 
       <!-- ARCHIVE PAGE -->
@@ -339,6 +363,10 @@
             <div class="export-item" onclick="exportFile('recap-photo')">
               <span class="export-item-icon">📸</span>
               recap-photo.html
+            </div>
+            <div class="export-item" onclick="exportFile('mixtape')">
+              <span class="export-item-icon">🎬</span>
+              mixtape.html
             </div>
             <div class="export-item" onclick="exportFile('dheka')">
               <span class="export-item-icon">👤</span>
@@ -516,6 +544,7 @@
     document.getElementById('page-' + page).classList.add('active');
     btn.classList.add('active');
     if (page === 'recap') loadRecap();
+    if (page === 'mixtapes') loadMixtapes();
   }
 
   // ── DATA ──
@@ -1291,6 +1320,134 @@
 
   function exportFile(filename) {
     alert(`"${filename}.html" is already live on your site!\n\nEvents update automatically via Supabase — no need to re-upload HTML files for event changes.\n\nOnly re-upload HTML files if you change design or layout.`);
+  }
+
+  // ── MIXTAPES ──
+  let mixtapes = [];
+
+  // Pulls the 11-character video ID out of any common YouTube URL shape —
+  // watch?v=, youtu.be/, embed/, or an already-nocookie embed link — so it
+  // doesn't matter which format gets pasted in.
+  function extractYouTubeId(url) {
+    if (!url) return null;
+    const match = url.match(/(?:youtube(?:-nocookie)?\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+    return match ? match[1] : null;
+  }
+
+  async function loadMixtapes() {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/mixtapes?order=sort_order.asc,created_at.asc`, { headers: sbHeaders() });
+    mixtapes = await res.json();
+    if (!Array.isArray(mixtapes)) mixtapes = [];
+    renderMixtapes();
+  }
+
+  function renderMixtapes() {
+    const list = document.getElementById('mixtapes-list');
+    if (!mixtapes.length) {
+      list.innerHTML = '<div style="font-size:11px;letter-spacing:2px;color:rgba(255,255,255,0.3);text-transform:uppercase;padding:20px 0;">No mixtapes yet — add one above</div>';
+      return;
+    }
+    list.innerHTML = mixtapes.map(mx => {
+      const ytId = extractYouTubeId(mx.youtube_url);
+      return `
+      <div class="card" id="mx-${mx.id}">
+        <div class="card-title">Mixtape · ${mx.title || 'Untitled'}</div>
+        <button class="card-delete" onclick="deleteMixtape(${mx.id})">✕ Delete</button>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Title</label>
+            <input class="form-input" value="${(mx.title || '').replace(/"/g, '&quot;')}" onchange="updateMixtapeField(${mx.id},'title',this.value)" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">YouTube Link (any format)</label>
+            <input class="form-input" value="${(mx.youtube_url || '').replace(/"/g, '&quot;')}" onchange="updateMixtapeField(${mx.id},'youtube_url',this.value); refreshMixtapePreview(${mx.id})" placeholder="https://www.youtube.com/watch?v=..." />
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Preview</label>
+          <div class="yt-preview" id="yt-preview-${mx.id}">
+            ${ytId
+              ? `<img src="https://img.youtube.com/vi/${ytId}/mqdefault.jpg" alt="" />`
+              : `<div class="yt-preview-empty">${mx.youtube_url ? 'Link not recognized — double check it' : 'Paste a link above'}</div>`}
+          </div>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-gold" onclick="saveMixtape(${mx.id}, this)">💾 Save to Live Site</button>
+        </div>
+      </div>
+      `;
+    }).join('');
+  }
+
+  function updateMixtapeField(id, field, value) {
+    const mx = mixtapes.find(m => m.id === id);
+    if (mx) mx[field] = value;
+  }
+
+  // Updates just the live-preview thumbnail after a link is edited, without
+  // re-rendering (and losing focus on) the whole card.
+  function refreshMixtapePreview(id) {
+    const mx = mixtapes.find(m => m.id === id);
+    if (!mx) return;
+    const ytId = extractYouTubeId(mx.youtube_url);
+    document.getElementById(`yt-preview-${id}`).innerHTML = ytId
+      ? `<img src="https://img.youtube.com/vi/${ytId}/mqdefault.jpg" alt="" />`
+      : `<div class="yt-preview-empty">${mx.youtube_url ? 'Link not recognized — double check it' : 'Paste a link above'}</div>`;
+  }
+
+  async function addMixtape() {
+    setStatus('Creating mixtape...');
+    const newMx = { title: 'New Mixtape', youtube_url: '', sort_order: mixtapes.length };
+    const result = await sbInsert('mixtapes', newMx);
+    if (result && result[0]) {
+      mixtapes.push(result[0]);
+      renderMixtapes();
+      setStatus('Mixtape created ✓ — add a title and link, then save');
+    }
+  }
+
+  async function saveMixtape(id, btn) {
+    const mx = mixtapes.find(m => m.id === id);
+    if (!mx) return;
+
+    btn.disabled = true;
+    btn.style.background = 'rgba(255,255,255,0.15)';
+    btn.style.color = 'rgba(255,255,255,0.5)';
+    btn.textContent = 'Saving…';
+    setStatus('Saving...');
+
+    try {
+      await sbUpdate('mixtapes', id, { title: mx.title, youtube_url: mx.youtube_url });
+      btn.style.background = '#3a7d44';
+      btn.style.color = '#fff';
+      btn.textContent = '✓ Saved!';
+      setStatus('Saved to live site ✓ — visible immediately!');
+      setTimeout(() => {
+        btn.disabled = false;
+        btn.style.background = '';
+        btn.style.color = '';
+        btn.textContent = '💾 Save to Live Site';
+      }, 2000);
+    } catch (err) {
+      btn.style.background = '#8b2020';
+      btn.style.color = '#fff';
+      btn.textContent = '✗ Failed — try again';
+      setStatus('Save failed — check connection');
+      setTimeout(() => {
+        btn.disabled = false;
+        btn.style.background = '';
+        btn.style.color = '';
+        btn.textContent = '💾 Save to Live Site';
+      }, 2500);
+    }
+  }
+
+  async function deleteMixtape(id) {
+    if (!confirm('Delete this mixtape from the live site?')) return;
+    await sbDelete('mixtapes', id);
+    mixtapes = mixtapes.filter(m => m.id !== id);
+    renderMixtapes();
+    setStatus('Mixtape deleted ✓');
   }
 </script>
 
