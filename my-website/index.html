@@ -751,7 +751,76 @@
     @media (max-width: 720px) {
       .about-section { padding: 60px 24px; }
       .about-stats { gap: 30px; }
+      .mixtape-promo-wrap { padding: 0 24px 60px; }
+      .mixtape-promo-card { padding: 36px 24px; }
     }
+
+    /* ── MIXTAPE PROMO ── */
+    .mixtape-promo-wrap {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 0 40px 80px;
+    }
+    .mixtape-promo-card {
+      display: block;
+      text-decoration: none;
+      cursor: pointer;
+      border: 1px solid rgba(255,215,0,0.18);
+      background: linear-gradient(160deg, rgba(255,215,0,0.04), transparent 60%);
+      padding: 48px 40px;
+      text-align: center;
+      transition: border-color 0.3s, background 0.3s;
+    }
+    .mixtape-promo-card:hover {
+      border-color: rgba(255,215,0,0.5);
+      background: linear-gradient(160deg, rgba(255,215,0,0.08), transparent 60%);
+    }
+    .mixtape-promo-eyebrow {
+      font-family: 'Oswald', sans-serif;
+      font-size: 10px;
+      letter-spacing: 4px;
+      color: var(--gold-dim);
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+    .mixtape-promo-title {
+      font-family: 'Anton', sans-serif;
+      font-size: clamp(24px, 4vw, 38px);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--white);
+      line-height: 1.25;
+      margin-bottom: 18px;
+    }
+    .mixtape-promo-title span { color: var(--gold); }
+    .mixtape-promo-body {
+      font-family: 'Oswald', sans-serif;
+      font-size: 13px;
+      letter-spacing: 0.5px;
+      color: rgba(240,237,230,0.5);
+      line-height: 1.8;
+      max-width: 520px;
+      margin: 0 auto 28px;
+    }
+    .mixtape-promo-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-family: 'Oswald', sans-serif;
+      font-size: 11px;
+      letter-spacing: 3px;
+      color: var(--gold);
+      text-transform: uppercase;
+      border-bottom: 1px solid rgba(255,215,0,0.3);
+      padding-bottom: 6px;
+      transition: gap 0.3s, border-color 0.3s;
+    }
+    .mixtape-promo-card:hover .mixtape-promo-cta {
+      gap: 16px;
+      border-color: var(--gold);
+    }
+    .mixtape-promo-arrow { transition: transform 0.3s; display: inline-block; }
+    .mixtape-promo-card:hover .mixtape-promo-arrow { transform: translateX(4px); }
 
     /* ── FOOTER ── */
     .footer {
@@ -1305,6 +1374,23 @@
 
     </div>
   </main>
+
+  <!-- MIXTAPE PROMO -->
+  <section id="mixtape-promo">
+    <div class="section-title">
+      <div class="section-title-inner">
+        <span class="section-title-text">Mixtape</span>
+      </div>
+    </div>
+    <div class="mixtape-promo-wrap">
+      <a class="mixtape-promo-card" href="mixtape.html">
+        <div class="mixtape-promo-eyebrow">Couldn't make it to the night?</div>
+        <div class="mixtape-promo-title">Hear The Sets.<br><span>Relive The Night.</span></div>
+        <p class="mixtape-promo-body">Full liveset recordings from our gunslingers, straight from the booth — no edits, no filter, just the sound as it happened.</p>
+        <div class="mixtape-promo-cta">Watch The Mixtapes <span class="mixtape-promo-arrow">→</span></div>
+      </a>
+    </div>
+  </section>
 
   <!-- ABOUT -->
   <section id="about">
