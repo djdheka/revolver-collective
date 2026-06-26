@@ -271,7 +271,7 @@
     .mobile-only { display: none; }
 
     @media (max-width: 800px) {
-      .masonry { columns: 2; }
+      .masonry { columns: 3; column-gap: 6px; }
       .gallery-wrapper { padding: 40px 20px 80px; }
       .nav { padding: 0 20px; }
       .event-section-header { flex-wrap: wrap; }
@@ -342,7 +342,8 @@
       .nav-dropdown { display: none; }
     }
     @media (max-width: 480px) {
-      .masonry { columns: 1; }
+      .masonry { columns: 3; column-gap: 4px; }
+      .masonry-item { margin-bottom: 4px; }
     }
   </style>
 </head>
