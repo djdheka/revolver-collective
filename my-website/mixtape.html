@@ -268,12 +268,27 @@
     const SUPABASE_URL = 'https://bglpsruvpscbupltihzs.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJnbHBzcnV2cHNjYnVwbHRpaHpzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE1MzkzMjgsImV4cCI6MjA5NzExNTMyOH0.C2d3XtZdE2XSoSKVIDnJU1OQng5tuv_e9Ld8i3vM53E';
 
-    // Pulls the 11-character video ID out of any common YouTube URL shape —
-    // watch?v=, youtu.be/, embed/, or an already-nocookie embed link.
-    function extractYouTubeId(url) {
+    // Figures out which platform a pasted link is from and pulls out the bit
+    // needed to build a working embed — the 11-char ID for YouTube (covers
+    // watch?v=, youtu.be/, embed/, nocookie embed), or the file ID for a
+    // Google Drive share/view/open link.
+    function detectVideoEmbed(url) {
       if (!url) return null;
-      const match = url.match(/(?:youtube(?:-nocookie)?\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
-      return match ? match[1] : null;
+      let m = url.match(/(?:youtube(?:-nocookie)?\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+      if (m) return { type: 'youtube', id: m[1] };
+      m = url.match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/);
+      if (m) return { type: 'drive', id: m[1] };
+      if (url.includes('drive.google.com')) {
+        m = url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+        if (m) return { type: 'drive', id: m[1] };
+      }
+      return null;
+    }
+
+    function embedUrlFor(video) {
+      return video.type === 'drive'
+        ? `https://drive.google.com/file/d/${video.id}/preview`
+        : `https://www.youtube-nocookie.com/embed/${video.id}`;
     }
 
     async function loadMixtapes() {
@@ -291,12 +306,12 @@
         }
 
         wrapper.innerHTML = `<div class="mixtape-grid">${data.map(m => {
-          const id = extractYouTubeId(m.youtube_url);
-          if (!id) return '';
+          const video = detectVideoEmbed(m.youtube_url);
+          if (!video) return '';
           return `
             <div class="mixtape-card">
               <div class="mixtape-video-wrap">
-                <iframe src="https://www.youtube-nocookie.com/embed/${id}" title="${m.title || 'Mixtape'}" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                <iframe src="${embedUrlFor(video)}" title="${m.title || 'Mixtape'}" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
               </div>
               <div class="mixtape-card-title">${m.title || ''}</div>
             </div>

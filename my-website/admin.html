@@ -316,7 +316,7 @@
       <!-- MIXTAPES PAGE -->
       <div class="page" id="page-mixtapes">
         <div class="page-title">Mixtapes</div>
-        <div class="page-subtitle">Add a title and a YouTube link — it plays directly on the Mixtape page, no redirect</div>
+        <div class="page-subtitle">Add a title and a YouTube or Google Drive link — it plays directly on the Mixtape page, no redirect</div>
 
         <button class="add-btn" onclick="addMixtape()">+ Add New Mixtape</button>
 
@@ -1325,13 +1325,35 @@
   // ── MIXTAPES ──
   let mixtapes = [];
 
-  // Pulls the 11-character video ID out of any common YouTube URL shape —
-  // watch?v=, youtu.be/, embed/, or an already-nocookie embed link — so it
-  // doesn't matter which format gets pasted in.
-  function extractYouTubeId(url) {
+  // Figures out which platform a pasted link is from and pulls out the bit
+  // needed to build a working embed — the 11-char ID for YouTube (covers
+  // watch?v=, youtu.be/, embed/, nocookie embed), or the file ID for a
+  // Google Drive share/view/open link. Doesn't matter which format is pasted.
+  function detectVideoEmbed(url) {
     if (!url) return null;
-    const match = url.match(/(?:youtube(?:-nocookie)?\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
-    return match ? match[1] : null;
+    let m = url.match(/(?:youtube(?:-nocookie)?\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+    if (m) return { type: 'youtube', id: m[1] };
+    m = url.match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/);
+    if (m) return { type: 'drive', id: m[1] };
+    if (url.includes('drive.google.com')) {
+      m = url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+      if (m) return { type: 'drive', id: m[1] };
+    }
+    return null;
+  }
+
+  // YouTube gets a static thumbnail (cheap to load even with many cards).
+  // Drive has no equivalent thumbnail API, so it gets a small live embed
+  // instead — which doubles as a real test that the sharing permission is set right.
+  function mixtapePreviewHTML(mx) {
+    const video = detectVideoEmbed(mx.youtube_url);
+    if (!video) {
+      return `<div class="yt-preview-empty">${mx.youtube_url ? 'Link not recognized — double check it' : 'Paste a YouTube or Google Drive link above'}</div>`;
+    }
+    if (video.type === 'drive') {
+      return `<iframe src="https://drive.google.com/file/d/${video.id}/preview" allow="autoplay" style="width:100%;height:100%;border:0;"></iframe>`;
+    }
+    return `<img src="https://img.youtube.com/vi/${video.id}/mqdefault.jpg" alt="" />`;
   }
 
   async function loadMixtapes() {
@@ -1347,9 +1369,7 @@
       list.innerHTML = '<div style="font-size:11px;letter-spacing:2px;color:rgba(255,255,255,0.3);text-transform:uppercase;padding:20px 0;">No mixtapes yet — add one above</div>';
       return;
     }
-    list.innerHTML = mixtapes.map(mx => {
-      const ytId = extractYouTubeId(mx.youtube_url);
-      return `
+    list.innerHTML = mixtapes.map(mx => `
       <div class="card" id="mx-${mx.id}">
         <div class="card-title">Mixtape · ${mx.title || 'Untitled'}</div>
         <button class="card-delete" onclick="deleteMixtape(${mx.id})">✕ Delete</button>
@@ -1359,24 +1379,20 @@
             <input class="form-input" value="${(mx.title || '').replace(/"/g, '&quot;')}" onchange="updateMixtapeField(${mx.id},'title',this.value)" />
           </div>
           <div class="form-group">
-            <label class="form-label">YouTube Link (any format)</label>
-            <input class="form-input" value="${(mx.youtube_url || '').replace(/"/g, '&quot;')}" onchange="updateMixtapeField(${mx.id},'youtube_url',this.value); refreshMixtapePreview(${mx.id})" placeholder="https://www.youtube.com/watch?v=..." />
+            <label class="form-label">Video Link (YouTube or Google Drive)</label>
+            <input class="form-input" value="${(mx.youtube_url || '').replace(/"/g, '&quot;')}" onchange="updateMixtapeField(${mx.id},'youtube_url',this.value); refreshMixtapePreview(${mx.id})" placeholder="https://www.youtube.com/watch?v=... or https://drive.google.com/file/d/.../view" />
           </div>
         </div>
         <div class="form-group">
           <label class="form-label">Preview</label>
-          <div class="yt-preview" id="yt-preview-${mx.id}">
-            ${ytId
-              ? `<img src="https://img.youtube.com/vi/${ytId}/mqdefault.jpg" alt="" />`
-              : `<div class="yt-preview-empty">${mx.youtube_url ? 'Link not recognized — double check it' : 'Paste a link above'}</div>`}
-          </div>
+          <div class="yt-preview" id="yt-preview-${mx.id}">${mixtapePreviewHTML(mx)}</div>
+          ${mx.youtube_url && mx.youtube_url.includes('drive.google.com') ? '<div class="location-status" style="margin-top:6px;">Google Drive file must be shared as "Anyone with the link" (Viewer) or it won\'t play for visitors</div>' : ''}
         </div>
         <div class="btn-row">
           <button class="btn btn-gold" onclick="saveMixtape(${mx.id}, this)">💾 Save to Live Site</button>
         </div>
       </div>
-      `;
-    }).join('');
+    `).join('');
   }
 
   function updateMixtapeField(id, field, value) {
@@ -1384,15 +1400,12 @@
     if (mx) mx[field] = value;
   }
 
-  // Updates just the live-preview thumbnail after a link is edited, without
+  // Updates just the live-preview after a link is edited, without
   // re-rendering (and losing focus on) the whole card.
   function refreshMixtapePreview(id) {
     const mx = mixtapes.find(m => m.id === id);
     if (!mx) return;
-    const ytId = extractYouTubeId(mx.youtube_url);
-    document.getElementById(`yt-preview-${id}`).innerHTML = ytId
-      ? `<img src="https://img.youtube.com/vi/${ytId}/mqdefault.jpg" alt="" />`
-      : `<div class="yt-preview-empty">${mx.youtube_url ? 'Link not recognized — double check it' : 'Paste a link above'}</div>`;
+    document.getElementById(`yt-preview-${id}`).innerHTML = mixtapePreviewHTML(mx);
   }
 
   async function addMixtape() {
