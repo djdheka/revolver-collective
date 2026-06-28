@@ -283,7 +283,7 @@
     }
     .tag-pill-del { cursor: pointer; color: rgba(255,100,100,0.6); background: none; border: none; font-size: 10px; }
     .tag-input-row { display: flex; gap: 8px; margin-top: 8px; }
-    .tag-input-row .form-input { flex: 1; }
+    .tag-input-row .form-input { flex: 0 1 260px; }
   </style>
 </head>
 <body>
@@ -729,7 +729,7 @@
             <select class="form-input" id="lineup-sel-${ev.id}">
               ${MEMBERS.map(m => `<option value="${m}">${m}</option>`).join('')}
             </select>
-            <button class="btn btn-outline" onclick="addLineup(${ev.id})">Add</button>
+            <button class="btn btn-gold" onclick="addLineup(${ev.id})">Add</button>
           </div>
         </div>
         <div class="btn-row">
