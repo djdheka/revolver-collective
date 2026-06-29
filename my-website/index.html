@@ -98,6 +98,34 @@
       filter: drop-shadow(0 0 40px rgba(201,168,76,0.15));
     }
 
+    /* Wrapper so dust particles can be positioned relative to the logo itself */
+    .hero-logo-wrap {
+      position: relative;
+      display: inline-block;
+    }
+    .hero-logo-particle {
+      position: absolute;
+      width: 3px;
+      height: 3px;
+      border-radius: 50%;
+      background: rgba(201,168,76,0.75);
+      box-shadow: 0 0 7px 1px rgba(201,168,76,0.55);
+      opacity: 0;
+      z-index: 2;
+      pointer-events: none;
+      animation: hero-logo-particle-float ease-in-out infinite;
+    }
+    @keyframes hero-logo-particle-float {
+      0% { transform: translate(0, 0); opacity: 0; }
+      15% { opacity: 0.8; }
+      50% { transform: translate(calc(var(--dx, 0px) * 0.55), calc(var(--dy, -30px) * 0.55)); opacity: 0.5; }
+      85% { opacity: 0.15; }
+      100% { transform: translate(var(--dx, 0px), var(--dy, -55px)); opacity: 0; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .hero-logo-particle { animation: none; }
+    }
+
     /* Diagonal scratch across hero */
     .hero-scratch {
       position: absolute;
@@ -781,8 +809,28 @@
       45% { opacity: 0.75; transform: scale(1.05); }
       60% { opacity: 0.45; transform: scale(0.99); }
     }
+    /* Drifting particles scattered around the box */
+    .mixtape-particle {
+      position: absolute;
+      width: 3px;
+      height: 3px;
+      border-radius: 50%;
+      background: rgba(255,215,0,0.75);
+      box-shadow: 0 0 7px 1px rgba(255,215,0,0.55);
+      opacity: 0;
+      z-index: 0;
+      pointer-events: none;
+      animation: mixtape-particle-float ease-in-out infinite;
+    }
+    @keyframes mixtape-particle-float {
+      0% { transform: translate(0, 0); opacity: 0; }
+      15% { opacity: 0.85; }
+      50% { transform: translate(calc(var(--dx, 0px) * 0.55), calc(var(--dy, -30px) * 0.55)); opacity: 0.55; }
+      85% { opacity: 0.15; }
+      100% { transform: translate(var(--dx, 0px), var(--dy, -55px)); opacity: 0; }
+    }
     @media (prefers-reduced-motion: reduce) {
-      .mixtape-promo-card::before { animation: none; }
+      .mixtape-promo-card::before, .mixtape-particle { animation: none; }
     }
     .mixtape-promo-card:hover {
       border-color: rgba(255,215,0,0.5);
@@ -1213,7 +1261,25 @@
     </video>
     <div class="hero-scratch"></div>
     <div class="hero-eyebrow">Yogyakarta · Indonesia</div>
-    <img class="hero-logo-img" src="REVOLVER_NEW__PUTIH_.png" alt="Revolver Collective" />
+    <div class="hero-logo-wrap">
+      <span class="hero-logo-particle" style="left:8%;  top:-3%;  --dx:-8px;  --dy:-35px; animation-duration:9s;  animation-delay:0.4s;"></span>
+      <span class="hero-logo-particle" style="left:30%; top:-5%;  --dx:5px;   --dy:-45px; animation-duration:11s; animation-delay:2.4s;"></span>
+      <span class="hero-logo-particle" style="left:55%; top:-4%;  --dx:-6px;  --dy:-40px; animation-duration:10s; animation-delay:3.6s;"></span>
+      <span class="hero-logo-particle" style="left:78%; top:-3%;  --dx:7px;   --dy:-35px; animation-duration:9s;  animation-delay:1.1s;"></span>
+
+      <span class="hero-logo-particle" style="left:14%; top:103%; --dx:-6px;  --dy:35px;  animation-duration:10s; animation-delay:1.8s;"></span>
+      <span class="hero-logo-particle" style="left:40%; top:106%; --dx:5px;   --dy:45px;  animation-duration:9s;  animation-delay:4.1s;"></span>
+      <span class="hero-logo-particle" style="left:65%; top:104%; --dx:-5px;  --dy:40px;  animation-duration:11s; animation-delay:0.6s;"></span>
+      <span class="hero-logo-particle" style="left:88%; top:106%; --dx:6px;   --dy:38px;  animation-duration:10s; animation-delay:2.9s;"></span>
+
+      <span class="hero-logo-particle" style="left:-4%;  top:30%; --dx:-40px; --dy:-5px; animation-duration:10s; animation-delay:1.3s;"></span>
+      <span class="hero-logo-particle" style="left:-6%;  top:65%; --dx:-45px; --dy:6px;  animation-duration:11s; animation-delay:3.8s;"></span>
+
+      <span class="hero-logo-particle" style="left:104%; top:32%; --dx:40px;  --dy:-5px; animation-duration:9s;  animation-delay:0.9s;"></span>
+      <span class="hero-logo-particle" style="left:106%; top:68%; --dx:45px;  --dy:6px;  animation-duration:10s; animation-delay:4.4s;"></span>
+
+      <img class="hero-logo-img" src="REVOLVER_NEW__PUTIH_.png" alt="Revolver Collective" />
+    </div>
     <div class="hero-rule"><div class="hero-rule-diamond"></div></div>
     <div class="hero-tagline">Your Gunslinger</div>
     <div class="hero-location">Est. — Six Gunslingers · One Sound</div>
@@ -1396,6 +1462,37 @@
       </div>
     </div>
     <div class="mixtape-promo-wrap">
+      <!-- top edge — drift upward, away from box -->
+      <span class="mixtape-particle" style="left:10%; top:-2%;  --dx:-8px;  --dy:-50px; animation-duration:9s;  animation-delay:0.3s;"></span>
+      <span class="mixtape-particle" style="left:24%; top:-4%;  --dx:6px;   --dy:-65px; animation-duration:11s; animation-delay:2.6s;"></span>
+      <span class="mixtape-particle" style="left:42%; top:-6%;  --dx:-4px;  --dy:-70px; animation-duration:10s; animation-delay:1.2s;"></span>
+      <span class="mixtape-particle" style="left:58%; top:-3%;  --dx:10px;  --dy:-55px; animation-duration:9s;  animation-delay:4.0s;"></span>
+      <span class="mixtape-particle" style="left:76%; top:-5%;  --dx:-6px;  --dy:-60px; animation-duration:12s; animation-delay:0.8s;"></span>
+      <span class="mixtape-particle" style="left:90%; top:-2%;  --dx:8px;   --dy:-50px; animation-duration:10s; animation-delay:3.4s;"></span>
+
+      <!-- bottom edge — drift downward, away from box -->
+      <span class="mixtape-particle" style="left:14%; top:103%; --dx:-6px;  --dy:50px;  animation-duration:10s; animation-delay:1.7s;"></span>
+      <span class="mixtape-particle" style="left:32%; top:106%; --dx:5px;   --dy:65px;  animation-duration:9s;  animation-delay:3.9s;"></span>
+      <span class="mixtape-particle" style="left:50%; top:104%; --dx:-8px;  --dy:55px;  animation-duration:11s; animation-delay:0.5s;"></span>
+      <span class="mixtape-particle" style="left:68%; top:107%; --dx:7px;   --dy:60px;  animation-duration:9s;  animation-delay:2.3s;"></span>
+      <span class="mixtape-particle" style="left:86%; top:104%; --dx:-5px;  --dy:50px;  animation-duration:12s; animation-delay:4.6s;"></span>
+
+      <!-- left side — drift left, away from box -->
+      <span class="mixtape-particle" style="left:-3%; top:20%;  --dx:-55px; --dy:-6px;  animation-duration:10s; animation-delay:1.0s;"></span>
+      <span class="mixtape-particle" style="left:-6%; top:50%;  --dx:-65px; --dy:8px;   animation-duration:11s; animation-delay:3.1s;"></span>
+      <span class="mixtape-particle" style="left:-4%; top:78%;  --dx:-50px; --dy:-5px;  animation-duration:9s;  animation-delay:4.9s;"></span>
+
+      <!-- right side — drift right, away from box -->
+      <span class="mixtape-particle" style="left:103%; top:22%; --dx:55px;  --dy:-6px;  animation-duration:9s;  animation-delay:2.0s;"></span>
+      <span class="mixtape-particle" style="left:106%; top:48%; --dx:65px;  --dy:8px;   animation-duration:12s; animation-delay:0.2s;"></span>
+      <span class="mixtape-particle" style="left:104%; top:76%; --dx:50px;  --dy:-5px;  animation-duration:10s; animation-delay:3.7s;"></span>
+
+      <!-- corners — drift diagonally outward -->
+      <span class="mixtape-particle" style="left:-2%;  top:-3%;  --dx:-40px; --dy:-40px; animation-duration:11s; animation-delay:1.5s;"></span>
+      <span class="mixtape-particle" style="left:102%; top:-3%;  --dx:40px;  --dy:-40px; animation-duration:10s; animation-delay:4.2s;"></span>
+      <span class="mixtape-particle" style="left:-2%;  top:103%; --dx:-40px; --dy:40px;  animation-duration:9s;  animation-delay:2.8s;"></span>
+      <span class="mixtape-particle" style="left:102%; top:103%; --dx:40px;  --dy:40px;  animation-duration:12s; animation-delay:0.6s;"></span>
+
       <a class="mixtape-promo-card" href="mixtape.html">
         <div class="mixtape-promo-eyebrow">Couldn't make it to the night?</div>
         <div class="mixtape-promo-title">Hear The Sets.<br><span>Relive The Night.</span></div>
