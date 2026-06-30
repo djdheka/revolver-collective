@@ -228,6 +228,54 @@
       .nav-links > li > a:hover { color: #c9a84c; letter-spacing: 8px; }
     }
   </style>
+
+  <style>
+    /* ── PAGE HEADER ENTRANCE ── */
+    .page-header-title {
+      opacity: 0;
+      transform: translateY(24px);
+      animation: header-enter 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.1s forwards;
+    }
+    .page-header-label { opacity: 0; animation: header-fade 0.7s ease 0s forwards; }
+    .page-header-rule  { opacity: 0; animation: header-fade 0.7s ease 0.6s forwards; }
+    @keyframes header-enter { to { opacity: 1; transform: translateY(0); } }
+    @keyframes header-fade  { to { opacity: 1; } }
+
+    /* ── MIXTAPE CARD ENTRANCE ── */
+    .mixtape-card {
+      opacity: 0;
+      transform: translateY(28px);
+      transition: opacity 0.6s ease, transform 0.6s ease, border-color 0.3s;
+    }
+    .mixtape-card.visible { opacity: 1; transform: translateY(0); }
+
+    /* Title drops in from above with a spring pulse after the card appears */
+    .mixtape-card-title {
+      opacity: 0;
+      transform: translateY(-14px);
+    }
+    .mixtape-card.visible .mixtape-card-title {
+      animation: cascade-drop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.3s forwards;
+    }
+    @keyframes cascade-drop {
+      0%   { opacity: 0; transform: translateY(-14px); }
+      60%  { opacity: 1; }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Hover lift on card */
+    .mixtape-card:hover {
+      border-color: rgba(201,168,76,0.5);
+      transform: translateY(-4px);
+    }
+    .mixtape-card.visible:hover { transform: translateY(-4px); }
+
+    @media (prefers-reduced-motion: reduce) {
+      .page-header-title, .page-header-label, .page-header-rule { animation: none; opacity: 1; transform: none; }
+      .mixtape-card { opacity: 1; transform: none; transition: border-color 0.3s; }
+      .mixtape-card-title { opacity: 1; transform: none; animation: none; }
+    }
+  </style>
 </head>
 <body>
 
@@ -323,6 +371,38 @@
     }
 
     loadMixtapes();
+  </script>
+
+  <script>
+    function observeMixtapeCards() {
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+            observer.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.08 });
+
+      document.querySelectorAll('.mixtape-card').forEach((card, i) => {
+        card.style.transitionDelay = `${i * 0.1}s`;
+        const rect = card.getBoundingClientRect();
+        if (rect.top < window.innerHeight && rect.bottom > 0) {
+          card.classList.add('visible');
+        } else {
+          observer.observe(card);
+        }
+      });
+    }
+
+    const mixtapeWrapper = document.getElementById('mixtape-wrapper');
+    const mixtapeMutationObserver = new MutationObserver(() => {
+      if (document.querySelectorAll('.mixtape-card').length > 0) {
+        mixtapeMutationObserver.disconnect();
+        setTimeout(observeMixtapeCards, 50);
+      }
+    });
+    mixtapeMutationObserver.observe(mixtapeWrapper, { childList: true });
   </script>
 
   <script>
