@@ -1588,7 +1588,7 @@
   // PWA: register the service worker so this can be installed as a home-screen app
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-      navigator.serviceWorker.register('sw.js').catch(() => {});
+      navigator.serviceWorker.register('sw.js', { scope: '/admin.html' }).catch(() => {});
     });
   }
 </script>

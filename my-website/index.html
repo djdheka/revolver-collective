@@ -1304,7 +1304,74 @@
     .reveal-delay-6 { transition-delay: 0.6s; }
     .reveal-delay-member { transition-delay: 0.4s; }
 
-  </style>
+    /* ── HERO LOGO ENTRANCE ── */
+    /* Logo starts invisible and slightly small, materialises over 1s on page load */
+    .hero-logo-img {
+      animation: hero-logo-enter 1.2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+    @keyframes hero-logo-enter {
+      0%   { opacity: 0; transform: scale(0.88); filter: drop-shadow(0 0 0px rgba(201,168,76,0)); }
+      60%  { opacity: 1; }
+      100% { opacity: 1; transform: scale(1);    filter: drop-shadow(0 0 40px rgba(201,168,76,0.15)); }
+    }
+    /* Particles wait until the logo has finished appearing */
+    .hero-logo-particle { animation-delay: calc(1.2s + var(--p-delay, 0s)) !important; }
+
+    /* ── ABOUT SECTION ANIMATIONS ── */
+    /* Quote lines slide up and fade in one by one */
+    .about-quote-line {
+      display: block;
+      opacity: 0;
+      transform: translateY(28px);
+      transition: opacity 0.8s ease, transform 0.8s ease;
+    }
+    .about-quote-line.visible { opacity: 1; transform: translateY(0); }
+    .about-quote-line:nth-child(2) { transition-delay: 0.18s; }
+    .about-quote-line:nth-child(3) { transition-delay: 0.36s; }
+
+    /* Gold divider rule draws in from the centre outward */
+    .about-rule {
+      overflow: hidden;
+    }
+    .about-rule::before, .about-rule::after {
+      transform: scaleX(0);
+      transform-origin: center;
+      transition: transform 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.55s;
+    }
+    .about-rule-diamond {
+      opacity: 0;
+      transition: opacity 0.4s ease 0.9s;
+    }
+    .about-rule.visible::before, .about-rule.visible::after { transform: scaleX(1); }
+    .about-rule.visible .about-rule-diamond { opacity: 1; }
+
+    /* Body text fades in after the rule finishes */
+    .about-body-reveal {
+      opacity: 0;
+      transform: translateY(16px);
+      transition: opacity 0.7s ease 0.7s, transform 0.7s ease 0.7s;
+    }
+    .about-body-reveal.visible { opacity: 1; transform: translateY(0); }
+
+    /* Stats count up from 0 — each number and label fades in staggered */
+    .about-stat-reveal {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+    .about-stat-reveal.visible { opacity: 1; transform: translateY(0); }
+    .about-stat-reveal:nth-child(2) { transition-delay: 0.15s; }
+    .about-stat-reveal:nth-child(3) { transition-delay: 0.3s; }
+
+    @media (prefers-reduced-motion: reduce) {
+      .hero-logo-img { animation: none; }
+      .about-quote-line, .about-rule::before, .about-rule::after,
+      .about-rule-diamond, .about-body-reveal, .about-stat-reveal {
+        opacity: 1 !important; transform: none !important; transition: none !important;
+      }
+    }
+
+
 </head>
 <body id="top">
 
@@ -1622,21 +1689,25 @@
       </div>
     </div>
     <div class="about-section">
-      <div class="about-quote">We Don't Follow<br>The <span>Sound</span>.<br>We Define It.</div>
-      <div class="about-rule"><div class="about-rule-diamond"></div></div>
-      <p class="about-body">
+      <div class="about-quote">
+        <span class="about-quote-line reveal">We Don't Follow</span>
+        <span class="about-quote-line reveal">The <span>Sound</span>.</span>
+        <span class="about-quote-line reveal">We Define It.</span>
+      </div>
+      <div class="about-rule reveal"><div class="about-rule-diamond"></div></div>
+      <p class="about-body about-body-reveal reveal">
         Revolver Collective is not just a DJ crew — it is a movement. Born in the heart of Yogyakarta, six gunslingers came together with one shared conviction: that music is the most powerful force in a room. We bring together a spectrum of sounds, from deep underground rhythms to euphoric dancefloor anthems, crafted to move people in ways they never expected. Every set is a statement. Every night is a declaration.
       </p>
       <div class="about-stats">
-        <div>
+        <div class="about-stat-reveal reveal">
           <div class="about-stat-number">6</div>
           <div class="about-stat-label">Gunslingers</div>
         </div>
-        <div>
+        <div class="about-stat-reveal reveal">
           <div class="about-stat-number">1</div>
           <div class="about-stat-label">Sound</div>
         </div>
-        <div>
+        <div class="about-stat-reveal reveal">
           <div class="about-stat-number">∞</div>
           <div class="about-stat-label">Nights</div>
         </div>
@@ -1890,7 +1961,7 @@
     // Register the service worker so the public site can run offline-resilient and installable
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('site-sw.js').catch(() => {});
+        navigator.serviceWorker.register('site-sw.js', { scope: '/index.html' }).catch(() => {});
       });
     }
   </script>
