@@ -3,7 +3,7 @@
   "short_name": "RVLVR Admin",
   "description": "Admin panel for Revolver Collective — manage events, recap photos, and mixtapes.",
   "start_url": "/admin.html",
-  "scope": "/admin.html",
+  "scope": "/",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#070707",
