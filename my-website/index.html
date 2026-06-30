@@ -8,6 +8,14 @@
   <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png?v=1">
   <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png?v=1">
   <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png?v=1">
+
+  <!-- PWA: makes the public site installable as its own home-screen app, separate from the admin app -->
+  <link rel="manifest" href="site-manifest.json">
+  <meta name="theme-color" content="#070707">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="RVLVR">
   <link href="https://fonts.googleapis.com/css2?family=Anton&family=Bebas+Neue&family=Oswald:wght@300;400;600;700&family=Inter:wght@300;400&display=swap" rel="stylesheet" />
 
   <style>
@@ -23,6 +31,71 @@
     }
 
     html { scroll-behavior: smooth; overflow-x: hidden; }
+
+    /* ── INSTALL BANNER ── */
+    .install-banner {
+      position: fixed;
+      left: 16px; right: 16px; bottom: 16px;
+      z-index: 99999;
+      max-width: 420px;
+      margin: 0 auto;
+      background: #0d0c0b;
+      border: 1px solid rgba(255,215,0,0.25);
+      box-shadow: 0 12px 32px rgba(0,0,0,0.6);
+      padding: 16px 18px;
+      display: none;
+      align-items: center;
+      gap: 14px;
+      transform: translateY(120%);
+      transition: transform 0.35s ease;
+    }
+    .install-banner.visible { display: flex; transform: translateY(0); }
+    .install-banner-icon {
+      width: 42px; height: 42px;
+      flex-shrink: 0;
+      border-radius: 8px;
+      overflow: hidden;
+      background: #000;
+    }
+    .install-banner-icon img { width: 100%; height: 100%; object-fit: cover; }
+    .install-banner-text { flex: 1; min-width: 0; }
+    .install-banner-title {
+      font-family: 'Anton', sans-serif;
+      font-size: 13px;
+      letter-spacing: 1px;
+      color: var(--white);
+      text-transform: uppercase;
+    }
+    .install-banner-sub {
+      font-family: 'Oswald', sans-serif;
+      font-size: 11px;
+      color: rgba(240,237,230,0.5);
+      margin-top: 2px;
+      line-height: 1.4;
+    }
+    .install-banner-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+    .install-banner-btn {
+      font-family: 'Oswald', sans-serif;
+      font-size: 10px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      padding: 8px 12px;
+      cursor: pointer;
+      border: none;
+      white-space: nowrap;
+    }
+    .install-banner-btn-install { background: var(--gold); color: var(--black); }
+    .install-banner-btn-install:hover { background: var(--white); }
+    .install-banner-btn-dismiss {
+      background: none; color: rgba(255,255,255,0.35);
+      font-size: 18px; padding: 4px 8px; line-height: 1;
+    }
+    .install-banner-btn-dismiss:hover { color: var(--white); }
+
+    @media (max-width: 480px) {
+      .install-banner { left: 10px; right: 10px; bottom: 10px; padding: 14px; gap: 10px; }
+      .install-banner-sub { display: none; }
+    }
 
     body {
       background: var(--black);
@@ -1235,6 +1308,20 @@
 </head>
 <body id="top">
 
+  <!-- INSTALL BANNER (Android: real install prompt · iOS: manual instructions hint) -->
+  <div class="install-banner" id="install-banner">
+    <div class="install-banner-icon"><img src="site-icon-192.png" alt="" /></div>
+    <div class="install-banner-text">
+      <div class="install-banner-title" id="install-banner-title">Install RVLVR</div>
+      <div class="install-banner-sub" id="install-banner-sub">Add to your home screen for quick access.</div>
+    </div>
+    <div class="install-banner-actions">
+      <button class="install-banner-btn install-banner-btn-install" id="install-banner-action">Install</button>
+      <button class="install-banner-btn install-banner-btn-dismiss" id="install-banner-dismiss" aria-label="Dismiss">✕</button>
+    </div>
+  </div>
+
+
   <!-- NAV -->
   <nav class="nav">
     <a class="nav-logo" href="index.html"><img src="REVOLVER_NEW__PUTIH_.png" alt="Revolver Collective" style="height:32px; display:block;" /></a>
@@ -1734,6 +1821,78 @@
     setTimeout(() => {
       document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
     }, 300);
+  </script>
+
+  <script>
+    // ── INSTALL BANNER ──
+    // Android/Chrome supports a real install prompt we can trigger ourselves.
+    // iOS Safari has no such API (Apple blocks it entirely) — for iPhone we show
+    // the same banner but with manual "Share → Add to Home Screen" instructions instead.
+    (function () {
+      const DISMISS_KEY = 'rvlvr_install_dismissed';
+      const banner = document.getElementById('install-banner');
+      const title = document.getElementById('install-banner-title');
+      const sub = document.getElementById('install-banner-sub');
+      const actionBtn = document.getElementById('install-banner-action');
+      const dismissBtn = document.getElementById('install-banner-dismiss');
+
+      // Already installed (running standalone)? Never show the banner.
+      const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+      if (isStandalone) return;
+
+      // Respect a previous dismissal for 14 days, so it doesn't nag every visit.
+      const dismissedAt = parseInt(localStorage.getItem(DISMISS_KEY) || '0', 10);
+      const FOURTEEN_DAYS = 14 * 24 * 60 * 60 * 1000;
+      if (dismissedAt && Date.now() - dismissedAt < FOURTEEN_DAYS) return;
+
+      const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+      let deferredPrompt = null;
+
+      function showBanner() {
+        banner.classList.add('visible');
+      }
+      function hideBanner() {
+        banner.classList.remove('visible');
+      }
+      function dismiss() {
+        localStorage.setItem(DISMISS_KEY, String(Date.now()));
+        hideBanner();
+      }
+
+      dismissBtn.addEventListener('click', dismiss);
+
+      if (isIOS) {
+        // No native prompt possible on iOS — show instructions instead.
+        sub.textContent = 'Tap the Share icon, then "Add to Home Screen".';
+        actionBtn.textContent = 'Got it';
+        actionBtn.addEventListener('click', dismiss);
+        showBanner();
+      } else {
+        // Android/Chrome/Desktop: capture the real install prompt.
+        window.addEventListener('beforeinstallprompt', (e) => {
+          e.preventDefault();
+          deferredPrompt = e;
+          showBanner();
+        });
+        actionBtn.addEventListener('click', async () => {
+          if (!deferredPrompt) { hideBanner(); return; }
+          deferredPrompt.prompt();
+          await deferredPrompt.userChoice;
+          deferredPrompt = null;
+          hideBanner();
+        });
+        window.addEventListener('appinstalled', () => {
+          hideBanner();
+        });
+      }
+    })();
+
+    // Register the service worker so the public site can run offline-resilient and installable
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('site-sw.js').catch(() => {});
+      });
+    }
   </script>
 </body>
 </html>

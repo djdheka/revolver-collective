@@ -1,0 +1,31 @@
+{
+  "name": "Revolver Collective",
+  "short_name": "RVLVR",
+  "description": "Six gunslingers, one sound. Revolver Collective — DJ crew based in Yogyakarta, Indonesia.",
+  "start_url": "/index.html",
+  "scope": "/index.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#070707",
+  "theme_color": "#070707",
+  "icons": [
+    {
+      "src": "site-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "site-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "site-icon-512-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
