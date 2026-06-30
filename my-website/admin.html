@@ -8,6 +8,15 @@
   <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png?v=1">
   <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png?v=1">
   <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png?v=1">
+
+  <!-- PWA: makes this installable as a home-screen app -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#070707">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="RVLVR Admin">
+  <link rel="apple-touch-icon" href="icon-192.png">
   <link href="https://fonts.googleapis.com/css2?family=Anton&family=Oswald:wght@300;400;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -1574,6 +1583,13 @@
     mixtapes = mixtapes.filter(m => m.id !== id);
     renderMixtapes();
     setStatus('Mixtape deleted ✓');
+  }
+
+  // PWA: register the service worker so this can be installed as a home-screen app
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js').catch(() => {});
+    });
   }
 </script>
 
