@@ -376,7 +376,7 @@
       animation: cascade-drop 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) 0.2s forwards;
     }
 
-    /* Masonry photos stagger in after the section header */
+    /* Masonry photos stagger in after the section header — delays set by JS */
     .masonry-item {
       opacity: 0;
       transform: scale(0.94);
@@ -386,14 +386,6 @@
       opacity: 1;
       transform: scale(1);
     }
-    /* Stagger each photo slightly */
-    .event-section.visible .masonry-item:nth-child(1)  { transition-delay: 0.35s; }
-    .event-section.visible .masonry-item:nth-child(2)  { transition-delay: 0.42s; }
-    .event-section.visible .masonry-item:nth-child(3)  { transition-delay: 0.49s; }
-    .event-section.visible .masonry-item:nth-child(4)  { transition-delay: 0.56s; }
-    .event-section.visible .masonry-item:nth-child(5)  { transition-delay: 0.63s; }
-    .event-section.visible .masonry-item:nth-child(6)  { transition-delay: 0.70s; }
-    .event-section.visible .masonry-item:nth-child(n+7) { transition-delay: 0.75s; }
 
     /* Photo hover zoom */
     .masonry-item { overflow: hidden; }
@@ -567,8 +559,13 @@
       const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
           if (entry.isIntersecting) {
-            entry.target.classList.add('visible');
-            observer.unobserve(entry.target);
+            const section = entry.target;
+            // Assign 0.5s delay per photo so they appear one by one
+            section.querySelectorAll('.masonry-item').forEach((item, i) => {
+              item.style.transitionDelay = `${0.3 + i * 0.5}s`;
+            });
+            section.classList.add('visible');
+            observer.unobserve(section);
           }
         });
       }, { threshold: 0.06 });
@@ -577,6 +574,10 @@
         section.style.transitionDelay = `${i * 0.1}s`;
         const rect = section.getBoundingClientRect();
         if (rect.top < window.innerHeight && rect.bottom > 0) {
+          // Already in viewport — assign delays and reveal immediately
+          section.querySelectorAll('.masonry-item').forEach((item, i) => {
+            item.style.transitionDelay = `${0.3 + i * 0.5}s`;
+          });
           section.classList.add('visible');
         } else {
           observer.observe(section);
