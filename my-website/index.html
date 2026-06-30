@@ -1888,9 +1888,17 @@
       });
     }, { threshold: 0.15, rootMargin: '0px 0px -100px 0px' });
 
-    // Small delay so elements aren't observed while still in initial viewport
+    // Immediately reveal anything already visible in the viewport on load,
+    // then start observing the rest for scroll-triggered reveal.
     setTimeout(() => {
-      document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+      document.querySelectorAll('.reveal').forEach(el => {
+        const rect = el.getBoundingClientRect();
+        if (rect.top < window.innerHeight && rect.bottom > 0) {
+          el.classList.add('visible');
+        } else {
+          observer.observe(el);
+        }
+      });
     }, 300);
   </script>
 
