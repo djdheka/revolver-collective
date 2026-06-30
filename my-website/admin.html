@@ -85,6 +85,37 @@
     /* ── MAIN CONTENT ── */
     .main-content { margin-left: 200px; flex: 1; padding: 32px; }
 
+    .admin-hamburger { display: none; }
+    .sidebar-overlay { display: none; }
+
+    @media (max-width: 860px) {
+      .admin-hamburger {
+        display: flex; flex-direction: column; justify-content: center; gap: 4px;
+        width: 28px; height: 28px; background: none; border: none; cursor: pointer; padding: 0;
+      }
+      .admin-hamburger span { display: block; width: 20px; height: 2px; background: var(--white); }
+
+      .sidebar {
+        transform: translateX(-100%);
+        transition: transform 0.25s ease;
+        z-index: 9500;
+        width: 240px;
+      }
+      .sidebar.open { transform: translateX(0); }
+
+      .sidebar-overlay {
+        display: block;
+        position: fixed; inset: 60px 0 0 0;
+        background: rgba(0,0,0,0.6);
+        z-index: 9400;
+        opacity: 0; pointer-events: none;
+        transition: opacity 0.25s ease;
+      }
+      .sidebar-overlay.open { opacity: 1; pointer-events: all; }
+
+      .main-content { margin-left: 0; padding: 20px; }
+    }
+
     .page { display: none; }
     .page.active { display: block; }
 
@@ -315,13 +346,20 @@
 <!-- ADMIN SCREEN -->
 <div id="admin-screen">
   <nav class="admin-nav">
-    <div class="admin-nav-title">⬡ Revolver Admin</div>
+    <div style="display:flex; align-items:center; gap:14px;">
+      <button class="admin-hamburger" id="admin-hamburger" onclick="toggleAdminSidebar()" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
+      <div class="admin-nav-title">⬡ Revolver Admin</div>
+    </div>
     <button class="admin-nav-logout" onclick="logout()">Log Out</button>
   </nav>
 
+  <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeAdminSidebar()"></div>
+
   <div class="admin-body">
     <!-- SIDEBAR -->
-    <div class="sidebar">
+    <div class="sidebar" id="sidebar">
       <div class="sidebar-section">Content</div>
       <button class="sidebar-item active" onclick="showPage('events', this)">📅 Events</button>
       <button class="sidebar-item" onclick="showPage('recap', this)">📸 Recap Photos</button>
@@ -603,6 +641,18 @@
     btn.classList.add('active');
     if (page === 'recap') loadRecap();
     if (page === 'mixtapes') loadMixtapes();
+    closeAdminSidebar();
+  }
+
+  // Mobile sidebar toggle — sidebar slides in as an overlay on small screens
+  // instead of permanently eating ~half the width like it does on desktop.
+  function toggleAdminSidebar() {
+    document.getElementById('sidebar').classList.toggle('open');
+    document.getElementById('sidebar-overlay').classList.toggle('open');
+  }
+  function closeAdminSidebar() {
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('sidebar-overlay').classList.remove('open');
   }
 
   // ── DATA ──
