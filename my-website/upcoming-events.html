@@ -504,6 +504,95 @@
       }
     }
   </style>
+
+  <style>
+    /* ── PAGE HEADER ENTRANCE ── */
+    .page-header-title {
+      opacity: 0;
+      transform: translateY(24px);
+      animation: header-enter 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.1s forwards;
+    }
+    .page-header-label {
+      opacity: 0;
+      animation: header-fade 0.7s ease 0s forwards;
+    }
+    .page-header-rule {
+      opacity: 0;
+      animation: header-fade 0.7s ease 0.6s forwards;
+    }
+    @keyframes header-enter {
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes header-fade {
+      to { opacity: 1; }
+    }
+
+    /* ── EVENT CARD ENTRANCE ── */
+    .event-block {
+      opacity: 0;
+      transform: translateY(32px);
+      transition: opacity 0.7s ease, transform 0.7s ease, border-color 0.3s;
+    }
+    .event-block.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    /* Hover lift */
+    .event-block:hover {
+      border-color: rgba(201,168,76,0.5);
+      transform: translateY(-4px);
+      box-shadow: 0 12px 40px rgba(201,168,76,0.08);
+    }
+    .event-block.visible:hover {
+      transform: translateY(-4px);
+    }
+
+    /* ── CASCADE DROP-IN for event details ── */
+    /* Each piece drops in from above with a single thump-pulse as it lands */
+    .event-name,
+    .event-day,
+    .event-time,
+    .event-venue-name {
+      opacity: 0;
+      transform: translateY(-22px);
+    }
+
+    /* Triggered once the card gets .visible — each item animates in sequence */
+    .event-block.visible .event-name {
+      animation: cascade-drop 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) 0.25s forwards;
+    }
+    .event-block.visible .event-day {
+      animation: cascade-drop 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) 0.42s forwards;
+    }
+    .event-block.visible .event-time {
+      animation: cascade-drop 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) 0.59s forwards;
+    }
+    .event-block.visible .event-venue-name {
+      animation: cascade-drop 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) 0.76s forwards;
+    }
+
+    /* cubic-bezier(0.34, 1.56, 0.64, 1) = overshoot spring — the "thump/pulse" on landing */
+    @keyframes cascade-drop {
+      0%   { opacity: 0; transform: translateY(-22px); }
+      60%  { opacity: 1; }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── MAP PIN PULSE ── */
+    .event-map-pin-pulse {
+      animation: pin-pulse 2s ease-in-out 1.2s 2;
+    }
+    @keyframes pin-pulse {
+      0%, 100% { transform: scale(1);    filter: drop-shadow(0 0 0px rgba(201,168,76,0)); }
+      50%       { transform: scale(1.25); filter: drop-shadow(0 0 8px rgba(201,168,76,0.7)); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .page-header-title, .page-header-label, .page-header-rule { animation: none; opacity: 1; transform: none; }
+      .event-block { opacity: 1; transform: none; transition: border-color 0.3s; }
+      .event-name, .event-day, .event-time, .event-venue-name { opacity: 1; transform: none; animation: none; }
+    }
+  </style>
 </head>
 <body>
 
@@ -677,7 +766,45 @@
 
     loadEvents();
   </script>
-<script>
+
+  <script>
+    // Observe event cards and add .visible once they enter the viewport,
+    // which triggers both the card slide-up and the cascade drop-in sequence.
+    function observeEventCards() {
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+            observer.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.08 });
+
+      document.querySelectorAll('.event-block').forEach((card, i) => {
+        // Stagger multiple cards slightly so they don't all pop in at once
+        card.style.transitionDelay = `${i * 0.08}s`;
+        const rect = card.getBoundingClientRect();
+        if (rect.top < window.innerHeight && rect.bottom > 0) {
+          card.classList.add('visible');
+        } else {
+          observer.observe(card);
+        }
+      });
+    }
+
+    // Events are loaded asynchronously from Supabase — wait for the DOM
+    // to be populated before setting up the observer.
+    const eventsList = document.getElementById('events-list');
+    const mutationObserver = new MutationObserver(() => {
+      if (document.querySelectorAll('.event-block').length > 0) {
+        mutationObserver.disconnect();
+        setTimeout(observeEventCards, 50);
+      }
+    });
+    mutationObserver.observe(eventsList, { childList: true });
+  </script>
+
+  <script>
   function toggleMenu() {
     document.getElementById('nav-links').classList.toggle('open');
     document.getElementById('hamburger').classList.toggle('open');
