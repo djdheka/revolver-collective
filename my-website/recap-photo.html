@@ -559,13 +559,9 @@
       const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
           if (entry.isIntersecting) {
-            const section = entry.target;
-            // Assign 0.5s delay per photo so they appear one by one
-            section.querySelectorAll('.masonry-item').forEach((item, i) => {
-              item.style.transitionDelay = `${0.3 + i * 0.5}s`;
-            });
-            section.classList.add('visible');
-            observer.unobserve(section);
+            assignPhotoDelays(entry.target);
+            entry.target.classList.add('visible');
+            observer.unobserve(entry.target);
           }
         });
       }, { threshold: 0.06 });
@@ -574,14 +570,34 @@
         section.style.transitionDelay = `${i * 0.1}s`;
         const rect = section.getBoundingClientRect();
         if (rect.top < window.innerHeight && rect.bottom > 0) {
-          // Already in viewport — assign delays and reveal immediately
-          section.querySelectorAll('.masonry-item').forEach((item, i) => {
-            item.style.transitionDelay = `${0.3 + i * 0.5}s`;
-          });
+          assignPhotoDelays(section);
           section.classList.add('visible');
         } else {
           observer.observe(section);
         }
+      });
+    }
+
+    // Assigns transition-delay to each photo based on its visual position —
+    // left to right across each row, then top to bottom row by row.
+    // This works with CSS column layouts where DOM order ≠ visual order.
+    function assignPhotoDelays(section) {
+      const items = Array.from(section.querySelectorAll('.masonry-item'));
+      if (!items.length) return;
+
+      // Sort items by [top position, left position] to get true reading order
+      const sorted = items.slice().sort((a, b) => {
+        const ay = a.getBoundingClientRect().top;
+        const by = b.getBoundingClientRect().top;
+        const ax = a.getBoundingClientRect().left;
+        const bx = b.getBoundingClientRect().left;
+        // Allow 20px tolerance for items in the "same" row
+        if (Math.abs(ay - by) < 20) return ax - bx;
+        return ay - by;
+      });
+
+      sorted.forEach((item, i) => {
+        item.style.transitionDelay = `${0.2 + i * 0.5}s`;
       });
     }
 
