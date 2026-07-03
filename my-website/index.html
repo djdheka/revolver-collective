@@ -167,7 +167,7 @@
       width: clamp(280px, 30vw, 480px);
       margin: 60px auto 4px;
       position: relative;
-      z-index: 1;
+      z-index: 2;
       filter: drop-shadow(0 0 40px rgba(201,168,76,0.15));
     }
 
@@ -199,7 +199,7 @@
       background: rgba(201,168,76,0.75);
       box-shadow: 0 0 7px 1px rgba(201,168,76,0.55);
       opacity: 0;
-      z-index: 2;
+      z-index: 0;
       pointer-events: none;
       animation: hero-logo-particle-float ease-in-out infinite;
     }
@@ -1431,56 +1431,56 @@
     <div class="hero-scratch"></div>
     <div class="hero-eyebrow">Yogyakarta · Indonesia</div>
     <div class="hero-logo-wrap">
-      <!-- BURST PARTICLES — all originate near logo center, shoot outward in all directions -->
-      <!-- 0° right -->
-      <span class="hero-logo-particle" style="left:50%; top:50%; --dx:180px;  --dy:0px;    animation-duration:9s;  animation-delay:0.0s;"></span>
-      <span class="hero-logo-particle" style="left:51%; top:49%; --dx:130px;  --dy:10px;   animation-duration:12s; animation-delay:2.8s;"></span>
-      <!-- 22° -->
-      <span class="hero-logo-particle" style="left:50%; top:48%; --dx:155px;  --dy:-65px;  animation-duration:10s; animation-delay:1.2s;"></span>
-      <!-- 45° right-up -->
-      <span class="hero-logo-particle" style="left:51%; top:50%; --dx:130px;  --dy:-130px; animation-duration:8s;  animation-delay:3.5s;"></span>
-      <span class="hero-logo-particle" style="left:49%; top:51%; --dx:90px;   --dy:-90px;  animation-duration:11s; animation-delay:0.6s;"></span>
-      <!-- 67° -->
-      <span class="hero-logo-particle" style="left:50%; top:50%; --dx:65px;   --dy:-155px; animation-duration:9s;  animation-delay:4.2s;"></span>
-      <!-- 90° up -->
-      <span class="hero-logo-particle" style="left:49%; top:50%; --dx:0px;    --dy:-180px; animation-duration:10s; animation-delay:1.8s;"></span>
-      <span class="hero-logo-particle" style="left:51%; top:48%; --dx:10px;   --dy:-130px; animation-duration:13s; animation-delay:0.3s;"></span>
-      <!-- 112° -->
-      <span class="hero-logo-particle" style="left:50%; top:49%; --dx:-65px;  --dy:-155px; animation-duration:9s;  animation-delay:3.0s;"></span>
-      <!-- 135° left-up -->
-      <span class="hero-logo-particle" style="left:50%; top:50%; --dx:-130px; --dy:-130px; animation-duration:11s; animation-delay:0.9s;"></span>
-      <span class="hero-logo-particle" style="left:51%; top:51%; --dx:-85px;  --dy:-85px;  animation-duration:8s;  animation-delay:4.7s;"></span>
-      <!-- 157° -->
-      <span class="hero-logo-particle" style="left:49%; top:50%; --dx:-155px; --dy:-65px;  animation-duration:10s; animation-delay:2.1s;"></span>
-      <!-- 180° left -->
-      <span class="hero-logo-particle" style="left:50%; top:50%; --dx:-180px; --dy:0px;    animation-duration:9s;  animation-delay:5.0s;"></span>
-      <span class="hero-logo-particle" style="left:51%; top:49%; --dx:-130px; --dy:-10px;  animation-duration:12s; animation-delay:1.5s;"></span>
-      <!-- 202° -->
-      <span class="hero-logo-particle" style="left:50%; top:51%; --dx:-155px; --dy:65px;   animation-duration:10s; animation-delay:3.8s;"></span>
-      <!-- 225° left-down -->
-      <span class="hero-logo-particle" style="left:49%; top:50%; --dx:-130px; --dy:130px;  animation-duration:8s;  animation-delay:0.4s;"></span>
-      <span class="hero-logo-particle" style="left:51%; top:50%; --dx:-90px;  --dy:90px;   animation-duration:11s; animation-delay:2.5s;"></span>
-      <!-- 247° -->
-      <span class="hero-logo-particle" style="left:50%; top:50%; --dx:-65px;  --dy:155px;  animation-duration:9s;  animation-delay:4.4s;"></span>
-      <!-- 270° down -->
-      <span class="hero-logo-particle" style="left:50%; top:51%; --dx:0px;    --dy:180px;  animation-duration:10s; animation-delay:1.0s;"></span>
-      <span class="hero-logo-particle" style="left:49%; top:49%; --dx:-10px;  --dy:130px;  animation-duration:13s; animation-delay:3.3s;"></span>
-      <!-- 292° -->
-      <span class="hero-logo-particle" style="left:51%; top:50%; --dx:65px;   --dy:155px;  animation-duration:9s;  animation-delay:0.7s;"></span>
-      <!-- 315° right-down -->
-      <span class="hero-logo-particle" style="left:50%; top:50%; --dx:130px;  --dy:130px;  animation-duration:11s; animation-delay:4.0s;"></span>
-      <span class="hero-logo-particle" style="left:49%; top:51%; --dx:85px;   --dy:85px;   animation-duration:8s;  animation-delay:1.9s;"></span>
-      <!-- 337° -->
-      <span class="hero-logo-particle" style="left:50%; top:50%; --dx:155px;  --dy:65px;   animation-duration:10s; animation-delay:2.6s;"></span>
-      <!-- Extra mid-range bursts for density -->
-      <span class="hero-logo-particle" style="left:50%; top:50%; --dx:100px;  --dy:-160px; animation-duration:9s;  animation-delay:5.3s;"></span>
-      <span class="hero-logo-particle" style="left:49%; top:50%; --dx:-100px; --dy:-160px; animation-duration:10s; animation-delay:0.2s;"></span>
-      <span class="hero-logo-particle" style="left:51%; top:50%; --dx:-160px; --dy:100px;  animation-duration:8s;  animation-delay:3.6s;"></span>
-      <span class="hero-logo-particle" style="left:50%; top:49%; --dx:160px;  --dy:100px;  animation-duration:11s; animation-delay:1.4s;"></span>
-      <span class="hero-logo-particle" style="left:50%; top:51%; --dx:60px;   --dy:-100px; animation-duration:7s;  animation-delay:4.9s;"></span>
-      <span class="hero-logo-particle" style="left:49%; top:50%; --dx:-60px;  --dy:-100px; animation-duration:7s;  animation-delay:2.3s;"></span>
-      <span class="hero-logo-particle" style="left:51%; top:50%; --dx:100px;  --dy:60px;   animation-duration:8s;  animation-delay:0.8s;"></span>
-      <span class="hero-logo-particle" style="left:50%; top:50%; --dx:-100px; --dy:60px;   animation-duration:9s;  animation-delay:3.1s;"></span>
+      <!-- BURST PARTICLES — originate near logo centre, shoot far into black areas -->
+      <!-- pure right -->
+      <span class="hero-logo-particle" style="left:50%; top:50%; --dx:620px;  --dy:0px;    animation-duration:9s;  animation-delay:0.0s;"></span>
+      <span class="hero-logo-particle" style="left:51%; top:48%; --dx:500px;  --dy:20px;   animation-duration:12s; animation-delay:2.8s;"></span>
+      <!-- right-up 22° -->
+      <span class="hero-logo-particle" style="left:50%; top:49%; --dx:570px;  --dy:-230px; animation-duration:10s; animation-delay:1.2s;"></span>
+      <!-- right-up 45° -->
+      <span class="hero-logo-particle" style="left:51%; top:50%; --dx:440px;  --dy:-440px; animation-duration:8s;  animation-delay:3.5s;"></span>
+      <span class="hero-logo-particle" style="left:49%; top:51%; --dx:320px;  --dy:-320px; animation-duration:11s; animation-delay:0.6s;"></span>
+      <!-- up-right 67° -->
+      <span class="hero-logo-particle" style="left:50%; top:50%; --dx:220px;  --dy:-520px; animation-duration:9s;  animation-delay:4.2s;"></span>
+      <!-- pure up -->
+      <span class="hero-logo-particle" style="left:49%; top:50%; --dx:0px;    --dy:-560px; animation-duration:10s; animation-delay:1.8s;"></span>
+      <span class="hero-logo-particle" style="left:51%; top:48%; --dx:30px;   --dy:-440px; animation-duration:13s; animation-delay:0.3s;"></span>
+      <!-- up-left 112° -->
+      <span class="hero-logo-particle" style="left:50%; top:49%; --dx:-220px; --dy:-520px; animation-duration:9s;  animation-delay:3.0s;"></span>
+      <!-- left-up 135° -->
+      <span class="hero-logo-particle" style="left:50%; top:50%; --dx:-440px; --dy:-440px; animation-duration:11s; animation-delay:0.9s;"></span>
+      <span class="hero-logo-particle" style="left:51%; top:51%; --dx:-300px; --dy:-300px; animation-duration:8s;  animation-delay:4.7s;"></span>
+      <!-- left 157° -->
+      <span class="hero-logo-particle" style="left:49%; top:50%; --dx:-570px; --dy:-230px; animation-duration:10s; animation-delay:2.1s;"></span>
+      <!-- pure left -->
+      <span class="hero-logo-particle" style="left:50%; top:50%; --dx:-620px; --dy:0px;    animation-duration:9s;  animation-delay:5.0s;"></span>
+      <span class="hero-logo-particle" style="left:51%; top:49%; --dx:-500px; --dy:-20px;  animation-duration:12s; animation-delay:1.5s;"></span>
+      <!-- left-down 202° -->
+      <span class="hero-logo-particle" style="left:50%; top:51%; --dx:-570px; --dy:230px;  animation-duration:10s; animation-delay:3.8s;"></span>
+      <!-- left-down 225° -->
+      <span class="hero-logo-particle" style="left:49%; top:50%; --dx:-440px; --dy:440px;  animation-duration:8s;  animation-delay:0.4s;"></span>
+      <span class="hero-logo-particle" style="left:51%; top:50%; --dx:-300px; --dy:300px;  animation-duration:11s; animation-delay:2.5s;"></span>
+      <!-- down-left 247° -->
+      <span class="hero-logo-particle" style="left:50%; top:50%; --dx:-220px; --dy:520px;  animation-duration:9s;  animation-delay:4.4s;"></span>
+      <!-- pure down -->
+      <span class="hero-logo-particle" style="left:50%; top:51%; --dx:0px;    --dy:560px;  animation-duration:10s; animation-delay:1.0s;"></span>
+      <span class="hero-logo-particle" style="left:49%; top:49%; --dx:-30px;  --dy:440px;  animation-duration:13s; animation-delay:3.3s;"></span>
+      <!-- down-right 292° -->
+      <span class="hero-logo-particle" style="left:51%; top:50%; --dx:220px;  --dy:520px;  animation-duration:9s;  animation-delay:0.7s;"></span>
+      <!-- right-down 315° -->
+      <span class="hero-logo-particle" style="left:50%; top:50%; --dx:440px;  --dy:440px;  animation-duration:11s; animation-delay:4.0s;"></span>
+      <span class="hero-logo-particle" style="left:49%; top:51%; --dx:300px;  --dy:300px;  animation-duration:8s;  animation-delay:1.9s;"></span>
+      <!-- right 337° -->
+      <span class="hero-logo-particle" style="left:50%; top:50%; --dx:570px;  --dy:230px;  animation-duration:10s; animation-delay:2.6s;"></span>
+      <!-- extra density mid-range -->
+      <span class="hero-logo-particle" style="left:50%; top:50%; --dx:360px;  --dy:-480px; animation-duration:9s;  animation-delay:5.3s;"></span>
+      <span class="hero-logo-particle" style="left:49%; top:50%; --dx:-360px; --dy:-480px; animation-duration:10s; animation-delay:0.2s;"></span>
+      <span class="hero-logo-particle" style="left:51%; top:50%; --dx:-480px; --dy:360px;  animation-duration:8s;  animation-delay:3.6s;"></span>
+      <span class="hero-logo-particle" style="left:50%; top:49%; --dx:480px;  --dy:360px;  animation-duration:11s; animation-delay:1.4s;"></span>
+      <span class="hero-logo-particle" style="left:50%; top:51%; --dx:200px;  --dy:-350px; animation-duration:7s;  animation-delay:4.9s;"></span>
+      <span class="hero-logo-particle" style="left:49%; top:50%; --dx:-200px; --dy:-350px; animation-duration:7s;  animation-delay:2.3s;"></span>
+      <span class="hero-logo-particle" style="left:51%; top:50%; --dx:380px;  --dy:200px;  animation-duration:8s;  animation-delay:0.8s;"></span>
+      <span class="hero-logo-particle" style="left:50%; top:50%; --dx:-380px; --dy:200px;  animation-duration:9s;  animation-delay:3.1s;"></span>
 
       <img class="hero-logo-img" src="REVOLVER_NEW__PUTIH_.png" alt="Revolver Collective" />
     </div>
