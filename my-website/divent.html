@@ -733,15 +733,6 @@
     .social-links.visible .social-link:nth-child(5) { transition-delay: 0.45s; }
 
 
-    /* ── BOOKING FORM GLOW ── */
-    .booking-glow {
-      position: relative;
-      animation: booking-pulse 3.5s ease-in-out infinite;
-    }
-    @keyframes booking-pulse {
-      0%, 100% { box-shadow: 0 0 10px 2px rgba(201,168,76,0.10), 0 0 24px 4px rgba(201,168,76,0.05); }
-      50%       { box-shadow: 0 0 20px 5px rgba(201,168,76,0.25), 0 0 42px 8px rgba(201,168,76,0.10); }
-    }
     @media (prefers-reduced-motion: reduce) {
       .hero-collective, .hero-role, .hero-name-img, .hero-realname,
       .hero-rule, .hero-tagline { animation: none; opacity: 1; transform: none; }
@@ -870,7 +861,7 @@
       </div>
 
       <!-- COL 3 BOTTOM: BOOK DHEKA -->
-      <div class="col-bottom member-reveal member-reveal-delay-3 booking-glow">
+      <div class="col-bottom member-reveal member-reveal-delay-3">
         <div class="section-label">Book Divent</div>
         <form class="contact-form" onsubmit="handleSubmit(event)">
           <div class="form-row">
