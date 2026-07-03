@@ -176,6 +176,21 @@
       position: relative;
       display: inline-block;
     }
+    /* On desktop, expand the wrap so particles spread across a wider zone
+       instead of clustering tightly around the small logo area */
+    @media (min-width: 800px) {
+      .hero-logo-wrap {
+        display: block;
+        width: 70vw;
+        max-width: 900px;
+        margin: 0 auto;
+      }
+      .hero-logo-particle {
+        width: 4px;
+        height: 4px;
+        box-shadow: 0 0 10px 2px rgba(201,168,76,0.6);
+      }
+    }
     .hero-logo-particle {
       position: absolute;
       width: 3px;
