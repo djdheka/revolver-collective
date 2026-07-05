@@ -378,7 +378,7 @@
       <button class="sidebar-item" onclick="showPage('mixtapes', this)">🎬 Mixtapes</button>
       <button class="sidebar-item" onclick="showPage('archive', this)">🗄 Archive</button>
       <div class="sidebar-section">Members</div>
-      <button class="sidebar-item" onclick="showPage('members', this)">👤 Member Info</button>
+      <button class="sidebar-item" onclick="showPage('members', this)">👤 Members</button>
       <div class="sidebar-section">Export</div>
       <button class="sidebar-item" onclick="showPage('export', this)">⬇ Export Files</button>
     </div>
@@ -428,11 +428,12 @@
 
       <!-- MEMBERS PAGE -->
       <div class="page" id="page-members">
-        <div class="page-title">Member Info</div>
-        <div class="page-subtitle">Click a member to edit their details</div>
+        <div class="page-title">Members</div>
+        <div class="page-subtitle">Add, edit, or remove a DJ profile — changes go live immediately, no file export needed</div>
 
-        <div class="member-grid" id="member-grid"></div>
-        <div id="member-editor"></div>
+        <button class="add-btn" onclick="addMember()">+ Add New Member</button>
+
+        <div id="members-list"></div>
       </div>
 
       <!-- EXPORT PAGE -->
@@ -653,6 +654,7 @@
     btn.classList.add('active');
     if (page === 'recap') loadRecap();
     if (page === 'mixtapes') loadMixtapes();
+    if (page === 'members') loadMembers();
     closeAdminSidebar();
   }
 
@@ -673,14 +675,6 @@
       { id: 1, name: 'Night Frequency', date: '2026-06-21', time: '21:00', venue: 'Liquid Bar & Resto', city: 'Yogyakarta', tag: 'Club Night', entry: 'Free Entry', desc: 'A late-night session built for the dance floor. Pure energy, curated sounds, and a crowd that knows how to move.', lineup: ['Dheka', 'DUVM', 'Rellion'] },
       { id: 2, name: 'Gunslinger Sessions', date: '2026-07-05', time: '21:00', venue: 'Five Seven', city: 'Yogyakarta', tag: 'Live Set', entry: 'Free Entry', desc: 'An intimate showcase of what Revolver Collective does best — raw, unfiltered sets from the gunslingers themselves.', lineup: ['Divent', 'Ravenz', 'Wizzkey'] },
       { id: 3, name: 'Bass & Gold', date: '2026-07-19', time: '20:00', venue: 'Bounty Discotheque', city: 'Bali', tag: 'Festival', entry: 'TBA', desc: 'The full collective. One stage. All six gunslingers bringing their best to the island.', lineup: ['Dheka', 'DUVM', 'Rellion', 'Divent', 'Ravenz', 'Wizzkey'] },
-    ],
-    members: [
-      { id: 'dheka', name: 'Dheka', realname: 'Mahardika Saputra', role: 'Open Format DJ', tagline: 'Live the Moment. Feel the Beat.', about: 'Known for energetic performances and crowd-focused music selection, Dheka brings a dynamic atmosphere to every event.' },
-      { id: 'duvm', name: 'DUVM', realname: 'Adam Athaya', role: 'DJ & MC', tagline: 'Drop The Beat. Own The Night.', about: 'Adam Athaya Dirham here. Born in Balikpapan, hyping up stages since 2023.' },
-      { id: 'divent', name: 'Divent', realname: 'M. Divent Belvansaz', role: 'Open Format DJ', tagline: 'Control The Crowd. Own The Floor.', about: 'An open-format DJ with a sharp focus on crowd control, energy management, and musical flow.' },
-      { id: 'rellion', name: 'Rellion', realname: 'Jeromy Ariel Kurniadi', role: 'MC DJ', tagline: 'Bring The Hype. Keep It Alive.', about: 'An MC DJ with a cool and energetic style who knows how to bring the atmosphere to life.' },
-      { id: 'ravenz', name: 'Ravenz', realname: 'Fan Abdul', role: 'DJ & Music Performer', tagline: 'Live The Beat. Feel The Vibe.', about: 'A passionate DJ with a strong interest in music, live performance, and crowd engagement.' },
-      { id: 'wizzkey', name: 'Wizzkey', realname: 'Waskito Agung Wahyu Pratomo', role: 'House DJ', tagline: 'Groove. Vibe. Emotion.', about: 'A House DJ with a cool and calm style, bringing positive energy through music.' },
     ],
     recapEvents: [
       { id: 1, name: 'Night Frequency', date: '21 June 2026', venue: 'Liquid Bar & Resto, Yogyakarta', photos: [] },
@@ -1155,59 +1149,277 @@
     if (ev) { ev.lineup = (ev.lineup||[]).filter(m => m !== member); save(); renderEvents(); }
   }
 
-  // ── MEMBERS ──
-  function renderMembers() {
-    const grid = document.getElementById('member-grid');
-    grid.innerHTML = data.members.map(m => `
-      <div class="member-card" onclick="editMember('${m.id}', this)">
-        <div class="member-card-name">${m.name}</div>
-        <div class="member-card-role">${m.role}</div>
-      </div>
-    `).join('');
-    document.getElementById('member-editor').innerHTML = '';
+  // ── MEMBERS (Supabase) ──
+  let members = [];
+
+  async function loadMembers() {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/members?order=sort_order.asc,created_at.asc`, { headers: sbHeaders() });
+    members = await res.json();
+    if (!Array.isArray(members)) members = [];
+    renderMembers();
   }
 
-  function editMember(id, card) {
-    document.querySelectorAll('.member-card').forEach(c => c.classList.remove('active'));
-    card.classList.add('active');
-    const m = data.members.find(x => x.id === id);
-    document.getElementById('member-editor').innerHTML = `
-      <div class="card">
-        <div class="card-title">Editing · ${m.name}</div>
+  function slugify(str) {
+    return (str || '')
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9]+/g, '')
+      .slice(0, 40);
+  }
+
+  function renderMembers() {
+    const list = document.getElementById('members-list');
+    if (!members.length) {
+      list.innerHTML = '<div style="font-size:11px;letter-spacing:2px;color:rgba(255,255,255,0.3);text-transform:uppercase;padding:20px 0;">No members yet — add one above</div>';
+      return;
+    }
+    list.innerHTML = members.map(m => `
+      <div class="card" id="member-${m.id}">
+        <div class="card-title">${m.active === false ? '⚪' : '🟢'} ${m.name || 'Untitled'} <span style="opacity:0.4;font-weight:normal;">· /${m.slug}</span></div>
+        <button class="card-delete" onclick="deleteMember(${m.id})">✕ Delete</button>
+
         <div class="form-row">
           <div class="form-group">
             <label class="form-label">Stage Name</label>
-            <input class="form-input" value="${m.name}" onchange="updateMember('${id}','name',this.value)" />
+            <input class="form-input" value="${esc(m.name)}" onchange="updateMemberField(${m.id},'name',this.value)" />
           </div>
           <div class="form-group">
             <label class="form-label">Real Name</label>
-            <input class="form-input" value="${m.realname}" onchange="updateMember('${id}','realname',this.value)" />
+            <input class="form-input" value="${esc(m.realname)}" onchange="updateMemberField(${m.id},'realname',this.value)" />
           </div>
         </div>
+
         <div class="form-row">
           <div class="form-group">
-            <label class="form-label">Role</label>
-            <input class="form-input" value="${m.role}" onchange="updateMember('${id}','role',this.value)" />
+            <label class="form-label">Role Line (shown under the position counter)</label>
+            <input class="form-input" value="${esc(m.role)}" onchange="updateMemberField(${m.id},'role',this.value)" placeholder="e.g. Open Format DJ · Club · Event · Wedding" />
           </div>
           <div class="form-group">
             <label class="form-label">Tagline</label>
-            <input class="form-input" value="${m.tagline}" onchange="updateMember('${id}','tagline',this.value)" />
+            <input class="form-input" value="${esc(m.tagline)}" onchange="updateMemberField(${m.id},'tagline',this.value)" />
           </div>
         </div>
+
         <div class="form-group">
           <label class="form-label">About</label>
-          <textarea class="form-textarea" onchange="updateMember('${id}','about',this.value)">${m.about}</textarea>
+          <textarea class="form-textarea" onchange="updateMemberField(${m.id},'about',this.value)">${esc(m.about)}</textarea>
         </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Photo URL</label>
+            <input class="form-input" value="${esc(m.hero_photo_url)}" onchange="updateMemberField(${m.id},'hero_photo_url',this.value)" placeholder="images/name.png" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Name Logo URL</label>
+            <input class="form-input" value="${esc(m.name_logo_url)}" onchange="updateMemberField(${m.id},'name_logo_url',this.value)" placeholder="name/name_font.png" />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Background (Desktop)</label>
+            <input class="form-input" value="${esc(m.bg_desktop_url)}" onchange="updateMemberField(${m.id},'bg_desktop_url',this.value)" placeholder="name/name_background.png" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Background (Mobile)</label>
+            <input class="form-input" value="${esc(m.bg_mobile_url)}" onchange="updateMemberField(${m.id},'bg_mobile_url',this.value)" placeholder="name/name_background_mobile.png" />
+          </div>
+        </div>
+
+        ${memberListEditorHTML(m, 'genres', 'Genres')}
+        ${memberListEditorHTML(m, 'skills', 'Skills')}
+        ${memberListEditorHTML(m, 'experience', 'Experience')}
+
+        <div class="form-group">
+          <label class="form-label">Find Me (Social Links)</label>
+          <div id="socials-${m.id}">${socialsEditorHTML(m)}</div>
+          <div class="tag-input-row">
+            <input class="form-input" id="social-platform-${m.id}" placeholder="Platform (e.g. Instagram)" style="max-width:160px;" />
+            <input class="form-input" id="social-handle-${m.id}" placeholder="Handle (e.g. @name)" style="max-width:200px;" />
+            <input class="form-input" id="social-url-${m.id}" placeholder="https://..." />
+            <button class="btn btn-gold" onclick="addSocial(${m.id})">Add</button>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Position (1 = first card)</label>
+            <input class="form-input" type="number" min="1" value="${m.sort_order || 1}" onchange="updateMemberField(${m.id},'sort_order',parseInt(this.value)||1)" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Visible on Site</label>
+            <select class="form-select" onchange="updateMemberField(${m.id},'active',this.value === 'true')">
+              <option value="true" ${m.active !== false ? 'selected' : ''}>Yes — show on site</option>
+              <option value="false" ${m.active === false ? 'selected' : ''}>No — hidden</option>
+            </select>
+          </div>
+        </div>
+
         <div class="btn-row">
-          <button class="btn btn-gold" onclick="alert('Changes saved! Go to Export to download the updated file.')">Save Changes</button>
+          <button class="btn btn-gold" onclick="saveMember(${m.id}, this)">💾 Save to Live Site</button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function esc(str) {
+    return (str == null ? '' : String(str)).replace(/"/g, '&quot;');
+  }
+
+  function memberListEditorHTML(m, field, label) {
+    const items = Array.isArray(m[field]) ? m[field] : [];
+    return `
+      <div class="form-group">
+        <label class="form-label">${label}</label>
+        <div class="tags-container">
+          ${items.map((item, i) => `<div class="tag-pill">${item}<button class="tag-pill-del" onclick="removeMemberListItem(${m.id},'${field}',${i})">✕</button></div>`).join('') || '<span style="font-size:10px;color:rgba(255,255,255,0.3);">None yet</span>'}
+        </div>
+        <div class="tag-input-row">
+          <input class="form-input" id="new-${field}-${m.id}" placeholder="Add ${label.toLowerCase()}..." onkeydown="if(event.key==='Enter'){event.preventDefault();addMemberListItem(${m.id},'${field}');}" />
+          <button class="btn btn-gold" onclick="addMemberListItem(${m.id},'${field}')">Add</button>
         </div>
       </div>
     `;
   }
 
-  function updateMember(id, field, value) {
-    const m = data.members.find(x => x.id === id);
-    if (m) { m[field] = value; save(); }
+  function addMemberListItem(id, field) {
+    const input = document.getElementById(`new-${field}-${id}`);
+    const val = input.value.trim();
+    if (!val) return;
+    const m = members.find(x => x.id === id);
+    if (!Array.isArray(m[field])) m[field] = [];
+    m[field].push(val);
+    input.value = '';
+    renderMembers();
+  }
+
+  function removeMemberListItem(id, field, index) {
+    const m = members.find(x => x.id === id);
+    if (m && Array.isArray(m[field])) {
+      m[field].splice(index, 1);
+      renderMembers();
+    }
+  }
+
+  function socialsEditorHTML(m) {
+    const socials = Array.isArray(m.socials) ? m.socials : [];
+    if (!socials.length) return '<div style="font-size:10px;color:rgba(255,255,255,0.3);margin-bottom:8px;">No social links yet</div>';
+    return `<div class="tags-container">${socials.map((s, i) => `<div class="tag-pill">${s.platform || ''}: ${s.handle || s.url || ''}<button class="tag-pill-del" onclick="removeSocial(${m.id},${i})">✕</button></div>`).join('')}</div>`;
+  }
+
+  function addSocial(id) {
+    const platform = document.getElementById(`social-platform-${id}`).value.trim();
+    const handle = document.getElementById(`social-handle-${id}`).value.trim();
+    const url = document.getElementById(`social-url-${id}`).value.trim();
+    if (!url) { alert('Please add at least a URL for this social link.'); return; }
+    const m = members.find(x => x.id === id);
+    if (!Array.isArray(m.socials)) m.socials = [];
+    m.socials.push({ platform, handle, url });
+    renderMembers();
+  }
+
+  function removeSocial(id, index) {
+    const m = members.find(x => x.id === id);
+    if (m && Array.isArray(m.socials)) {
+      m.socials.splice(index, 1);
+      renderMembers();
+    }
+  }
+
+  function updateMemberField(id, field, value) {
+    const m = members.find(x => x.id === id);
+    if (m) m[field] = value;
+  }
+
+  async function addMember() {
+    const name = prompt('Stage name for the new member:');
+    if (!name || !name.trim()) return;
+
+    let slug = slugify(name);
+    if (!slug) { alert('Please use a name with at least one letter or number.'); return; }
+    if (members.some(m => m.slug === slug)) {
+      slug = slug + '-' + Math.floor(Math.random() * 1000);
+    }
+
+    setStatus('Creating member...');
+    const newMember = {
+      slug,
+      name: name.trim(),
+      realname: '',
+      role: '',
+      tagline: '',
+      about: '',
+      genres: [],
+      skills: [],
+      experience: [],
+      socials: [],
+      hero_photo_url: '',
+      name_logo_url: '',
+      bg_desktop_url: '',
+      bg_mobile_url: '',
+      sort_order: members.length + 1,
+      active: true
+    };
+    const result = await sbInsert('members', newMember);
+    if (result && result[0]) {
+      members.push(result[0]);
+      renderMembers();
+      setStatus(`Member "${name}" created ✓ — fill in details, then save`);
+    } else {
+      setStatus('Could not create member — check connection');
+    }
+  }
+
+  async function saveMember(id, btn) {
+    const m = members.find(x => x.id === id);
+    if (!m) return;
+
+    btn.disabled = true;
+    btn.style.background = 'rgba(255,255,255,0.15)';
+    btn.style.color = 'rgba(255,255,255,0.5)';
+    btn.textContent = 'Saving…';
+    setStatus('Saving...');
+
+    try {
+      await sbUpdate('members', id, {
+        name: m.name, realname: m.realname, role: m.role, tagline: m.tagline, about: m.about,
+        genres: m.genres, skills: m.skills, experience: m.experience, socials: m.socials,
+        hero_photo_url: m.hero_photo_url, name_logo_url: m.name_logo_url,
+        bg_desktop_url: m.bg_desktop_url, bg_mobile_url: m.bg_mobile_url,
+        sort_order: m.sort_order, active: m.active
+      });
+      btn.style.background = '#3a7d44';
+      btn.style.color = '#fff';
+      btn.textContent = '✓ Saved!';
+      setStatus('Saved to live site ✓ — visible immediately!');
+      setTimeout(() => {
+        btn.disabled = false;
+        btn.style.background = '';
+        btn.style.color = '';
+        btn.textContent = '💾 Save to Live Site';
+      }, 2000);
+    } catch (err) {
+      btn.style.background = '#8b2020';
+      btn.style.color = '#fff';
+      btn.textContent = '✗ Failed — try again';
+      setStatus('Save failed — check connection');
+      setTimeout(() => {
+        btn.disabled = false;
+        btn.style.background = '';
+        btn.style.color = '';
+        btn.textContent = '💾 Save to Live Site';
+      }, 2500);
+    }
+  }
+
+  async function deleteMember(id) {
+    const m = members.find(x => x.id === id);
+    if (!confirm(`Delete "${m ? m.name : 'this member'}" from the live site? This cannot be undone.`)) return;
+    await sbDelete('members', id);
+    members = members.filter(x => x.id !== id);
+    renderMembers();
+    setStatus('Member deleted ✓');
   }
 
   // ── RECAP PHOTOS (Supabase) ──
