@@ -1207,12 +1207,26 @@
 
         <div class="form-row">
           <div class="form-group">
-            <label class="form-label">Photo URL</label>
+            <label class="form-label">Photo</label>
             <input class="form-input" value="${esc(m.hero_photo_url)}" onchange="updateMemberField(${m.id},'hero_photo_url',this.value)" placeholder="images/name.png" />
+            <div class="btn-row" style="margin-top:8px;align-items:center;">
+              <label class="btn btn-outline" style="cursor:pointer;margin:0;">
+                📤 Upload Photo
+                <input type="file" accept="image/*" style="display:none" onchange="uploadMemberImage(${m.id},'hero_photo_url',this.files[0])" />
+              </label>
+              ${m.hero_photo_url ? `<img src="${cdnUrl(m.hero_photo_url,120)}" style="height:44px;border-radius:4px;object-fit:cover;" onerror="this.style.display='none'" />` : ''}
+            </div>
           </div>
           <div class="form-group">
-            <label class="form-label">Name Logo URL</label>
+            <label class="form-label">Name Logo</label>
             <input class="form-input" value="${esc(m.name_logo_url)}" onchange="updateMemberField(${m.id},'name_logo_url',this.value)" placeholder="name/name_font.png" />
+            <div class="btn-row" style="margin-top:8px;align-items:center;">
+              <label class="btn btn-outline" style="cursor:pointer;margin:0;">
+                📤 Upload Logo
+                <input type="file" accept="image/*" style="display:none" onchange="uploadMemberImage(${m.id},'name_logo_url',this.files[0])" />
+              </label>
+              ${m.name_logo_url ? `<img src="${cdnUrl(m.name_logo_url,120)}" style="height:44px;border-radius:4px;object-fit:cover;background:rgba(255,255,255,0.05);" onerror="this.style.display='none'" />` : ''}
+            </div>
           </div>
         </div>
 
@@ -1220,10 +1234,24 @@
           <div class="form-group">
             <label class="form-label">Background (Desktop)</label>
             <input class="form-input" value="${esc(m.bg_desktop_url)}" onchange="updateMemberField(${m.id},'bg_desktop_url',this.value)" placeholder="name/name_background.png" />
+            <div class="btn-row" style="margin-top:8px;align-items:center;">
+              <label class="btn btn-outline" style="cursor:pointer;margin:0;">
+                📤 Upload Background
+                <input type="file" accept="image/*" style="display:none" onchange="uploadMemberImage(${m.id},'bg_desktop_url',this.files[0])" />
+              </label>
+              ${m.bg_desktop_url ? `<img src="${cdnUrl(m.bg_desktop_url,120)}" style="height:44px;border-radius:4px;object-fit:cover;" onerror="this.style.display='none'" />` : ''}
+            </div>
           </div>
           <div class="form-group">
             <label class="form-label">Background (Mobile)</label>
             <input class="form-input" value="${esc(m.bg_mobile_url)}" onchange="updateMemberField(${m.id},'bg_mobile_url',this.value)" placeholder="name/name_background_mobile.png" />
+            <div class="btn-row" style="margin-top:8px;align-items:center;">
+              <label class="btn btn-outline" style="cursor:pointer;margin:0;">
+                📤 Upload Background
+                <input type="file" accept="image/*" style="display:none" onchange="uploadMemberImage(${m.id},'bg_mobile_url',this.files[0])" />
+              </label>
+              ${m.bg_mobile_url ? `<img src="${cdnUrl(m.bg_mobile_url,120)}" style="height:44px;border-radius:4px;object-fit:cover;" onerror="this.style.display='none'" />` : ''}
+            </div>
           </div>
         </div>
 
@@ -1420,6 +1448,33 @@
     members = members.filter(x => x.id !== id);
     renderMembers();
     setStatus('Member deleted ✓');
+  }
+
+  // Uploads a member's photo/logo/background straight to Cloudinary (same
+  // account already used for Recap Photos), then fills in the field with the
+  // resulting URL automatically — no need to know file paths or use GitHub.
+  async function uploadMemberImage(id, field, file) {
+    if (!file) return;
+    setStatus('Uploading image...');
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+    try {
+      const uploadRes = await fetch(
+        `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,
+        { method: 'POST', body: formData }
+      );
+      const result = await uploadRes.json();
+      if (result.secure_url) {
+        updateMemberField(id, field, result.secure_url);
+        renderMembers();
+        setStatus('Image uploaded ✓ — click Save to Live Site to publish it');
+      } else {
+        setStatus('Upload failed — please try again');
+      }
+    } catch (err) {
+      setStatus('Upload failed — check connection');
+    }
   }
 
   // ── RECAP PHOTOS (Supabase) ──
