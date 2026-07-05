@@ -1497,7 +1497,7 @@
     </div>
     <div class="hero-rule"><div class="hero-rule-diamond"></div></div>
     <div class="hero-tagline">Your Gunslinger</div>
-    <div class="hero-location">Est. — Six Gunslingers · One Sound</div>
+    <div class="hero-location">Est. — <span id="hero-gunslinger-count">Six</span> Gunslingers · One Sound</div>
   </header>
 
   <!-- UPCOMING EVENTS -->
@@ -1773,10 +1773,13 @@
         const membersList = await res.json();
         const grid = document.getElementById('member-grid');
 
-        // Keep the "Gunslingers" stat in the About section in sync with
-        // however many members are actually active, instead of a fixed number.
+        // Keep the "Gunslingers" stat in the About section, and the hero
+        // banner's "Est. — X Gunslingers" line, in sync with however many
+        // members are actually active, instead of a fixed number.
         const countEl = document.getElementById('gunslinger-count');
         if (countEl) countEl.textContent = Array.isArray(membersList) ? membersList.length : 0;
+        const heroCountEl = document.getElementById('hero-gunslinger-count');
+        if (heroCountEl) heroCountEl.textContent = Array.isArray(membersList) ? membersList.length : 0;
 
         if (!Array.isArray(membersList) || !membersList.length) {
           grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;font-size:10px;letter-spacing:3px;color:rgba(255,255,255,0.3);">NO MEMBERS YET</div>';
