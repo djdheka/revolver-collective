@@ -1592,7 +1592,7 @@
       </p>
       <div class="about-stats">
         <div class="about-stat-reveal reveal">
-          <div class="about-stat-number">6</div>
+          <div class="about-stat-number" id="gunslinger-count">6</div>
           <div class="about-stat-label">Gunslingers</div>
         </div>
         <div class="about-stat-reveal reveal">
@@ -1772,6 +1772,11 @@
         });
         const membersList = await res.json();
         const grid = document.getElementById('member-grid');
+
+        // Keep the "Gunslingers" stat in the About section in sync with
+        // however many members are actually active, instead of a fixed number.
+        const countEl = document.getElementById('gunslinger-count');
+        if (countEl) countEl.textContent = Array.isArray(membersList) ? membersList.length : 0;
 
         if (!Array.isArray(membersList) || !membersList.length) {
           grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;font-size:10px;letter-spacing:3px;color:rgba(255,255,255,0.3);">NO MEMBERS YET</div>';
