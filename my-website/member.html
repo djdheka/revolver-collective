@@ -49,8 +49,12 @@
       pointer-events: none;
       background-size: cover;
       background-position: center top;
-      opacity: 0.9;
+      opacity: 0;
+      transition: opacity 0.7s ease;
     }
+    .hero-collage.loaded { opacity: 0.9; }
+    .hero-photo { opacity: 0; }
+    .hero-photo.loaded { opacity: 1; }
 
     /* Scratch lines */
     body::after {
@@ -116,7 +120,7 @@
       object-fit: contain;
       object-position: top center;
       filter: drop-shadow(0 0 0px rgba(255,215,0,0));
-      transition: transform 0.5s ease, filter 0.5s ease;
+      transition: transform 0.5s ease, filter 0.5s ease, opacity 0.6s ease;
     }
 
     .photo-hover-zone:hover ~ .hero-photo,
@@ -893,6 +897,20 @@
       if (bg) document.getElementById('hero-collage').style.backgroundImage = `url('${bg}')`;
     }
 
+    // Preloads an image URL and resolves once it's actually ready to paint
+    // (or immediately if there's no URL / it fails) — used so the hero photo
+    // and background always appear together instead of whichever downloads
+    // first popping in ahead of the other.
+    function preloadImage(url) {
+      return new Promise((resolve) => {
+        if (!url) { resolve(); return; }
+        const img = new Image();
+        img.onload = () => resolve();
+        img.onerror = () => resolve();
+        img.src = url;
+      });
+    }
+
     async function loadMember() {
       const params = new URLSearchParams(window.location.search);
       const slug = params.get('m');
@@ -923,11 +941,30 @@
         currentMember = rows[0];
         renderMember(currentMember, allActive.length);
 
+        // Figure out which background to use (desktop/mobile), then preload
+        // both the photo and background fully before showing anything, so
+        // they appear together instead of staggered.
+        const isMobile = window.matchMedia('(max-width: 768px)').matches;
+        const bgUrl = (isMobile && currentMember.bg_mobile_url) ? currentMember.bg_mobile_url : currentMember.bg_desktop_url;
+        const photoUrl = currentMember.hero_photo_url;
+
+        await Promise.all([preloadImage(photoUrl), preloadImage(bgUrl)]);
+
+        const photoEl = document.getElementById('hero-photo');
+        const collageEl = document.getElementById('hero-collage');
+        photoEl.src = photoUrl || '';
+        if (bgUrl) collageEl.style.backgroundImage = `url('${bgUrl}')`;
+
         loading.style.display = 'none';
         document.getElementById('member-root').style.display = '';
 
-        // Kick off entrance + reveal animations now that content exists
-        requestAnimationFrame(initAnimations);
+        // Reveal photo + background together on the next frame, then start
+        // the rest of the entrance animations
+        requestAnimationFrame(() => {
+          photoEl.classList.add('loaded');
+          collageEl.classList.add('loaded');
+          initAnimations();
+        });
       } catch (err) {
         loading.textContent = 'Could not load member — please try again.';
       }
@@ -936,9 +973,7 @@
     function renderMember(m, totalActive) {
       document.getElementById('page-title').textContent = `${m.name} – Revolver Collective`;
 
-      document.getElementById('hero-photo').src = m.hero_photo_url || '';
       document.getElementById('hero-photo').alt = m.name || '';
-      setBackground();
 
       const posLabel = (m.sort_order && totalActive) ? `${String(m.sort_order).padStart(2,'0')} / ${String(totalActive).padStart(2,'0')} \u00A0\u00B7\u00A0 Revolver Collective` : 'Revolver Collective';
       document.getElementById('hero-collective').textContent = posLabel;
