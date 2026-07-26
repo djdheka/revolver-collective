@@ -232,6 +232,53 @@
       max-width: 480px;
     }
 
+    /* flyer thumbnail */
+    .event-flyer-wrap { margin-top: 4px; }
+    .event-flyer {
+      display: block;
+      max-height: 220px;
+      max-width: 260px;
+      width: auto;
+      border: 1px solid rgba(201,168,76,0.25);
+      border-radius: 2px;
+      cursor: pointer;
+      transition: border-color 0.3s, opacity 0.3s;
+    }
+    .event-flyer:hover { border-color: var(--gold); opacity: 0.9; }
+
+    /* flyer lightbox */
+    .flyer-lightbox {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 20000;
+      background: rgba(0,0,0,0.9);
+      align-items: center;
+      justify-content: center;
+      padding: 40px;
+      cursor: zoom-out;
+    }
+    .flyer-lightbox.active { display: flex; }
+    .flyer-lightbox img {
+      max-width: 100%;
+      max-height: 100%;
+      border: 1px solid rgba(201,168,76,0.3);
+    }
+    .flyer-lightbox-close {
+      position: absolute;
+      top: 24px; right: 32px;
+      font-size: 12px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--white);
+      cursor: pointer;
+    }
+    .flyer-lightbox-close:hover { color: var(--gold); }
+
+    @media (max-width: 800px) {
+      .event-flyer { max-width: 100%; max-height: 320px; }
+    }
+
     /* venue + map */
     .event-venue-row {
       display: flex;
@@ -623,6 +670,11 @@
     <div style="text-align:center;padding:60px;font-size:10px;letter-spacing:3px;color:rgba(255,255,255,0.3);">LOADING EVENTS...</div>
   </div>
 
+  <div class="flyer-lightbox" id="flyer-lightbox" onclick="closeFlyerLightbox()">
+    <div class="flyer-lightbox-close">✕ Close</div>
+    <img id="flyer-lightbox-img" src="" alt="Event flyer" />
+  </div>
+
   <footer>
     © 2026 Revolver Collective &nbsp;·&nbsp; Yogyakarta, Indonesia
   </footer>
@@ -630,6 +682,24 @@
   <script>
     const SUPABASE_URL = 'https://bglpsruvpscbupltihzs.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJnbHBzcnV2cHNjYnVwbHRpaHpzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE1MzkzMjgsImV4cCI6MjA5NzExNTMyOH0.C2d3XtZdE2XSoSKVIDnJU1OQng5tuv_e9Ld8i3vM53E';
+
+    // Inserts Cloudinary transforms: f_auto,q_auto for format/quality, plus a width
+    // cap so the full-resolution flyer isn't sent to a small preview thumb.
+    function cdnUrl(url, width) {
+      if (url && url.includes('res.cloudinary.com') && url.includes('/upload/')) {
+        const transform = width ? `f_auto,q_auto,c_limit,w_${width}` : 'f_auto,q_auto';
+        return url.replace('/upload/', `/upload/${transform}/`);
+      }
+      return url;
+    }
+
+    function openFlyerLightbox(url) {
+      document.getElementById('flyer-lightbox-img').src = url;
+      document.getElementById('flyer-lightbox').classList.add('active');
+    }
+    function closeFlyerLightbox() {
+      document.getElementById('flyer-lightbox').classList.remove('active');
+    }
 
     const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
     const MEMBERS_IMAGES = { Dheka: 'images/dheka.png', DUVM: 'images/duvm.png', Rellion: 'images/rellion.png', Divent: 'images/divent.png', Ravenz: 'images/ravenz.png', Wizzkey: 'images/wizzkey.png' };
@@ -695,6 +765,10 @@
             </div>
             <div class="event-info-panel">
               <div class="event-name">${ev.name}</div>
+              ${ev.flyer_url ? `
+              <div class="event-flyer-wrap">
+                <img class="event-flyer" src="${cdnUrl(ev.flyer_url, 600)}" alt="${ev.name} flyer" loading="lazy" onclick="openFlyerLightbox('${cdnUrl(ev.flyer_url, 1400)}')" />
+              </div>` : ''}
               <div class="event-desc">${ev.description || ''}</div>
               <div class="event-venue-row">
                 <div class="event-venue-info">

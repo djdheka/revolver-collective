@@ -773,6 +773,18 @@
           </div>
         </div>
         <div class="form-group">
+          <label class="form-label">Flyer (optional)</label>
+          <div class="location-status" style="margin-top:0;margin-bottom:8px;">Shown on the live Upcoming Events page and included in the Archive PDF once the event is over</div>
+          <div class="btn-row" style="align-items:center;">
+            <label class="btn btn-outline" style="cursor:pointer;margin:0;">
+              📤 ${ev.flyer_url ? 'Replace Flyer' : 'Upload Flyer'}
+              <input type="file" accept="image/*" style="display:none" onchange="uploadEventFlyer(${ev.id},this.files[0])" />
+            </label>
+            ${ev.flyer_url ? `<button class="btn" style="background:rgba(255,80,80,0.15);color:#f55;border:1px solid rgba(255,80,80,0.3)" onclick="removeEventFlyer(${ev.id})">✕ Remove Flyer</button>` : ''}
+            ${ev.flyer_url ? `<img src="${cdnUrl(ev.flyer_url,140)}" style="height:80px;border-radius:4px;object-fit:cover;" onerror="this.style.display='none'" />` : ''}
+          </div>
+        </div>
+        <div class="form-group">
           <label class="form-label">Description</label>
           <textarea class="form-textarea" onchange="updateEvent(${ev.id},'description',this.value)">${ev.description||''}</textarea>
         </div>
@@ -836,7 +848,10 @@
     }
     list.innerHTML = pastEvents.map(ev => `
       <div class="card">
-        <div class="card-title">${ev.name || 'Untitled Event'}</div>
+        <div class="card-title" style="display:flex;align-items:center;gap:10px;">
+          ${ev.flyer_url ? `<img src="${cdnUrl(ev.flyer_url,100)}" style="height:36px;width:36px;border-radius:4px;object-fit:cover;" onerror="this.style.display='none'" />` : ''}
+          <span>${ev.name || 'Untitled Event'}</span>
+        </div>
         <div style="font-size:11px;letter-spacing:1px;color:rgba(255,255,255,0.5);line-height:1.8;margin-bottom:14px;">
           ${formatEventDate(ev.date)}<br/>
           ${ev.venue || ''}${ev.venue && ev.city ? ', ' : ''}${ev.city || ''}<br/>
@@ -849,17 +864,46 @@
     `).join('');
   }
 
-  function downloadArchivePDF(target) {
+  // Always requests the flyer as a plain JPEG (regardless of the format it was
+  // originally uploaded as) so jsPDF's addImage can embed it reliably — some
+  // browsers upload HEIC/WEBP which jsPDF can't read directly.
+  function pdfFlyerUrl(url) {
+    if (url && url.includes('res.cloudinary.com') && url.includes('/upload/')) {
+      return url.replace('/upload/', '/upload/f_jpg,q_auto,c_limit,w_1000/');
+    }
+    return url;
+  }
+
+  async function loadImageAsDataURL(url) {
+    try {
+      const res = await fetch(url);
+      if (!res.ok) return null;
+      const blob = await res.blob();
+      return await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      });
+    } catch (err) {
+      console.error('Flyer load failed for PDF:', err);
+      return null;
+    }
+  }
+
+  async function downloadArchivePDF(target) {
     const { jsPDF } = window.jspdf;
     const events = target === 'all' ? getPastEvents() : getPastEvents().filter(e => String(e.id) === String(target));
     if (!events.length) { setStatus('No past events to export'); return; }
+    setStatus('Preparing PDF...');
 
     const doc = new jsPDF({ unit: 'pt', format: 'a4' });
     const pageWidth = doc.internal.pageSize.getWidth();
     const marginX = 56;
     let y = 70;
 
-    events.forEach((ev, idx) => {
+    for (let idx = 0; idx < events.length; idx++) {
+      const ev = events[idx];
       if (idx > 0) {
         doc.addPage();
         y = 70;
@@ -885,6 +929,25 @@
       doc.setFontSize(22);
       doc.text(ev.name || 'Untitled Event', marginX, y);
       y += 34;
+
+      if (ev.flyer_url) {
+        const dataUrl = await loadImageAsDataURL(pdfFlyerUrl(ev.flyer_url));
+        if (dataUrl) {
+          try {
+            const props = doc.getImageProperties(dataUrl);
+            const maxW = pageWidth - marginX * 2;
+            const maxH = 260;
+            let w = maxW;
+            let h = (props.height / props.width) * w;
+            if (h > maxH) { h = maxH; w = (props.width / props.height) * h; }
+            const imgX = marginX + (maxW - w) / 2;
+            doc.addImage(dataUrl, 'JPEG', imgX, y, w, h);
+            y += h + 24;
+          } catch (err) {
+            console.error('Could not embed flyer in PDF:', err);
+          }
+        }
+      }
 
       const fields = [
         ['Date', formatEventDate(ev.date)],
@@ -915,7 +978,7 @@
         const descLines = doc.splitTextToSize(ev.description, pageWidth - marginX * 2);
         doc.text(descLines, marginX, y);
       }
-    });
+    }
 
     const filename = target === 'all'
       ? `revolver-collective-archive-${new Date().toISOString().slice(0,10)}.pdf`
@@ -926,7 +989,7 @@
 
   async function addEvent() {
     setStatus('Creating event...');
-    const newEv = { name: 'New Event', date: '', time: '21:00', venue: '', city: 'Yogyakarta', tag: 'Club Night', entry: 'Free Entry', description: '', lineup: [] };
+    const newEv = { name: 'New Event', date: '', time: '21:00', venue: '', city: 'Yogyakarta', tag: 'Club Night', entry: 'Free Entry', description: '', lineup: [], flyer_url: null };
     const result = await sbInsert('events', newEv);
     if (result && result[0]) {
       data.events.push(result[0]);
@@ -1093,7 +1156,8 @@
         name: ev.name, date: ev.date, time: ev.time,
         venue: ev.venue, city: ev.city, tag: ev.tag,
         entry: ev.entry, description: ev.description, lineup: ev.lineup,
-        lat: ev.lat || null, lng: ev.lng || null
+        lat: ev.lat || null, lng: ev.lng || null,
+        flyer_url: ev.flyer_url || null
       });
       renderArchive();
       btn.style.background = '#3a7d44';
@@ -1479,6 +1543,51 @@
     } catch (err) {
       setStatus('Upload failed — check connection');
     }
+  }
+
+  // Uploads an event flyer straight to Cloudinary (same account as member
+  // photos and recap galleries), saves the URL onto the event locally, then
+  // pushes it to the live site right away — no separate "Save" click needed,
+  // since a flyer is optional and shouldn't be lost if forgotten.
+  async function uploadEventFlyer(id, file) {
+    if (!file) return;
+    const ev = data.events.find(e => e.id === id);
+    if (!ev) return;
+    setStatus('Uploading flyer...');
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+    try {
+      const uploadRes = await fetch(
+        `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,
+        { method: 'POST', body: formData }
+      );
+      const result = await uploadRes.json();
+      if (result.secure_url) {
+        ev.flyer_url = result.secure_url;
+        save();
+        await sbUpdate('events', id, { flyer_url: result.secure_url });
+        renderEvents();
+        renderArchive();
+        setStatus('Flyer uploaded and saved to live site ✓');
+      } else {
+        setStatus('Flyer upload failed — please try again');
+      }
+    } catch (err) {
+      setStatus('Flyer upload failed — check connection');
+    }
+  }
+
+  async function removeEventFlyer(id) {
+    const ev = data.events.find(e => e.id === id);
+    if (!ev) return;
+    if (!confirm('Remove this flyer from the live site?')) return;
+    ev.flyer_url = null;
+    save();
+    await sbUpdate('events', id, { flyer_url: null });
+    renderEvents();
+    renderArchive();
+    setStatus('Flyer removed ✓');
   }
 
   // ── RECAP PHOTOS (Supabase) ──
