@@ -144,6 +144,8 @@
     .event-block {
       display: grid;
       grid-template-columns: 260px 1fr;
+      grid-template-rows: auto 1fr;
+      grid-template-areas: "date info" "flyer info";
       gap: 0;
       border: 1px solid var(--gold);
       position: relative;
@@ -157,10 +159,12 @@
       top: 0; left: 0; right: 0;
       height: 2px;
       background: linear-gradient(to right, transparent, var(--gold), transparent);
+      z-index: 1;
     }
 
     /* LEFT: date panel */
     .event-date-panel {
+      grid-area: date;
       background: rgba(201,168,76,0.04);
       border-right: 1px solid rgba(201,168,76,0.15);
       padding: 40px 32px;
@@ -210,6 +214,7 @@
 
     /* RIGHT: info panel */
     .event-info-panel {
+      grid-area: info;
       padding: 40px 40px 40px 40px;
       display: flex;
       flex-direction: column;
@@ -232,13 +237,21 @@
       max-width: 480px;
     }
 
-    /* flyer thumbnail */
-    .event-flyer-wrap { margin-top: 4px; }
+    /* flyer thumbnail — sits directly under the date panel on desktop */
+    .event-flyer-wrap {
+      grid-area: flyer;
+      background: rgba(201,168,76,0.04);
+      border-right: 1px solid rgba(201,168,76,0.15);
+      border-top: 1px solid rgba(201,168,76,0.1);
+      padding: 24px 32px 32px;
+      display: flex;
+      justify-content: center;
+    }
     .event-flyer {
       display: block;
-      max-height: 220px;
+      width: 100%;
+      height: auto;
       max-width: 260px;
-      width: auto;
       border: 1px solid rgba(201,168,76,0.25);
       border-radius: 2px;
       cursor: pointer;
@@ -276,7 +289,8 @@
     .flyer-lightbox-close:hover { color: var(--gold); }
 
     @media (max-width: 800px) {
-      .event-flyer { max-width: 100%; max-height: 320px; }
+      .event-flyer { max-width: 100%; }
+      .event-flyer-wrap { border-right: none; }
     }
 
     /* venue + map */
@@ -457,7 +471,11 @@
     .hamburger.open span:nth-child(3) { transform: rotate(-45deg) translate(5px, -5px); }
 
     @media (max-width: 800px) {
-      .event-block { grid-template-columns: 1fr; }
+      .event-block {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto auto auto;
+        grid-template-areas: "date" "flyer" "info";
+      }
       .event-date-panel { border-right: none; border-bottom: 1px solid rgba(201,168,76,0.15); }
       .event-date-panel > div {
         display: grid;
@@ -763,12 +781,12 @@
                 <span class="event-tag">${ev.tag || ''}</span>
               </div>
             </div>
+            ${ev.flyer_url ? `
+            <div class="event-flyer-wrap">
+              <img class="event-flyer" src="${cdnUrl(ev.flyer_url, 600)}" alt="${ev.name} flyer" loading="lazy" onclick="openFlyerLightbox('${cdnUrl(ev.flyer_url, 1400)}')" />
+            </div>` : ''}
             <div class="event-info-panel">
               <div class="event-name">${ev.name}</div>
-              ${ev.flyer_url ? `
-              <div class="event-flyer-wrap">
-                <img class="event-flyer" src="${cdnUrl(ev.flyer_url, 600)}" alt="${ev.name} flyer" loading="lazy" onclick="openFlyerLightbox('${cdnUrl(ev.flyer_url, 1400)}')" />
-              </div>` : ''}
               <div class="event-desc">${ev.description || ''}</div>
               <div class="event-venue-row">
                 <div class="event-venue-info">
