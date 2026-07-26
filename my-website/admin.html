@@ -542,11 +542,21 @@
   }
   async function sbInsert(table, obj) {
     const r = await fetch(`${SUPABASE_URL}/rest/v1/${table}`, { method: 'POST', headers: sbHeaders(), body: JSON.stringify(obj) });
-    return r.json();
+    const json = await r.json();
+    if (!r.ok) {
+      const msg = (json && json.message) ? json.message : `Request failed (${r.status})`;
+      throw new Error(msg);
+    }
+    return json;
   }
   async function sbUpdate(table, id, obj) {
     const r = await fetch(`${SUPABASE_URL}/rest/v1/${table}?id=eq.${id}`, { method: 'PATCH', headers: sbHeaders(), body: JSON.stringify(obj) });
-    return r.json();
+    const json = await r.json();
+    if (!r.ok) {
+      const msg = (json && json.message) ? json.message : `Request failed (${r.status})`;
+      throw new Error(msg);
+    }
+    return json;
   }
   async function sbDelete(table, id) {
     await fetch(`${SUPABASE_URL}/rest/v1/${table}?id=eq.${id}`, { method: 'DELETE', headers: sbHeaders() });
@@ -990,13 +1000,19 @@
   async function addEvent() {
     setStatus('Creating event...');
     const newEv = { name: 'New Event', date: '', time: '21:00', venue: '', city: 'Yogyakarta', tag: 'Club Night', entry: 'Free Entry', description: '', lineup: [], flyer_url: null };
-    const result = await sbInsert('events', newEv);
-    if (result && result[0]) {
-      data.events.push(result[0]);
-      renderEvents();
-      renderArchive();
-      setStatus('Event created ✓');
-      showToast('New event added!');
+    try {
+      const result = await sbInsert('events', newEv);
+      if (result && result[0]) {
+        data.events.push(result[0]);
+        renderEvents();
+        renderArchive();
+        setStatus('Event created ✓');
+        showToast('New event added!');
+      } else {
+        setStatus('Could not create event — please try again');
+      }
+    } catch (err) {
+      setStatus('Could not create event: ' + err.message);
     }
   }
 
@@ -1582,12 +1598,20 @@
     const ev = data.events.find(e => e.id === id);
     if (!ev) return;
     if (!confirm('Remove this flyer from the live site?')) return;
+    const previousUrl = ev.flyer_url;
     ev.flyer_url = null;
     save();
-    await sbUpdate('events', id, { flyer_url: null });
-    renderEvents();
-    renderArchive();
-    setStatus('Flyer removed ✓');
+    try {
+      await sbUpdate('events', id, { flyer_url: null });
+      renderEvents();
+      renderArchive();
+      setStatus('Flyer removed ✓');
+    } catch (err) {
+      ev.flyer_url = previousUrl;
+      save();
+      renderEvents();
+      setStatus('Could not remove flyer: ' + err.message);
+    }
   }
 
   // ── RECAP PHOTOS (Supabase) ──
