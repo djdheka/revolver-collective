@@ -523,21 +523,9 @@
   // Real Supabase Auth client. Used for login + to track the current session's
   // access token, which is what makes RLS treat this admin panel as "authenticated"
   // rather than just an anonymous visitor.
-  let sb = null;
-  try {
-    if (typeof supabase === 'undefined') throw new Error('Supabase library did not load');
-    sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-  } catch (err) {
-    document.addEventListener('DOMContentLoaded', () => {
-      const errorEl = document.getElementById('login-error');
-      if (errorEl) {
-        errorEl.textContent = 'Could not load the login system — check your internet connection and refresh the page';
-        errorEl.style.display = 'block';
-      }
-    });
-  }
+  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
   let currentSession = null;
-  if (sb) sb.auth.onAuthStateChange((_event, session) => { currentSession = session; });
+  sb.auth.onAuthStateChange((_event, session) => { currentSession = session; });
 
   function sbHeaders() {
     return {
@@ -585,14 +573,9 @@
 
   // ── AUTH (Supabase) ──
   async function login() {
-    const errorEl = document.getElementById('login-error');
-    if (!sb) {
-      errorEl.textContent = 'Login system did not load — check your connection and refresh the page';
-      errorEl.style.display = 'block';
-      return;
-    }
     const email = document.getElementById('email-input').value.trim();
     const pw = document.getElementById('pw-input').value;
+    const errorEl = document.getElementById('login-error');
     errorEl.style.display = 'none';
     if (!email || !pw) {
       errorEl.textContent = 'Please enter both email and password';
@@ -662,20 +645,15 @@
   // a fresh invite/recovery link → set-password screen; a normal returning
   // visit → straight into the admin panel without asking to log in again.
   (async () => {
-    if (!sb) return;
-    try {
-      const { data: { session } } = await sb.auth.getSession();
-      if (session) {
-        currentSession = session;
-        if (arrivedViaInviteOrRecovery) {
-          showSetPasswordScreen();
-        } else {
-          showAdminScreen();
-          init();
-        }
+    const { data: { session } } = await sb.auth.getSession();
+    if (session) {
+      currentSession = session;
+      if (arrivedViaInviteOrRecovery) {
+        showSetPasswordScreen();
+      } else {
+        showAdminScreen();
+        init();
       }
-    } catch (err) {
-      console.error('Session check failed:', err);
     }
   })();
 
