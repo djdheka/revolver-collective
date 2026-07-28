@@ -542,21 +542,11 @@
   }
   async function sbInsert(table, obj) {
     const r = await fetch(`${SUPABASE_URL}/rest/v1/${table}`, { method: 'POST', headers: sbHeaders(), body: JSON.stringify(obj) });
-    const json = await r.json();
-    if (!r.ok) {
-      const msg = (json && json.message) ? json.message : `Request failed (${r.status})`;
-      throw new Error(msg);
-    }
-    return json;
+    return r.json();
   }
   async function sbUpdate(table, id, obj) {
     const r = await fetch(`${SUPABASE_URL}/rest/v1/${table}?id=eq.${id}`, { method: 'PATCH', headers: sbHeaders(), body: JSON.stringify(obj) });
-    const json = await r.json();
-    if (!r.ok) {
-      const msg = (json && json.message) ? json.message : `Request failed (${r.status})`;
-      throw new Error(msg);
-    }
-    return json;
+    return r.json();
   }
   async function sbDelete(table, id) {
     await fetch(`${SUPABASE_URL}/rest/v1/${table}?id=eq.${id}`, { method: 'DELETE', headers: sbHeaders() });
@@ -585,16 +575,27 @@
   async function login() {
     const email = document.getElementById('email-input').value.trim();
     const pw = document.getElementById('pw-input').value;
-    const { data: authData, error } = await sb.auth.signInWithPassword({ email, password: pw });
-    if (error) {
-      document.getElementById('login-error').textContent = 'Incorrect email or password';
-      document.getElementById('login-error').style.display = 'block';
+    const errorEl = document.getElementById('login-error');
+    errorEl.style.display = 'none';
+    if (!email || !pw) {
+      errorEl.textContent = 'Please enter both email and password';
+      errorEl.style.display = 'block';
       return;
     }
-    currentSession = authData.session;
-    document.getElementById('login-error').style.display = 'none';
-    showAdminScreen();
-    init();
+    try {
+      const { data: authData, error } = await sb.auth.signInWithPassword({ email, password: pw });
+      if (error) {
+        errorEl.textContent = error.message || 'Incorrect email or password';
+        errorEl.style.display = 'block';
+        return;
+      }
+      currentSession = authData.session;
+      showAdminScreen();
+      init();
+    } catch (err) {
+      errorEl.textContent = 'Login failed: ' + (err.message || 'check your connection and try again');
+      errorEl.style.display = 'block';
+    }
   }
 
   async function logout() {
@@ -783,18 +784,6 @@
           </div>
         </div>
         <div class="form-group">
-          <label class="form-label">Flyer (optional)</label>
-          <div class="location-status" style="margin-top:0;margin-bottom:8px;">Shown on the live Upcoming Events page and included in the Archive PDF once the event is over</div>
-          <div class="btn-row" style="align-items:center;">
-            <label class="btn btn-outline" style="cursor:pointer;margin:0;">
-              📤 ${ev.flyer_url ? 'Replace Flyer' : 'Upload Flyer'}
-              <input type="file" accept="image/*" style="display:none" onchange="uploadEventFlyer(${ev.id},this.files[0])" />
-            </label>
-            ${ev.flyer_url ? `<button class="btn" style="background:rgba(255,80,80,0.15);color:#f55;border:1px solid rgba(255,80,80,0.3)" onclick="removeEventFlyer(${ev.id})">✕ Remove Flyer</button>` : ''}
-            ${ev.flyer_url ? `<img src="${cdnUrl(ev.flyer_url,140)}" style="height:80px;border-radius:4px;object-fit:cover;" onerror="this.style.display='none'" />` : ''}
-          </div>
-        </div>
-        <div class="form-group">
           <label class="form-label">Description</label>
           <textarea class="form-textarea" onchange="updateEvent(${ev.id},'description',this.value)">${ev.description||''}</textarea>
         </div>
@@ -808,6 +797,18 @@
               ${MEMBERS.map(m => `<option value="${m}">${m}</option>`).join('')}
             </select>
             <button class="btn btn-gold" onclick="addLineup(${ev.id})">Add</button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Flyer (optional)</label>
+          <div class="location-status" style="margin-top:0;margin-bottom:8px;">Shown on the live Upcoming Events page and included in the Archive PDF once the event is over</div>
+          <div class="btn-row" style="align-items:center;">
+            <label class="btn btn-outline" style="cursor:pointer;margin:0;">
+              📤 ${ev.flyer_url ? 'Replace Flyer' : 'Upload Flyer'}
+              <input type="file" accept="image/*" style="display:none" onchange="uploadEventFlyer(${ev.id},this.files[0])" />
+            </label>
+            ${ev.flyer_url ? `<button class="btn" style="background:rgba(255,80,80,0.15);color:#f55;border:1px solid rgba(255,80,80,0.3)" onclick="removeEventFlyer(${ev.id})">✕ Remove Flyer</button>` : ''}
+            ${ev.flyer_url ? `<img src="${cdnUrl(ev.flyer_url,140)}" style="height:80px;border-radius:4px;object-fit:cover;" onerror="this.style.display='none'" />` : ''}
           </div>
         </div>
         <div class="btn-row">
@@ -1000,19 +1001,13 @@
   async function addEvent() {
     setStatus('Creating event...');
     const newEv = { name: 'New Event', date: '', time: '21:00', venue: '', city: 'Yogyakarta', tag: 'Club Night', entry: 'Free Entry', description: '', lineup: [], flyer_url: null };
-    try {
-      const result = await sbInsert('events', newEv);
-      if (result && result[0]) {
-        data.events.push(result[0]);
-        renderEvents();
-        renderArchive();
-        setStatus('Event created ✓');
-        showToast('New event added!');
-      } else {
-        setStatus('Could not create event — please try again');
-      }
-    } catch (err) {
-      setStatus('Could not create event: ' + err.message);
+    const result = await sbInsert('events', newEv);
+    if (result && result[0]) {
+      data.events.push(result[0]);
+      renderEvents();
+      renderArchive();
+      setStatus('Event created ✓');
+      showToast('New event added!');
     }
   }
 
@@ -1598,20 +1593,12 @@
     const ev = data.events.find(e => e.id === id);
     if (!ev) return;
     if (!confirm('Remove this flyer from the live site?')) return;
-    const previousUrl = ev.flyer_url;
     ev.flyer_url = null;
     save();
-    try {
-      await sbUpdate('events', id, { flyer_url: null });
-      renderEvents();
-      renderArchive();
-      setStatus('Flyer removed ✓');
-    } catch (err) {
-      ev.flyer_url = previousUrl;
-      save();
-      renderEvents();
-      setStatus('Could not remove flyer: ' + err.message);
-    }
+    await sbUpdate('events', id, { flyer_url: null });
+    renderEvents();
+    renderArchive();
+    setStatus('Flyer removed ✓');
   }
 
   // ── RECAP PHOTOS (Supabase) ──
