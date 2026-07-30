@@ -523,9 +523,21 @@
   // Real Supabase Auth client. Used for login + to track the current session's
   // access token, which is what makes RLS treat this admin panel as "authenticated"
   // rather than just an anonymous visitor.
-  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  let sb = null;
+  try {
+    if (typeof supabase === 'undefined') throw new Error('Supabase library did not load');
+    sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  } catch (err) {
+    document.addEventListener('DOMContentLoaded', () => {
+      const errorEl = document.getElementById('login-error');
+      if (errorEl) {
+        errorEl.textContent = 'Could not load the login system — check your internet connection and refresh the page';
+        errorEl.style.display = 'block';
+      }
+    });
+  }
   let currentSession = null;
-  sb.auth.onAuthStateChange((_event, session) => { currentSession = session; });
+  if (sb) sb.auth.onAuthStateChange((_event, session) => { currentSession = session; });
 
   function sbHeaders() {
     return {
@@ -573,9 +585,14 @@
 
   // ── AUTH (Supabase) ──
   async function login() {
+    const errorEl = document.getElementById('login-error');
+    if (!sb) {
+      errorEl.textContent = 'Login system did not load — check your connection and refresh the page';
+      errorEl.style.display = 'block';
+      return;
+    }
     const email = document.getElementById('email-input').value.trim();
     const pw = document.getElementById('pw-input').value;
-    const errorEl = document.getElementById('login-error');
     errorEl.style.display = 'none';
     if (!email || !pw) {
       errorEl.textContent = 'Please enter both email and password';
@@ -645,15 +662,20 @@
   // a fresh invite/recovery link → set-password screen; a normal returning
   // visit → straight into the admin panel without asking to log in again.
   (async () => {
-    const { data: { session } } = await sb.auth.getSession();
-    if (session) {
-      currentSession = session;
-      if (arrivedViaInviteOrRecovery) {
-        showSetPasswordScreen();
-      } else {
-        showAdminScreen();
-        init();
+    if (!sb) return;
+    try {
+      const { data: { session } } = await sb.auth.getSession();
+      if (session) {
+        currentSession = session;
+        if (arrivedViaInviteOrRecovery) {
+          showSetPasswordScreen();
+        } else {
+          showAdminScreen();
+          init();
+        }
       }
+    } catch (err) {
+      console.error('Session check failed:', err);
     }
   })();
 
@@ -1619,7 +1641,7 @@
       `;
       return;
     }
-    list.innerHTML = recapGalleries.map(ev => {
+    list.innerHTML = `<button class="add-btn" onclick="addRecapEvent()" style="margin-bottom:24px;">+ Add New Event Gallery</button>` + recapGalleries.map(ev => {
       const photos = parsePhotos(ev.photos);
       const legacyCount = photos.filter(p => p && p.includes('/storage/v1/object/public/recap-photos/')).length;
       return `
@@ -1647,9 +1669,7 @@
           <div id="upload-status-${ev.id}" style="font-size:10px;letter-spacing:1px;color:var(--gold);min-height:16px;margin-top:4px;"></div>
         </div>
       `;
-    }).join('') + `
-      <button class="add-btn" onclick="addRecapEvent()">+ Add New Event Gallery</button>
-    `;
+    }).join('');
   }
 
   function parsePhotos(raw) {
