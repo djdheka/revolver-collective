@@ -301,6 +301,8 @@
       .event-flyer-wrap { border-right: none; }
       .flyer-lightbox { padding: 12px; }
       .event-ticket-row { flex-direction: column; align-items: flex-start; gap: 16px; }
+      .event-title-row { flex-direction: column; gap: 12px; }
+      .event-title-row .event-ticket-info { text-align: left; }
       .event-cta-group { justify-content: flex-start; width: 100%; }
       .event-cta { padding: 12px 18px; flex: 1; text-align: center; }
     }
@@ -410,10 +412,18 @@
     .event-gunslinger:hover .event-gunslinger-name { color: var(--gold); }
 
     /* ticket */
+    .event-title-row {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 24px;
+    }
+    .event-title-row .event-ticket-info { text-align: right; flex-shrink: 0; }
+
     .event-ticket-row {
       display: flex;
       align-items: center;
-      justify-content: space-between;
+      justify-content: flex-end;
       border-top: 1px solid rgba(201,168,76,0.1);
       padding-top: 24px;
     }
@@ -819,17 +829,19 @@
               <img class="event-flyer" src="${cdnUrl(ev.flyer_url, 600)}" alt="${ev.name} flyer" loading="lazy" onclick="openFlyerLightbox('${cdnUrl(ev.flyer_url, 1400)}')" />
             </div>` : ''}
             <div class="event-info-panel">
-              <div class="event-name">${ev.name}</div>
+              <div class="event-title-row">
+                <div class="event-name">${ev.name}</div>
+                <div class="event-ticket-info">
+                  <div class="event-ticket-label">Entry</div>
+                  <div class="event-ticket-price">${ev.entry || 'TBA'}</div>
+                </div>
+              </div>
               <div class="event-desc">${ev.description || ''}</div>
               <div>
                 <div class="event-lineup-label">Lineup</div>
                 <div class="event-lineup">${lineup}</div>
               </div>
               <div class="event-ticket-row">
-                <div class="event-ticket-info">
-                  <div class="event-ticket-label">Entry</div>
-                  <div class="event-ticket-price">${ev.entry || 'TBA'}</div>
-                </div>
                 <div class="event-cta-group">
                   <a class="event-cta event-cta-outline" href="https://wa.me/6289507021276" target="_blank" rel="noopener">Admin 1</a>
                   <a class="event-cta event-cta-outline" href="https://wa.me/6281329496532" target="_blank" rel="noopener">Admin 2</a>
