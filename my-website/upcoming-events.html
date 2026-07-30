@@ -142,14 +142,15 @@
 
     /* ── EVENT BLOCK ── */
     .event-block {
-      display: flex;
-      flex-direction: column;
-      gap: 32px;
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      grid-template-rows: auto 1fr;
+      grid-template-areas: "date info" "flyer info";
+      gap: 0;
       border: 1px solid var(--gold);
       position: relative;
       overflow: hidden;
       transition: border-color 0.3s;
-      padding: 44px;
     }
     .event-block:hover { border-color: rgba(201,168,76,0.4); }
     .event-block::before {
@@ -161,8 +162,16 @@
       z-index: 1;
     }
 
-    /* centered date */
-    .event-date-center { text-align: center; }
+    /* LEFT: date panel */
+    .event-date-panel {
+      grid-area: date;
+      background: rgba(201,168,76,0.04);
+      border-right: 1px solid rgba(201,168,76,0.15);
+      padding: 40px 32px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
     .event-day {
       font-family: 'Anton', sans-serif;
       font-size: 80px;
@@ -177,19 +186,8 @@
       text-transform: uppercase;
       margin-top: 6px;
     }
-
-    /* venue (left) / door open (right) row */
-    .event-meta-row {
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 32px;
-      border-top: 1px solid rgba(201,168,76,0.12);
-      border-bottom: 1px solid rgba(201,168,76,0.12);
-      padding: 28px 0;
-    }
-    .event-door-info { text-align: right; }
     .event-time {
+      margin-top: 32px;
       font-size: 10px;
       letter-spacing: 3px;
       color: rgba(255,255,255,0.35);
@@ -204,16 +202,24 @@
     }
     .event-tag {
       display: inline-block;
-      margin-top: 12px;
+      margin-top: 24px;
       font-size: 8px;
       letter-spacing: 3px;
       color: var(--gold);
       text-transform: uppercase;
       border: 1px solid rgba(201,168,76,0.35);
       padding: 5px 12px;
+      align-self: flex-start;
     }
 
-    /* title + description */
+    /* RIGHT: info panel */
+    .event-info-panel {
+      grid-area: info;
+      padding: 40px 40px 40px 40px;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
     .event-name {
       font-family: 'Anton', sans-serif;
       font-size: clamp(28px, 4vw, 48px);
@@ -228,21 +234,25 @@
       line-height: 2;
       color: rgba(255,255,255,0.45);
       text-transform: uppercase;
-      max-width: 640px;
-      margin-top: 20px;
+      max-width: 480px;
     }
 
-    /* flyer thumbnail */
+    /* flyer thumbnail — sits directly under the date panel on desktop */
     .event-flyer-wrap {
+      grid-area: flyer;
+      background: rgba(201,168,76,0.04);
+      border-right: 1px solid rgba(201,168,76,0.15);
+      border-top: 1px solid rgba(201,168,76,0.1);
+      padding: 24px 32px 32px;
       display: flex;
       justify-content: center;
+      align-items: flex-start;
     }
     .event-flyer {
       display: block;
       width: auto;
       height: auto;
       max-width: 100%;
-      max-height: 520px;
       border: 1px solid rgba(201,168,76,0.25);
       border-radius: 2px;
       cursor: pointer;
@@ -282,17 +292,21 @@
     .flyer-lightbox-close:hover { color: var(--gold); }
 
     @media (max-width: 800px) {
-      .event-block { padding: 28px 24px; gap: 24px; }
-      .event-meta-row { flex-direction: column; gap: 20px; }
-      .event-door-info { text-align: left; }
-      .event-flyer { max-height: none; }
+      .event-flyer { max-width: 100%; }
+      .event-flyer-wrap { border-right: none; }
       .flyer-lightbox { padding: 12px; }
       .event-ticket-row { flex-direction: column; align-items: flex-start; gap: 16px; }
       .event-cta-group { justify-content: flex-start; width: 100%; }
       .event-cta { padding: 12px 18px; flex: 1; text-align: center; }
     }
 
-    /* venue (in meta row) */
+    /* venue + map */
+    .event-venue-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 32px;
+    }
+    .event-venue-info { flex: 1; }
     .event-venue-label {
       font-size: 9px;
       letter-spacing: 4px;
@@ -313,14 +327,12 @@
       text-transform: uppercase;
       margin-top: 4px;
     }
-
-    /* map block (below lineup) */
-    .event-map-block { }
     .event-map {
-      width: 100%;
+      width: 500px;
       height: 360px;
       border: 1px solid rgba(201,168,76,0.2);
       overflow: hidden;
+      flex-shrink: 0;
     }
     .event-map iframe {
       width: 100%;
@@ -342,7 +354,7 @@
     }
     .event-directions {
       display: inline-block;
-      margin-top: 12px;
+      margin-top: 10px;
       font-size: 8px;
       letter-spacing: 3px;
       color: var(--gold);
@@ -480,6 +492,25 @@
     .hamburger.open span:nth-child(3) { transform: rotate(-45deg) translate(5px, -5px); }
 
     @media (max-width: 800px) {
+      .event-block {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto auto auto;
+        grid-template-areas: "date" "flyer" "info";
+      }
+      .event-date-panel { border-right: none; border-bottom: 1px solid rgba(201,168,76,0.15); }
+      .event-date-panel > div {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        grid-template-rows: auto auto;
+        column-gap: 16px;
+        align-items: start;
+      }
+      .event-day { grid-column: 1; grid-row: 1; }
+      .event-month-year { grid-column: 1; grid-row: 2; margin-top: 6px; }
+      .event-time { grid-column: 2; grid-row: 1; margin-top: 0; text-align: right; justify-self: end; }
+      .event-tag { grid-column: 2; grid-row: 2; margin-top: 8px; justify-self: end; }
+      .event-venue-row { flex-direction: column; }
+      .event-map { width: 100%; }
       .events-list { padding: 40px 24px 80px; }
       .nav { padding: 0 20px; }
 
@@ -763,48 +794,46 @@
 
           return `
           <div class="event-block">
-            <div class="event-date-center">
-              <div class="event-day">${day}</div>
-              <div class="event-month-year">${monthYear}</div>
+            <div class="event-date-panel">
+              <div>
+                <div class="event-day">${day}</div>
+                <div class="event-month-year">${monthYear}</div>
+                <div class="event-time">Door Open<span>${ev.time || '21:00'} WIB</span></div>
+                <span class="event-tag">${ev.tag || ''}</span>
+              </div>
             </div>
             ${ev.flyer_url ? `
             <div class="event-flyer-wrap">
               <img class="event-flyer" src="${cdnUrl(ev.flyer_url, 600)}" alt="${ev.name} flyer" loading="lazy" onclick="openFlyerLightbox('${cdnUrl(ev.flyer_url, 1400)}')" />
             </div>` : ''}
-            <div class="event-meta-row">
-              <div class="event-venue-info">
-                <div class="event-venue-label">Venue</div>
-                <div class="event-venue-name">${ev.venue}</div>
-                <div class="event-venue-address">${ev.city}, Indonesia</div>
-              </div>
-              <div class="event-door-info">
-                <div class="event-time">Door Open<span>${ev.time || '21:00'} WIB</span></div>
-                <span class="event-tag">${ev.tag || ''}</span>
-              </div>
-            </div>
-            <div>
+            <div class="event-info-panel">
               <div class="event-name">${ev.name}</div>
               <div class="event-desc">${ev.description || ''}</div>
-            </div>
-            <div>
-              <div class="event-lineup-label">Lineup</div>
-              <div class="event-lineup">${lineup}</div>
-            </div>
-            <div class="event-map-block">
-              <div class="event-map" id="map-${i}" data-venue="${encodeURIComponent(ev.venue + ', ' + ev.city)}">
-                <div class="event-map-loading">Loading map…</div>
+              <div class="event-venue-row">
+                <div class="event-venue-info">
+                  <div class="event-venue-label">Venue</div>
+                  <div class="event-venue-name">${ev.venue}</div>
+                  <div class="event-venue-address">${ev.city}, Indonesia</div>
+                  <a class="event-directions" href="https://maps.google.com/?q=${encodeURIComponent(ev.venue + ' ' + ev.city)}" target="_blank" rel="noopener">↗ Get Directions</a>
+                </div>
+                <div class="event-map" id="map-${i}" data-venue="${encodeURIComponent(ev.venue + ', ' + ev.city)}">
+                  <div class="event-map-loading">Loading map…</div>
+                </div>
               </div>
-              <a class="event-directions" href="https://maps.google.com/?q=${encodeURIComponent(ev.venue + ' ' + ev.city)}" target="_blank" rel="noopener">↗ Get Directions</a>
-            </div>
-            <div class="event-ticket-row">
-              <div class="event-ticket-info">
-                <div class="event-ticket-label">Entry</div>
-                <div class="event-ticket-price">${ev.entry || 'TBA'}</div>
+              <div>
+                <div class="event-lineup-label">Lineup</div>
+                <div class="event-lineup">${lineup}</div>
               </div>
-              <div class="event-cta-group">
-                <a class="event-cta event-cta-outline" href="https://wa.me/6289507021276" target="_blank" rel="noopener">Admin 1</a>
-                <a class="event-cta event-cta-outline" href="https://wa.me/6281329496532" target="_blank" rel="noopener">Admin 2</a>
-                <a class="event-cta" href="https://www.instagram.com/rvlvr.collective/" target="_blank" rel="noopener">More Info</a>
+              <div class="event-ticket-row">
+                <div class="event-ticket-info">
+                  <div class="event-ticket-label">Entry</div>
+                  <div class="event-ticket-price">${ev.entry || 'TBA'}</div>
+                </div>
+                <div class="event-cta-group">
+                  <a class="event-cta event-cta-outline" href="https://wa.me/6289507021276" target="_blank" rel="noopener">Admin 1</a>
+                  <a class="event-cta event-cta-outline" href="https://wa.me/6281329496532" target="_blank" rel="noopener">Admin 2</a>
+                  <a class="event-cta" href="https://www.instagram.com/rvlvr.collective/" target="_blank" rel="noopener">More Info</a>
+                </div>
               </div>
             </div>
           </div>`;
