@@ -815,10 +815,9 @@
                 <span class="event-tag">${ev.tag || ''}</span>
               </div>
             </div>
-            ${ev.flyer_url ? `
             <div class="event-flyer-wrap">
-              <img class="event-flyer" src="${cdnUrl(ev.flyer_url, 600)}" alt="${ev.name} flyer" loading="lazy" onclick="openFlyerLightbox('${cdnUrl(ev.flyer_url, 1400)}')" />
-            </div>` : ''}
+              ${ev.flyer_url ? `<img class="event-flyer" src="${cdnUrl(ev.flyer_url, 600)}" alt="${ev.name} flyer" loading="lazy" onclick="openFlyerLightbox('${cdnUrl(ev.flyer_url, 1400)}')" />` : ''}
+            </div>
             <div class="event-info-panel">
               <div class="event-name">${ev.name}</div>
               <div class="event-desc">${ev.description || ''}</div>
