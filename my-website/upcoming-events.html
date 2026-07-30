@@ -239,7 +239,7 @@
       line-height: 2;
       color: rgba(255,255,255,0.45);
       text-transform: uppercase;
-      max-width: 480px;
+      max-width: 720px;
     }
 
     /* flyer thumbnail — sits directly under the date panel on desktop */
@@ -385,8 +385,13 @@
       gap: 4px;
     }
     @media (min-width: 801px) {
-      .event-lineup.lineup-grid-2 { display: grid; grid-template-columns: repeat(2, 140px); gap: 24px 32px; }
-      .event-lineup.lineup-grid-3 { display: grid; grid-template-columns: repeat(3, 140px); gap: 24px 32px; }
+      .event-lineup.lineup-grid-2 { display: grid; grid-template-columns: repeat(2, 210px); gap: 32px 48px; justify-content: center; }
+      .event-lineup.lineup-grid-3 { display: grid; grid-template-columns: repeat(3, 210px); gap: 32px 40px; justify-content: center; }
+      .event-lineup.lineup-grid-2 .event-gunslinger img,
+      .event-lineup.lineup-grid-3 .event-gunslinger img {
+        width: 210px;
+        height: 280px;
+      }
     }
     .event-gunslinger {
       display: flex;
