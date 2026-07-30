@@ -295,6 +295,9 @@
       .event-flyer { max-width: 100%; }
       .event-flyer-wrap { border-right: none; }
       .flyer-lightbox { padding: 12px; }
+      .event-ticket-row { flex-direction: column; align-items: flex-start; gap: 16px; }
+      .event-cta-group { justify-content: flex-start; width: 100%; }
+      .event-cta { padding: 12px 18px; flex: 1; text-align: center; }
     }
 
     /* venue + map */
@@ -435,6 +438,20 @@
       transition: background 0.3s, color 0.3s;
     }
     .event-cta:hover { background: var(--white); }
+
+    .event-cta-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+    .event-cta-outline {
+      background: transparent;
+      color: var(--gold);
+      border: 1px solid rgba(201,168,76,0.4);
+    }
+    .event-cta-outline:hover { background: rgba(201,168,76,0.1); color: var(--white); }
 
     /* ── FOOTER ── */
     footer {
@@ -812,7 +829,11 @@
                   <div class="event-ticket-label">Entry</div>
                   <div class="event-ticket-price">${ev.entry || 'TBA'}</div>
                 </div>
-                <a class="event-cta" href="https://www.instagram.com/rvlvr.collective/" target="_blank" rel="noopener">More Info</a>
+                <div class="event-cta-group">
+                  <a class="event-cta event-cta-outline" href="https://wa.me/6289507021276" target="_blank" rel="noopener">Admin 1</a>
+                  <a class="event-cta event-cta-outline" href="https://wa.me/6281329496532" target="_blank" rel="noopener">Admin 2</a>
+                  <a class="event-cta" href="https://www.instagram.com/rvlvr.collective/" target="_blank" rel="noopener">More Info</a>
+                </div>
               </div>
             </div>
           </div>`;
