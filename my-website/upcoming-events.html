@@ -142,11 +142,8 @@
 
     /* ── EVENT BLOCK ── */
     .event-block {
-      display: grid;
-      grid-template-columns: 260px 1fr;
-      grid-template-rows: auto 1fr;
-      grid-template-areas: "date info" "flyer info";
-      gap: 0;
+      display: flex;
+      align-items: stretch;
       border: 1px solid var(--gold);
       position: relative;
       overflow: hidden;
@@ -162,9 +159,16 @@
       z-index: 1;
     }
 
+    /* LEFT column wrapper: date panel + flyer stack vertically, always matches the right column's height */
+    .event-left-col {
+      width: 260px;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+    }
+
     /* LEFT: date panel */
     .event-date-panel {
-      grid-area: date;
       background: rgba(201,168,76,0.04);
       border-right: 1px solid rgba(201,168,76,0.15);
       padding: 40px 32px;
@@ -219,7 +223,7 @@
 
     /* RIGHT: info panel */
     .event-info-panel {
-      grid-area: info;
+      flex: 1;
       padding: 40px 40px 40px 40px;
       display: flex;
       flex-direction: column;
@@ -244,7 +248,7 @@
 
     /* flyer thumbnail — sits directly under the date panel on desktop */
     .event-flyer-wrap {
-      grid-area: flyer;
+      flex: 1;
       background: rgba(201,168,76,0.04);
       border-right: 1px solid rgba(201,168,76,0.15);
       border-top: 1px solid rgba(201,168,76,0.1);
@@ -507,11 +511,8 @@
     .hamburger.open span:nth-child(3) { transform: rotate(-45deg) translate(5px, -5px); }
 
     @media (max-width: 800px) {
-      .event-block {
-        grid-template-columns: 1fr;
-        grid-template-rows: auto auto auto;
-        grid-template-areas: "date" "flyer" "info";
-      }
+      .event-block { flex-direction: column; }
+      .event-left-col { width: 100%; }
       .event-date-panel { border-right: none; border-bottom: 1px solid rgba(201,168,76,0.15); }
       .event-date-panel > div {
         display: grid;
@@ -818,22 +819,24 @@
 
           return `
           <div class="event-block">
-            <div class="event-date-panel">
-              <div>
-                <div class="event-day">${day}</div>
-                <div class="event-month-year">${monthYear}</div>
-                <div class="event-venue-info">
-                  <div class="event-venue-label">Venue</div>
-                  <div class="event-venue-name">${ev.venue}</div>
-                  <div class="event-venue-address">${ev.city}, Indonesia</div>
-                  <a class="event-directions" href="https://maps.google.com/?q=${encodeURIComponent(ev.venue + ' ' + ev.city)}" target="_blank" rel="noopener">↗ Get Directions</a>
+            <div class="event-left-col">
+              <div class="event-date-panel">
+                <div>
+                  <div class="event-day">${day}</div>
+                  <div class="event-month-year">${monthYear}</div>
+                  <div class="event-venue-info">
+                    <div class="event-venue-label">Venue</div>
+                    <div class="event-venue-name">${ev.venue}</div>
+                    <div class="event-venue-address">${ev.city}, Indonesia</div>
+                    <a class="event-directions" href="https://maps.google.com/?q=${encodeURIComponent(ev.venue + ' ' + ev.city)}" target="_blank" rel="noopener">↗ Get Directions</a>
+                  </div>
+                  <div class="event-time">Door Open<span>${ev.time || '21:00'} WIB</span></div>
+                  <span class="event-tag">${ev.tag || ''}</span>
                 </div>
-                <div class="event-time">Door Open<span>${ev.time || '21:00'} WIB</span></div>
-                <span class="event-tag">${ev.tag || ''}</span>
               </div>
-            </div>
-            <div class="event-flyer-wrap">
-              ${ev.flyer_url ? `<img class="event-flyer" src="${cdnUrl(ev.flyer_url, 600)}" alt="${ev.name} flyer" loading="lazy" onclick="openFlyerLightbox('${cdnUrl(ev.flyer_url, 1400)}')" />` : ''}
+              <div class="event-flyer-wrap">
+                ${ev.flyer_url ? `<img class="event-flyer" src="${cdnUrl(ev.flyer_url, 600)}" alt="${ev.name} flyer" loading="lazy" onclick="openFlyerLightbox('${cdnUrl(ev.flyer_url, 1400)}')" />` : ''}
+              </div>
             </div>
             <div class="event-info-panel">
               <div class="event-name">${ev.name}</div>
