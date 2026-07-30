@@ -384,6 +384,10 @@
       flex-wrap: wrap;
       gap: 4px;
     }
+    @media (min-width: 801px) {
+      .event-lineup.lineup-grid-2 { display: grid; grid-template-columns: repeat(2, 140px); gap: 24px 32px; }
+      .event-lineup.lineup-grid-3 { display: grid; grid-template-columns: repeat(3, 140px); gap: 24px 32px; }
+    }
     .event-gunslinger {
       display: flex;
       flex-direction: column;
@@ -799,6 +803,13 @@
               <span class="event-gunslinger-name">${m}</span>
             </a>`).join('');
 
+          const memberCount = (ev.lineup || []).length;
+          const hasFlyer = !!ev.flyer_url;
+          let lineupClass = '';
+          if (memberCount === 4) lineupClass = hasFlyer ? 'lineup-grid-2' : '';
+          else if (memberCount === 5) lineupClass = 'lineup-grid-2';
+          else if (memberCount === 6) lineupClass = 'lineup-grid-3';
+
           return `
           <div class="event-block">
             <div class="event-date-panel">
@@ -823,7 +834,7 @@
               <div class="event-desc">${ev.description || ''}</div>
               <div>
                 <div class="event-lineup-label">Lineup</div>
-                <div class="event-lineup">${lineup}</div>
+                <div class="event-lineup ${lineupClass}">${lineup}</div>
               </div>
               <div class="event-ticket-row">
                 <div class="event-ticket-info">
