@@ -821,11 +821,6 @@
             <div class="event-info-panel">
               <div class="event-name">${ev.name}</div>
               <div class="event-desc">${ev.description || ''}</div>
-              <div class="event-venue-row">
-                <div class="event-map" id="map-${i}" data-venue="${encodeURIComponent(ev.venue + ', ' + ev.city)}">
-                  <div class="event-map-loading">Loading map…</div>
-                </div>
-              </div>
               <div>
                 <div class="event-lineup-label">Lineup</div>
                 <div class="event-lineup">${lineup}</div>
