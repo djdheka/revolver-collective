@@ -554,11 +554,21 @@
   }
   async function sbInsert(table, obj) {
     const r = await fetch(`${SUPABASE_URL}/rest/v1/${table}`, { method: 'POST', headers: sbHeaders(), body: JSON.stringify(obj) });
-    return r.json();
+    const json = await r.json();
+    if (!r.ok) {
+      const msg = (json && json.message) ? json.message : `Request failed (${r.status})`;
+      throw new Error(msg);
+    }
+    return json;
   }
   async function sbUpdate(table, id, obj) {
     const r = await fetch(`${SUPABASE_URL}/rest/v1/${table}?id=eq.${id}`, { method: 'PATCH', headers: sbHeaders(), body: JSON.stringify(obj) });
-    return r.json();
+    const json = await r.json();
+    if (!r.ok) {
+      const msg = (json && json.message) ? json.message : `Request failed (${r.status})`;
+      throw new Error(msg);
+    }
+    return json;
   }
   async function sbDelete(table, id) {
     await fetch(`${SUPABASE_URL}/rest/v1/${table}?id=eq.${id}`, { method: 'DELETE', headers: sbHeaders() });
@@ -806,6 +816,18 @@
           </div>
         </div>
         <div class="form-group">
+          <label class="form-label">Flyer (optional)</label>
+          <div class="location-status" style="margin-top:0;margin-bottom:8px;">Shown on the live Upcoming Events page and included in the Archive PDF once the event is over</div>
+          <div class="btn-row" style="align-items:center;">
+            <label class="btn btn-outline" style="cursor:pointer;margin:0;">
+              📤 ${ev.flyer_url ? 'Replace Flyer' : 'Upload Flyer'}
+              <input type="file" accept="image/*" style="display:none" onchange="uploadEventFlyer(${ev.id},this.files[0])" />
+            </label>
+            ${ev.flyer_url ? `<button class="btn" style="background:rgba(255,80,80,0.15);color:#f55;border:1px solid rgba(255,80,80,0.3)" onclick="removeEventFlyer(${ev.id})">✕ Remove Flyer</button>` : ''}
+            ${ev.flyer_url ? `<img src="${cdnUrl(ev.flyer_url,140)}" style="height:80px;border-radius:4px;object-fit:cover;" onerror="this.style.display='none'" />` : ''}
+          </div>
+        </div>
+        <div class="form-group">
           <label class="form-label">Description</label>
           <textarea class="form-textarea" onchange="updateEvent(${ev.id},'description',this.value)">${ev.description||''}</textarea>
         </div>
@@ -819,18 +841,6 @@
               ${MEMBERS.map(m => `<option value="${m}">${m}</option>`).join('')}
             </select>
             <button class="btn btn-gold" onclick="addLineup(${ev.id})">Add</button>
-          </div>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Flyer (optional)</label>
-          <div class="location-status" style="margin-top:0;margin-bottom:8px;">Shown on the live Upcoming Events page and included in the Archive PDF once the event is over</div>
-          <div class="btn-row" style="align-items:center;">
-            <label class="btn btn-outline" style="cursor:pointer;margin:0;">
-              📤 ${ev.flyer_url ? 'Replace Flyer' : 'Upload Flyer'}
-              <input type="file" accept="image/*" style="display:none" onchange="uploadEventFlyer(${ev.id},this.files[0])" />
-            </label>
-            ${ev.flyer_url ? `<button class="btn" style="background:rgba(255,80,80,0.15);color:#f55;border:1px solid rgba(255,80,80,0.3)" onclick="removeEventFlyer(${ev.id})">✕ Remove Flyer</button>` : ''}
-            ${ev.flyer_url ? `<img src="${cdnUrl(ev.flyer_url,140)}" style="height:80px;border-radius:4px;object-fit:cover;" onerror="this.style.display='none'" />` : ''}
           </div>
         </div>
         <div class="btn-row">
@@ -1023,13 +1033,19 @@
   async function addEvent() {
     setStatus('Creating event...');
     const newEv = { name: 'New Event', date: '', time: '21:00', venue: '', city: 'Yogyakarta', tag: 'Club Night', entry: 'Free Entry', description: '', lineup: [], flyer_url: null };
-    const result = await sbInsert('events', newEv);
-    if (result && result[0]) {
-      data.events.push(result[0]);
-      renderEvents();
-      renderArchive();
-      setStatus('Event created ✓');
-      showToast('New event added!');
+    try {
+      const result = await sbInsert('events', newEv);
+      if (result && result[0]) {
+        data.events.unshift(result[0]);
+        renderEvents();
+        renderArchive();
+        setStatus('Event created ✓');
+        showToast('New event added!');
+      } else {
+        setStatus('Could not create event — please try again');
+      }
+    } catch (err) {
+      setStatus('Could not create event: ' + err.message);
     }
   }
 
@@ -1615,12 +1631,20 @@
     const ev = data.events.find(e => e.id === id);
     if (!ev) return;
     if (!confirm('Remove this flyer from the live site?')) return;
+    const previousUrl = ev.flyer_url;
     ev.flyer_url = null;
     save();
-    await sbUpdate('events', id, { flyer_url: null });
-    renderEvents();
-    renderArchive();
-    setStatus('Flyer removed ✓');
+    try {
+      await sbUpdate('events', id, { flyer_url: null });
+      renderEvents();
+      renderArchive();
+      setStatus('Flyer removed ✓');
+    } catch (err) {
+      ev.flyer_url = previousUrl;
+      save();
+      renderEvents();
+      setStatus('Could not remove flyer: ' + err.message);
+    }
   }
 
   // ── RECAP PHOTOS (Supabase) ──
