@@ -311,7 +311,7 @@
       align-items: flex-start;
       gap: 32px;
     }
-    .event-venue-info { flex: 1; }
+    .event-venue-info { margin-top: 32px; }
     .event-venue-label {
       font-size: 9px;
       letter-spacing: 4px;
@@ -514,6 +514,7 @@
       .event-month-year { grid-column: 1; grid-row: 2; margin-top: 6px; }
       .event-time { grid-column: 2; grid-row: 1; margin-top: 0; text-align: right; justify-self: end; }
       .event-tag { grid-column: 2; grid-row: 2; margin-top: 8px; justify-self: end; }
+      .event-venue-info { grid-column: 1 / -1; grid-row: 3; margin-top: 20px; text-align: left; }
       .event-venue-row { flex-direction: column; }
       .event-map { width: 100%; }
       .events-list { padding: 40px 24px 80px; }
@@ -803,6 +804,12 @@
               <div>
                 <div class="event-day">${day}</div>
                 <div class="event-month-year">${monthYear}</div>
+                <div class="event-venue-info">
+                  <div class="event-venue-label">Venue</div>
+                  <div class="event-venue-name">${ev.venue}</div>
+                  <div class="event-venue-address">${ev.city}, Indonesia</div>
+                  <a class="event-directions" href="https://maps.google.com/?q=${encodeURIComponent(ev.venue + ' ' + ev.city)}" target="_blank" rel="noopener">↗ Get Directions</a>
+                </div>
                 <div class="event-time">Door Open<span>${ev.time || '21:00'} WIB</span></div>
                 <span class="event-tag">${ev.tag || ''}</span>
               </div>
@@ -815,12 +822,6 @@
               <div class="event-name">${ev.name}</div>
               <div class="event-desc">${ev.description || ''}</div>
               <div class="event-venue-row">
-                <div class="event-venue-info">
-                  <div class="event-venue-label">Venue</div>
-                  <div class="event-venue-name">${ev.venue}</div>
-                  <div class="event-venue-address">${ev.city}, Indonesia</div>
-                  <a class="event-directions" href="https://maps.google.com/?q=${encodeURIComponent(ev.venue + ' ' + ev.city)}" target="_blank" rel="noopener">↗ Get Directions</a>
-                </div>
                 <div class="event-map" id="map-${i}" data-venue="${encodeURIComponent(ev.venue + ', ' + ev.city)}">
                   <div class="event-map-loading">Loading map…</div>
                 </div>
