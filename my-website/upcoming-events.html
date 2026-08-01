@@ -509,14 +509,23 @@
     @media (max-width: 800px) {
       .event-block { flex-direction: column; }
       .event-left-col { width: 100%; }
-      .event-date-panel { border-right: none; border-bottom: 1px solid rgba(201,168,76,0.15); align-items: flex-start; text-align: left; }
+      .event-date-panel { border-right: none; border-bottom: 1px solid rgba(201,168,76,0.15); align-items: stretch; text-align: left; }
       .event-date-panel > div {
-        display: flex;
-        flex-direction: column;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        grid-template-areas:
+          "day day"
+          "month month"
+          "venue door"
+          "venue tag";
+        row-gap: 6px;
+        column-gap: 16px;
       }
-      .event-venue-info { margin-top: 24px; }
-      .event-time { margin-top: 24px; }
-      .event-tag { align-self: flex-start; }
+      .event-day { grid-area: day; text-align: center; }
+      .event-month-year { grid-area: month; text-align: center; margin-top: 0; margin-bottom: 20px; }
+      .event-venue-info { grid-area: venue; text-align: left; margin-top: 0; }
+      .event-time { grid-area: door; text-align: right; margin-top: 0; }
+      .event-tag { grid-area: tag; justify-self: end; margin-top: 8px; }
       .event-map { width: 100%; }
       .events-list { padding: 40px 24px 80px; }
       .nav { padding: 0 20px; }
