@@ -93,7 +93,51 @@
       padding: 120px 40px 60px;
       text-align: center;
       border-bottom: 1px solid rgba(201,168,76,0.1);
+      position: relative;
+      overflow: hidden;
     }
+
+    /* Drifting dust particles around the page title — same effect as the homepage hero logo */
+    .page-header-title-wrap {
+      position: relative;
+      display: inline-block;
+    }
+    @media (min-width: 800px) {
+      .page-header-title-wrap {
+        display: block;
+        width: 70vw;
+        max-width: 900px;
+        margin: 0 auto;
+      }
+      .page-header-particle {
+        width: 6px;
+        height: 6px;
+        box-shadow: 0 0 14px 3px rgba(201,168,76,0.8);
+      }
+    }
+    .page-header-particle {
+      position: absolute;
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: rgba(201,168,76,0.95);
+      box-shadow: 0 0 10px 2px rgba(201,168,76,0.7);
+      opacity: 0;
+      z-index: 0;
+      pointer-events: none;
+      animation: page-header-particle-float ease-in-out infinite;
+    }
+    @keyframes page-header-particle-float {
+      0%   { transform: translate(0, 0); opacity: 0; }
+      12%  { opacity: 1; }
+      50%  { transform: translate(calc(var(--dx, 0px) * 0.55), calc(var(--dy, -30px) * 0.55)); opacity: 0.7; }
+      85%  { opacity: 0.2; }
+      100% { transform: translate(var(--dx, 0px), var(--dy, -55px)); opacity: 0; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .page-header-particle { animation: none; }
+    }
+
     .page-header-label {
       font-size: 10px;
       letter-spacing: 6px;
@@ -107,6 +151,8 @@
       letter-spacing: 6px;
       text-transform: uppercase;
       color: var(--white);
+      position: relative;
+      z-index: 2;
     }
     .page-header-rule {
       display: flex;
@@ -141,6 +187,23 @@
     }
 
     /* ── EVENT BLOCK ── */
+    .event-card-glow {
+      animation: event-card-glow 3s ease-in-out infinite;
+      transition: box-shadow 0.3s;
+      border-radius: 1px;
+    }
+    @keyframes event-card-glow {
+      0%, 100% { box-shadow: 0 0 10px 2px rgba(201,168,76,0.12), 0 0 24px 4px rgba(201,168,76,0.06); }
+      50%       { box-shadow: 0 0 20px 5px rgba(201,168,76,0.30), 0 0 44px 8px rgba(201,168,76,0.14); }
+    }
+    .event-card-glow:hover {
+      box-shadow: 0 0 28px 6px rgba(201,168,76,0.40), 0 0 55px 10px rgba(201,168,76,0.18);
+      animation: none;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .event-card-glow { animation: none; }
+    }
+
     .event-block {
       display: flex;
       align-items: stretch;
@@ -719,7 +782,25 @@
 
   <div class="page-header">
     <div class="page-header-label">Revolver Collective</div>
-    <div class="page-header-title">Upcoming Events</div>
+    <div class="page-header-title-wrap">
+      <span class="page-header-particle" style="left:85%; top:45%; --dx:420px; --dy:0px;    animation-duration:9s;  animation-delay:-5.0s;"></span>
+      <span class="page-header-particle" style="left:82%; top:30%; --dx:390px; --dy:-160px; animation-duration:10s; animation-delay:-7.2s;"></span>
+      <span class="page-header-particle" style="left:75%; top:18%; --dx:300px; --dy:-300px; animation-duration:8s;  animation-delay:-3.6s;"></span>
+      <span class="page-header-particle" style="left:63%; top:10%; --dx:160px; --dy:-400px; animation-duration:9s;  animation-delay:-5.6s;"></span>
+      <span class="page-header-particle" style="left:50%; top:8%;  --dx:0px;   --dy:-440px; animation-duration:10s; animation-delay:-3.0s;"></span>
+      <span class="page-header-particle" style="left:37%; top:10%; --dx:-160px;--dy:-400px; animation-duration:9s;  animation-delay:-7.0s;"></span>
+      <span class="page-header-particle" style="left:25%; top:18%; --dx:-300px;--dy:-300px; animation-duration:11s; animation-delay:-4.4s;"></span>
+      <span class="page-header-particle" style="left:18%; top:30%; --dx:-390px;--dy:-160px; animation-duration:10s; animation-delay:-2.8s;"></span>
+      <span class="page-header-particle" style="left:15%; top:45%; --dx:-420px;--dy:0px;    animation-duration:9s;  animation-delay:-7.4s;"></span>
+      <span class="page-header-particle" style="left:18%; top:60%; --dx:-390px;--dy:160px;  animation-duration:10s; animation-delay:-6.0s;"></span>
+      <span class="page-header-particle" style="left:25%; top:72%; --dx:-300px;--dy:300px;  animation-duration:8s;  animation-delay:-6.6s;"></span>
+      <span class="page-header-particle" style="left:37%; top:80%; --dx:-160px;--dy:400px;  animation-duration:9s;  animation-delay:-5.0s;"></span>
+      <span class="page-header-particle" style="left:50%; top:82%; --dx:0px;   --dy:440px;  animation-duration:10s; animation-delay:-4.2s;"></span>
+      <span class="page-header-particle" style="left:63%; top:80%; --dx:160px; --dy:400px;  animation-duration:9s;  animation-delay:-4.6s;"></span>
+      <span class="page-header-particle" style="left:75%; top:72%; --dx:300px; --dy:300px;  animation-duration:11s; animation-delay:-9.9s;"></span>
+      <span class="page-header-particle" style="left:82%; top:60%; --dx:390px; --dy:160px;  animation-duration:10s; animation-delay:-3.6s;"></span>
+      <div class="page-header-title">Upcoming Events</div>
+    </div>
     <div class="page-header-rule"><div class="page-header-rule-diamond"></div></div>
   </div>
 
@@ -816,6 +897,7 @@
           else if (memberCount === 6) lineupClass = 'lineup-grid-3';
 
           return `
+          <div class="event-card-glow">
           <div class="event-block">
             <div class="event-left-col">
               <div class="event-date-panel">
@@ -853,6 +935,7 @@
                 </div>
               </div>
             </div>
+          </div>
           </div>`;
         }).join('');
 
