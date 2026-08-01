@@ -509,20 +509,14 @@
     @media (max-width: 800px) {
       .event-block { flex-direction: column; }
       .event-left-col { width: 100%; }
-      .event-date-panel { border-right: none; border-bottom: 1px solid rgba(201,168,76,0.15); }
+      .event-date-panel { border-right: none; border-bottom: 1px solid rgba(201,168,76,0.15); align-items: flex-start; text-align: left; }
       .event-date-panel > div {
-        display: grid;
-        grid-template-columns: auto 1fr;
-        grid-template-rows: auto auto;
-        column-gap: 16px;
-        align-items: start;
+        display: flex;
+        flex-direction: column;
       }
-      .event-day { grid-column: 1; grid-row: 1; }
-      .event-month-year { grid-column: 1; grid-row: 2; margin-top: 6px; }
-      .event-time { grid-column: 2; grid-row: 1; margin-top: 0; text-align: right; justify-self: end; }
-      .event-tag { grid-column: 2; grid-row: 2; margin-top: 8px; justify-self: end; }
-      .event-venue-info { grid-column: 1 / -1; grid-row: 3; margin-top: 20px; text-align: left; }
-      .event-venue-row { flex-direction: column; }
+      .event-venue-info { margin-top: 24px; }
+      .event-time { margin-top: 24px; }
+      .event-tag { align-self: flex-start; }
       .event-map { width: 100%; }
       .events-list { padding: 40px 24px 80px; }
       .nav { padding: 0 20px; }
