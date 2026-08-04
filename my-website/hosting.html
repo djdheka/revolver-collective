@@ -112,50 +112,330 @@
       padding: 50px 40px 100px;
     }
 
-    /* event context card */
-    .event-context {
-      border: 1px solid rgba(201,168,76,0.25);
-      background: rgba(201,168,76,0.04);
-      padding: 32px 40px;
-      margin-bottom: 44px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 40px;
-      text-align: left;
+    .status-msg {
+      text-align: center;
+      padding: 60px 20px;
+      font-size: 11px;
+      letter-spacing: 3px;
+      color: rgba(255,255,255,0.4);
+      text-transform: uppercase;
     }
-    .event-context-flyer {
+    .status-msg.error { color: rgba(255,120,120,0.6); }
+
+    /* ── EVENT CARD ── */
+    .guestlist-event {
+      border: 1px solid var(--gold);
+      margin-bottom: 40px;
+    }
+
+    .event-card-row {
+      display: flex;
+      align-items: stretch;
+      gap: 0;
+      padding: 32px;
+    }
+
+    .event-card-flyer {
       flex-shrink: 0;
+      width: 220px;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+    }
+    .event-card-flyer img {
       display: block;
-      max-width: 220px;
-      max-height: 300px;
-      width: auto;
+      width: 100%;
       height: auto;
+      max-height: 320px;
+      object-fit: cover;
       border: 1px solid rgba(201,168,76,0.25);
       border-radius: 2px;
       cursor: pointer;
       transition: border-color 0.3s, opacity 0.3s;
     }
-    .event-context-flyer:hover { border-color: var(--gold); opacity: 0.9; }
-    .event-context-text { text-align: left; }
-    @media (max-width: 700px) {
-      .event-context { flex-direction: column; text-align: center; }
-      .event-context-text { text-align: center; }
+    .event-card-flyer img:hover { border-color: var(--gold); opacity: 0.9; }
+
+    .event-card-main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      margin-left: 28px;
+      border: 1px solid rgba(201,168,76,0.2);
     }
-    .event-context-name {
+    .event-card-name {
       font-family: 'Anton', sans-serif;
-      font-size: clamp(22px, 4vw, 32px);
+      font-size: clamp(20px, 3vw, 30px);
       letter-spacing: 3px;
       color: var(--gold);
       text-transform: uppercase;
+      padding: 18px 24px;
+      border-bottom: 1px solid rgba(201,168,76,0.15);
     }
-    .event-context-meta {
-      margin-top: 10px;
+    .event-card-desc {
+      flex: 1;
+      padding: 20px 24px;
       font-size: 11px;
-      letter-spacing: 2px;
+      letter-spacing: 1.5px;
+      line-height: 1.9;
+      color: rgba(255,255,255,0.6);
+      text-transform: uppercase;
+      white-space: pre-line;
+    }
+
+    .event-card-venue {
+      flex-shrink: 0;
+      width: 220px;
+      margin-left: 28px;
+      border: 1px solid rgba(201,168,76,0.2);
+      padding: 24px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      gap: 18px;
+    }
+    .event-card-venue-name {
+      font-size: 13px;
+      letter-spacing: 1.5px;
+      color: var(--white);
+      text-transform: uppercase;
+    }
+    .event-card-venue-time {
+      font-size: 11px;
+      letter-spacing: 1.5px;
       color: rgba(255,255,255,0.5);
       text-transform: uppercase;
     }
+    .event-card-venue-time span { display: block; color: var(--gold); margin-top: 4px; font-size: 12px; }
+    .event-card-directions {
+      font-size: 9px;
+      letter-spacing: 2px;
+      color: var(--gold);
+      text-transform: uppercase;
+      text-decoration: none;
+      border-bottom: 1px solid rgba(201,168,76,0.3);
+      padding-bottom: 2px;
+      transition: border-color 0.3s;
+    }
+    .event-card-directions:hover { border-color: var(--gold); }
+
+    /* ── TOGGLE BAR ── */
+    .guestlist-toggle {
+      width: 100%;
+      background: transparent;
+      border: none;
+      border-top: 1px solid rgba(201,168,76,0.2);
+      color: var(--gold);
+      font-family: 'Oswald', sans-serif;
+      font-size: 11px;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      padding: 16px 0;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      transition: background 0.3s;
+    }
+    .guestlist-toggle:hover { background: rgba(201,168,76,0.05); }
+    .guestlist-toggle .arrow { transition: transform 0.3s; display: inline-block; }
+    .guestlist-toggle.open .arrow { transform: rotate(180deg); }
+
+    /* ── HOST COLUMNS ── */
+    .hosts-panel {
+      display: none;
+      border-top: 1px solid rgba(201,168,76,0.2);
+      padding: 28px 32px 32px;
+    }
+    .hosts-panel.open { display: block; }
+    .hosts-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+    .host-col {
+      width: 180px;
+      flex-shrink: 0;
+      border: 1px solid rgba(201,168,76,0.25);
+      display: flex;
+      flex-direction: column;
+    }
+    .host-col.full { border-color: rgba(255,255,255,0.12); }
+    .host-col-header {
+      padding: 14px 16px;
+      border-bottom: 1px solid rgba(201,168,76,0.15);
+      text-align: center;
+    }
+    .host-col-title {
+      font-family: 'Anton', sans-serif;
+      font-size: 15px;
+      letter-spacing: 2px;
+      color: var(--white);
+      text-transform: uppercase;
+    }
+    .host-col-count {
+      font-size: 10px;
+      letter-spacing: 1.5px;
+      color: var(--gold);
+      margin-top: 4px;
+    }
+    .host-col-count.is-full { color: rgba(255,120,120,0.75); }
+    .host-col-body {
+      flex: 1;
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .host-col-names {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .host-col-name-row {
+      font-size: 10px;
+      letter-spacing: 1px;
+      color: rgba(255,255,255,0.7);
+      text-transform: uppercase;
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+      line-height: 1.5;
+    }
+    .host-col-name-row .dot {
+      width: 3px; height: 3px;
+      background: var(--gold);
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .host-col-join {
+      margin-top: auto;
+      font-family: 'Oswald', sans-serif;
+      font-size: 9px;
+      letter-spacing: 2.5px;
+      color: var(--black);
+      text-transform: uppercase;
+      background: var(--gold);
+      padding: 10px 0;
+      border: none;
+      cursor: pointer;
+      transition: background 0.3s, color 0.3s;
+    }
+    .host-col-join:hover { background: var(--white); }
+    .host-col-full-label {
+      margin-top: auto;
+      font-size: 9px;
+      letter-spacing: 2px;
+      color: rgba(255,255,255,0.3);
+      text-transform: uppercase;
+      text-align: center;
+    }
+
+    /* join form (opens inline within the host column) */
+    .host-form {
+      display: none;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 4px;
+      padding-top: 12px;
+      border-top: 1px solid rgba(201,168,76,0.1);
+    }
+    .host-form.open { display: flex; }
+    .host-form label {
+      display: block;
+      font-size: 8px;
+      letter-spacing: 2px;
+      color: var(--gold);
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+    .host-form input, .host-form select {
+      width: 100%;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(201,168,76,0.25);
+      color: var(--white);
+      font-family: 'Oswald', sans-serif;
+      font-size: 11px;
+      letter-spacing: 0.5px;
+      padding: 8px 10px;
+    }
+    .host-form input:focus, .host-form select:focus {
+      outline: none;
+      border-color: var(--gold);
+    }
+    .host-form-extra-names {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .host-form-error {
+      font-size: 9px;
+      letter-spacing: 0.5px;
+      color: rgba(255,120,120,0.8);
+      text-transform: none;
+      display: none;
+      line-height: 1.5;
+    }
+    .host-form-error.show { display: block; }
+    .host-form-success {
+      font-size: 9px;
+      letter-spacing: 1.5px;
+      color: var(--gold);
+      text-transform: uppercase;
+      display: none;
+      text-align: center;
+    }
+    .host-form-success.show { display: block; }
+    .host-form-actions {
+      display: flex;
+      gap: 8px;
+    }
+    .host-form-submit {
+      flex: 1;
+      font-family: 'Oswald', sans-serif;
+      font-size: 9px;
+      letter-spacing: 2px;
+      color: var(--black);
+      text-transform: uppercase;
+      background: var(--gold);
+      padding: 9px 0;
+      border: none;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    .host-form-submit:hover { background: var(--white); }
+    .host-form-submit:disabled { opacity: 0.4; cursor: not-allowed; }
+    .host-form-cancel {
+      font-family: 'Oswald', sans-serif;
+      font-size: 9px;
+      letter-spacing: 2px;
+      color: rgba(255,255,255,0.5);
+      text-transform: uppercase;
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.15);
+      padding: 9px 12px;
+      cursor: pointer;
+      transition: border-color 0.3s, color 0.3s;
+    }
+    .host-form-cancel:hover { color: var(--white); border-color: rgba(255,255,255,0.35); }
+
+    /* ── NOTE ── */
+    .hosting-note {
+      margin-top: 20px;
+      border-left: 2px solid var(--gold);
+      padding: 16px 24px;
+      background: rgba(201,168,76,0.03);
+    }
+    .hosting-note p {
+      font-size: 11px;
+      letter-spacing: 1px;
+      line-height: 1.9;
+      color: rgba(255,255,255,0.55);
+      text-transform: none;
+    }
+    .hosting-note p + p { margin-top: 6px; }
 
     /* flyer lightbox */
     .flyer-lightbox {
@@ -188,205 +468,6 @@
     }
     .flyer-lightbox-close:hover { color: var(--gold); }
 
-    .status-msg {
-      text-align: center;
-      padding: 60px 20px;
-      font-size: 11px;
-      letter-spacing: 3px;
-      color: rgba(255,255,255,0.4);
-      text-transform: uppercase;
-    }
-    .status-msg.error { color: rgba(255,120,120,0.6); }
-
-    /* ── HOST CARDS ── */
-    .hosts-list {
-      display: flex;
-      flex-direction: column;
-      gap: 28px;
-    }
-    .host-card {
-      border: 1px solid rgba(201,168,76,0.2);
-      background: rgba(255,255,255,0.02);
-      transition: border-color 0.3s;
-    }
-    .host-card.full { border-color: rgba(255,255,255,0.1); }
-    .host-card-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 22px 28px;
-      border-bottom: 1px solid rgba(201,168,76,0.12);
-    }
-    .host-card-title {
-      font-family: 'Anton', sans-serif;
-      font-size: 20px;
-      letter-spacing: 3px;
-      color: var(--white);
-      text-transform: uppercase;
-    }
-    .host-card-count {
-      font-size: 12px;
-      letter-spacing: 2px;
-      color: var(--gold);
-      text-transform: uppercase;
-    }
-    .host-card-count.is-full { color: rgba(255,120,120,0.7); }
-
-    .host-card-body {
-      padding: 22px 28px 26px;
-    }
-    .host-names {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      margin-bottom: 20px;
-    }
-    .host-names:empty { display: none; }
-    .host-name-row {
-      font-size: 12px;
-      letter-spacing: 1.5px;
-      color: rgba(255,255,255,0.7);
-      text-transform: uppercase;
-      display: flex;
-      align-items: baseline;
-      gap: 8px;
-    }
-    .host-name-row .dot {
-      width: 4px; height: 4px;
-      background: var(--gold);
-      border-radius: 50%;
-      flex-shrink: 0;
-    }
-    .host-name-sub {
-      font-size: 10px;
-      letter-spacing: 1px;
-      color: rgba(255,255,255,0.35);
-    }
-
-    .host-join-btn {
-      font-family: 'Oswald', sans-serif;
-      font-size: 10px;
-      letter-spacing: 4px;
-      color: var(--black);
-      text-transform: uppercase;
-      background: var(--gold);
-      padding: 12px 26px;
-      border: none;
-      cursor: pointer;
-      transition: background 0.3s, color 0.3s;
-    }
-    .host-join-btn:hover { background: var(--white); }
-    .host-full-label {
-      font-size: 10px;
-      letter-spacing: 3px;
-      color: rgba(255,255,255,0.3);
-      text-transform: uppercase;
-    }
-
-    /* join form */
-    .host-form {
-      display: none;
-      margin-top: 20px;
-      padding-top: 20px;
-      border-top: 1px solid rgba(201,168,76,0.1);
-      flex-direction: column;
-      gap: 16px;
-    }
-    .host-form.open { display: flex; }
-    .host-form label {
-      display: block;
-      font-size: 9px;
-      letter-spacing: 3px;
-      color: var(--gold);
-      text-transform: uppercase;
-      margin-bottom: 6px;
-    }
-    .host-form input, .host-form select {
-      width: 100%;
-      background: rgba(255,255,255,0.03);
-      border: 1px solid rgba(201,168,76,0.25);
-      color: var(--white);
-      font-family: 'Oswald', sans-serif;
-      font-size: 13px;
-      letter-spacing: 1px;
-      padding: 12px 14px;
-    }
-    .host-form input:focus, .host-form select:focus {
-      outline: none;
-      border-color: var(--gold);
-    }
-    .host-form-extra-names {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-    .host-form-actions {
-      display: flex;
-      gap: 12px;
-      margin-top: 4px;
-    }
-    .host-form-submit {
-      font-family: 'Oswald', sans-serif;
-      font-size: 10px;
-      letter-spacing: 4px;
-      color: var(--black);
-      text-transform: uppercase;
-      background: var(--gold);
-      padding: 12px 28px;
-      border: none;
-      cursor: pointer;
-      transition: background 0.3s;
-    }
-    .host-form-submit:hover { background: var(--white); }
-    .host-form-submit:disabled { opacity: 0.4; cursor: not-allowed; }
-    .host-form-cancel {
-      font-family: 'Oswald', sans-serif;
-      font-size: 10px;
-      letter-spacing: 4px;
-      color: rgba(255,255,255,0.5);
-      text-transform: uppercase;
-      background: transparent;
-      border: 1px solid rgba(255,255,255,0.15);
-      padding: 12px 22px;
-      cursor: pointer;
-      transition: border-color 0.3s, color 0.3s;
-    }
-    .host-form-cancel:hover { color: var(--white); border-color: rgba(255,255,255,0.35); }
-    .host-form-error {
-      font-size: 10px;
-      letter-spacing: 1px;
-      color: rgba(255,120,120,0.8);
-      text-transform: none;
-      display: none;
-    }
-    .host-form-error.show { display: block; }
-    .host-form-success {
-      font-size: 11px;
-      letter-spacing: 2px;
-      color: var(--gold);
-      text-transform: uppercase;
-      display: none;
-      text-align: center;
-      padding: 14px 0;
-    }
-    .host-form-success.show { display: block; }
-
-    /* ── NOTE ── */
-    .hosting-note {
-      margin-top: 44px;
-      border-left: 2px solid var(--gold);
-      padding: 16px 24px;
-      background: rgba(201,168,76,0.03);
-    }
-    .hosting-note p {
-      font-size: 11px;
-      letter-spacing: 1px;
-      line-height: 1.9;
-      color: rgba(255,255,255,0.55);
-      text-transform: none;
-    }
-    .hosting-note p + p { margin-top: 6px; }
-
     /* ── FOOTER ── */
     footer {
       border-top: 1px solid rgba(201,168,76,0.1);
@@ -401,12 +482,18 @@
     /* Hamburger - hidden on desktop */
     .hamburger { display: none; }
 
+    @media (max-width: 900px) {
+      .event-card-row { flex-direction: column; padding: 20px; }
+      .event-card-flyer { width: 100%; justify-content: center; }
+      .event-card-flyer img { max-width: 220px; }
+      .event-card-main { margin-left: 0; margin-top: 20px; }
+      .event-card-venue { width: 100%; margin-left: 0; margin-top: 20px; }
+      .hosts-panel { padding: 20px; }
+    }
+
     @media (max-width: 800px) {
       .page-header { padding: 100px 24px 40px; }
       .hosting-wrapper { padding: 36px 20px 80px; }
-      .event-context { padding: 22px 20px; }
-      .host-card-header { padding: 18px 20px; }
-      .host-card-body { padding: 18px 20px 22px; }
       .nav { padding: 0 20px; }
 
       .hamburger {
@@ -501,14 +588,12 @@
     <div class="page-header-rule"><div class="page-header-rule-diamond"></div></div>
   </div>
 
-  <div class="hosting-wrapper">
-    <div id="event-context">
-      <div class="status-msg">LOADING EVENT...</div>
-    </div>
+  <div class="hosting-wrapper" id="hosting-wrapper">
+    <div class="status-msg">LOADING EVENTS...</div>
+  </div>
 
-    <div class="hosts-list" id="hosts-list"></div>
-
-    <div class="hosting-note" id="hosting-note" style="display:none;">
+  <div class="hosting-wrapper" style="padding-top:0;">
+    <div class="hosting-note">
       <p>Hosting harus perempuan.</p>
       <p>Pembatalan hosting hanya bisa dilakukan melalui konfirmasi admin.</p>
     </div>
@@ -529,6 +614,8 @@
 
     const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 
+    let allHosts = {}; // keyed by event id -> array of host rows
+
     // Inserts Cloudinary transforms: f_auto,q_auto for format/quality, plus a width
     // cap so the full-resolution flyer isn't sent to a small preview thumb.
     function cdnUrl(url, width) {
@@ -547,111 +634,116 @@
       document.getElementById('flyer-lightbox').classList.remove('active');
     }
 
-    const params = new URLSearchParams(window.location.search);
-    const eventId = params.get('event');
-
-    let currentEvent = null;
-    let currentHosts = [];
-
-    function renderStatus(el, message, isError) {
-      el.innerHTML = `<div class="status-msg${isError ? ' error' : ''}">${message}</div>`;
+    // Same "is this event over?" rule as the admin panel and upcoming-events page:
+    // an event counts as past once it's 03:00 WIB the day AFTER the event date.
+    function getNowInWIB() {
+      const wibString = new Date().toLocaleString('en-US', { timeZone: 'Asia/Jakarta' });
+      return new Date(wibString);
+    }
+    function isPastEvent(ev) {
+      if (!ev.date) return false;
+      const cutoff = new Date(ev.date + 'T00:00:00');
+      cutoff.setDate(cutoff.getDate() + 1);
+      cutoff.setHours(3, 0, 0, 0);
+      return getNowInWIB() >= cutoff;
     }
 
-    async function loadEvent() {
-      const contextEl = document.getElementById('event-context');
-      const listEl = document.getElementById('hosts-list');
-
-      if (!eventId) {
-        renderStatus(contextEl, 'NO EVENT SPECIFIED', true);
-        return;
-      }
-
+    async function loadEvents() {
+      const wrapper = document.getElementById('hosting-wrapper');
       try {
         const res = await fetch(
-          `${SUPABASE_URL}/rest/v1/events?id=eq.${encodeURIComponent(eventId)}&select=*`,
+          `${SUPABASE_URL}/rest/v1/events?guestlist_enabled=eq.true&order=date.asc`,
           { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } }
         );
-        const rows = await res.json();
-        if (!rows.length) {
-          renderStatus(contextEl, 'EVENT NOT FOUND', true);
-          return;
-        }
-        currentEvent = rows[0];
+        const allEvents = await res.json();
+        const events = allEvents.filter(ev => !isPastEvent(ev));
 
-        const flyerHtml = currentEvent.flyer_url
-          ? `<img class="event-context-flyer" src="${cdnUrl(currentEvent.flyer_url, 500)}" alt="${currentEvent.name} flyer" onclick="openFlyerLightbox('${cdnUrl(currentEvent.flyer_url, 1400)}')" />`
-          : '';
-
-        if (!currentEvent.guestlist_enabled) {
-          contextEl.innerHTML = `
-            <div class="event-context">
-              ${flyerHtml}
-              <div class="event-context-text">
-                <div class="event-context-name">${currentEvent.name}</div>
-              </div>
-            </div>`;
-          renderStatus(listEl, 'GUEST LIST IS NOT AVAILABLE FOR THIS EVENT');
+        if (!events.length) {
+          wrapper.innerHTML = '<div class="status-msg">NO GUEST LIST OPEN RIGHT NOW</div>';
           return;
         }
 
-        const d = currentEvent.date ? new Date(currentEvent.date) : null;
-        const dateStr = d ? `${d.getDate().toString().padStart(2,'0')} ${MONTHS[d.getMonth()]} ${d.getFullYear()}` : '';
+        wrapper.innerHTML = events.map(ev => renderEventCard(ev)).join('');
 
-        contextEl.innerHTML = `
-          <div class="event-context">
-            ${flyerHtml}
-            <div class="event-context-text">
-              <div class="event-context-name">${currentEvent.name}</div>
-              <div class="event-context-meta">${dateStr}${currentEvent.venue ? ' · ' + currentEvent.venue : ''}</div>
+        // Load hosts for every event in parallel
+        await Promise.all(events.map(ev => loadHostsForEvent(ev.id)));
+
+        events.forEach(ev => renderHostsPanel(ev));
+
+      } catch (err) {
+        console.error('Failed to load events:', err);
+        wrapper.innerHTML = '<div class="status-msg error">FAILED TO LOAD EVENTS</div>';
+      }
+    }
+
+    function renderEventCard(ev) {
+      const d = ev.date ? new Date(ev.date) : null;
+      const dateStr = d ? `${d.getDate().toString().padStart(2,'0')} ${MONTHS[d.getMonth()]} ${d.getFullYear()}` : '';
+      const flyerHtml = ev.flyer_url
+        ? `<img src="${cdnUrl(ev.flyer_url, 500)}" alt="${ev.name} flyer" onclick="openFlyerLightbox('${cdnUrl(ev.flyer_url, 1400)}')" />`
+        : '';
+
+      return `
+        <div class="guestlist-event" id="event-${ev.id}">
+          <div class="event-card-row">
+            <div class="event-card-flyer">${flyerHtml}</div>
+            <div class="event-card-main">
+              <div class="event-card-name">${ev.name}</div>
+              <div class="event-card-desc">${ev.description || ''}</div>
             </div>
-          </div>`;
-
-        if (!currentEvent.guestlist_capacity) {
-          renderStatus(listEl, 'GUEST LIST CAPACITY NOT SET YET — PLEASE CONTACT ADMIN', true);
-          return;
-        }
-
-        document.getElementById('hosting-note').style.display = 'block';
-        await loadHosts();
-
-      } catch (err) {
-        console.error('Failed to load event:', err);
-        renderStatus(contextEl, 'FAILED TO LOAD EVENT', true);
-      }
+            <div class="event-card-venue">
+              <div class="event-card-venue-name">${ev.venue || ''}</div>
+              <div class="event-card-venue-time">Door Open<span>${ev.time || '21:00'} WIB · ${dateStr}</span></div>
+              <a class="event-card-directions" href="https://maps.google.com/?q=${encodeURIComponent((ev.venue || '') + ' ' + (ev.city || ''))}" target="_blank" rel="noopener">↗ Get Directions</a>
+            </div>
+          </div>
+          <button class="guestlist-toggle" id="toggle-${ev.id}" onclick="toggleGuestList(${ev.id})">
+            <span>Show Guest List</span><span class="arrow">▼</span>
+          </button>
+          <div class="hosts-panel" id="panel-${ev.id}">
+            ${!ev.guestlist_capacity
+              ? '<div class="status-msg error">GUEST LIST CAPACITY NOT SET YET — PLEASE CONTACT ADMIN</div>'
+              : `<div class="hosts-row" id="hosts-row-${ev.id}"></div>`}
+          </div>
+        </div>`;
     }
 
-    async function loadHosts() {
+    function toggleGuestList(eventId) {
+      const panel = document.getElementById(`panel-${eventId}`);
+      const btn = document.getElementById(`toggle-${eventId}`);
+      panel.classList.toggle('open');
+      btn.classList.toggle('open');
+      btn.querySelector('span').textContent = panel.classList.contains('open') ? 'Hide Guest List' : 'Show Guest List';
+    }
+
+    async function loadHostsForEvent(eventId) {
       try {
         const res = await fetch(
-          `${SUPABASE_URL}/rest/v1/hosts?event_id=eq.${encodeURIComponent(eventId)}&order=host_number.asc,created_at.asc`,
+          `${SUPABASE_URL}/rest/v1/hosts?event_id=eq.${eventId}&order=host_number.asc,created_at.asc`,
           { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } }
         );
-        currentHosts = await res.json();
-        renderHosts();
+        allHosts[eventId] = await res.json();
       } catch (err) {
-        console.error('Failed to load hosts:', err);
-        renderStatus(document.getElementById('hosts-list'), 'FAILED TO LOAD GUEST LIST', true);
+        console.error('Failed to load hosts for event', eventId, err);
+        allHosts[eventId] = [];
       }
     }
 
-    function renderHosts() {
-      const listEl = document.getElementById('hosts-list');
-      const capacity = currentEvent.guestlist_capacity;
+    function renderHostsPanel(ev) {
+      const rowEl = document.getElementById(`hosts-row-${ev.id}`);
+      if (!rowEl) return; // capacity not set, panel shows a message instead
 
-      // Group existing entries by host_number
+      const capacity = ev.guestlist_capacity;
+      const hosts = allHosts[ev.id] || [];
+
       const grouped = {};
-      currentHosts.forEach(h => {
+      hosts.forEach(h => {
         if (!grouped[h.host_number]) grouped[h.host_number] = [];
         grouped[h.host_number].push(h);
       });
 
       const existingNumbers = Object.keys(grouped).map(Number);
       const maxExisting = existingNumbers.length ? Math.max(...existingNumbers) : 0;
-
-      // Hosts 1..maxExisting are already unlocked (they have data).
-      // One more empty host unlocks after them, since the rule is "host N+1
-      // opens once host N has at least 1 person" — and any host present in
-      // the data already has at least 1 person by definition.
       const hostsToShow = maxExisting + 1;
 
       let html = '';
@@ -663,72 +755,72 @@
 
         const namesHtml = entries.map(e => {
           const allNames = [e.submitter_name, ...(e.other_names || [])];
-          return `<div class="host-name-row"><span class="dot"></span>${allNames.join(', ')}</div>`;
+          return `<div class="host-col-name-row"><span class="dot"></span>${allNames.join(', ')}</div>`;
         }).join('');
 
         html += `
-          <div class="host-card ${isFull ? 'full' : ''}" data-host="${n}">
-            <div class="host-card-header">
-              <div class="host-card-title">Host ${n}</div>
-              <div class="host-card-count ${isFull ? 'is-full' : ''}">${totalPeople}/${capacity}${isFull ? ' · FULL' : ''}</div>
+          <div class="host-col ${isFull ? 'full' : ''}">
+            <div class="host-col-header">
+              <div class="host-col-title">Host ${n}</div>
+              <div class="host-col-count ${isFull ? 'is-full' : ''}">${totalPeople}/${capacity}${isFull ? ' · FULL' : ''}</div>
             </div>
-            <div class="host-card-body">
-              <div class="host-names">${namesHtml}</div>
+            <div class="host-col-body">
+              <div class="host-col-names">${namesHtml}</div>
               ${isFull
-                ? `<div class="host-full-label">This host is full</div>`
-                : `<button class="host-join-btn" onclick="toggleForm(${n})">+ Join Host ${n}</button>`}
-              <div class="host-form" id="form-${n}">
+                ? `<div class="host-col-full-label">Full</div>`
+                : `<button class="host-col-join" onclick="toggleForm(${ev.id}, ${n})">+ Join</button>`}
+              <div class="host-form" id="form-${ev.id}-${n}">
                 <div>
                   <label>Name</label>
-                  <input type="text" id="name-${n}" placeholder="Your name" />
+                  <input type="text" id="name-${ev.id}-${n}" placeholder="Your name" />
                 </div>
                 <div>
                   <label>How many person</label>
-                  <select id="count-${n}" onchange="renderExtraNames(${n})">
+                  <select id="count-${ev.id}-${n}" onchange="renderExtraNames(${ev.id}, ${n})">
                     ${Array.from({length: remaining}, (_, i) => i + 1).map(i => `<option value="${i}">${i}</option>`).join('')}
                   </select>
                 </div>
-                <div class="host-form-extra-names" id="extra-names-${n}"></div>
-                <div class="host-form-error" id="error-${n}"></div>
-                <div class="host-form-success" id="success-${n}">Joined Host ${n} successfully!</div>
+                <div class="host-form-extra-names" id="extra-names-${ev.id}-${n}"></div>
+                <div class="host-form-error" id="error-${ev.id}-${n}"></div>
+                <div class="host-form-success" id="success-${ev.id}-${n}">Joined!</div>
                 <div class="host-form-actions">
-                  <button class="host-form-submit" id="submit-${n}" onclick="submitHost(${n}, ${remaining})">Submit</button>
-                  <button class="host-form-cancel" onclick="toggleForm(${n})">Cancel</button>
+                  <button class="host-form-submit" id="submit-${ev.id}-${n}" onclick="submitHost(${ev.id}, ${n}, ${remaining})">Submit</button>
+                  <button class="host-form-cancel" onclick="toggleForm(${ev.id}, ${n})">✕</button>
                 </div>
               </div>
             </div>
           </div>`;
       }
 
-      listEl.innerHTML = html;
+      rowEl.innerHTML = html;
     }
 
-    function toggleForm(n) {
-      const form = document.getElementById(`form-${n}`);
+    function toggleForm(eventId, n) {
+      const form = document.getElementById(`form-${eventId}-${n}`);
       const wasOpen = form.classList.contains('open');
       document.querySelectorAll('.host-form.open').forEach(f => f.classList.remove('open'));
       if (!wasOpen) {
         form.classList.add('open');
-        renderExtraNames(n);
+        renderExtraNames(eventId, n);
       }
     }
 
-    function renderExtraNames(n) {
-      const count = parseInt(document.getElementById(`count-${n}`).value, 10);
-      const wrap = document.getElementById(`extra-names-${n}`);
+    function renderExtraNames(eventId, n) {
+      const count = parseInt(document.getElementById(`count-${eventId}-${n}`).value, 10);
+      const wrap = document.getElementById(`extra-names-${eventId}-${n}`);
       let html = '';
       for (let i = 2; i <= count; i++) {
-        html += `<div><label>Name of person ${i}</label><input type="text" id="extra-${n}-${i}" placeholder="Name" /></div>`;
+        html += `<div><label>Person ${i}</label><input type="text" id="extra-${eventId}-${n}-${i}" placeholder="Name" /></div>`;
       }
       wrap.innerHTML = html;
     }
 
-    async function submitHost(n, remaining) {
-      const nameInput = document.getElementById(`name-${n}`);
-      const countSelect = document.getElementById(`count-${n}`);
-      const errorEl = document.getElementById(`error-${n}`);
-      const successEl = document.getElementById(`success-${n}`);
-      const submitBtn = document.getElementById(`submit-${n}`);
+    async function submitHost(eventId, n, remaining) {
+      const nameInput = document.getElementById(`name-${eventId}-${n}`);
+      const countSelect = document.getElementById(`count-${eventId}-${n}`);
+      const errorEl = document.getElementById(`error-${eventId}-${n}`);
+      const successEl = document.getElementById(`success-${eventId}-${n}`);
+      const submitBtn = document.getElementById(`submit-${eventId}-${n}`);
 
       const submitterName = nameInput.value.trim();
       const totalPeople = parseInt(countSelect.value, 10);
@@ -741,14 +833,14 @@
         return;
       }
       if (totalPeople > remaining) {
-        errorEl.textContent = `Only ${remaining} spot(s) left in this host.`;
+        errorEl.textContent = `Only ${remaining} spot(s) left.`;
         errorEl.classList.add('show');
         return;
       }
 
       const otherNames = [];
       for (let i = 2; i <= totalPeople; i++) {
-        const val = document.getElementById(`extra-${n}-${i}`).value.trim();
+        const val = document.getElementById(`extra-${eventId}-${n}-${i}`).value.trim();
         if (!val) {
           errorEl.textContent = `Please enter the name of person ${i}.`;
           errorEl.classList.add('show');
@@ -779,7 +871,19 @@
         if (!res.ok) throw new Error('Insert failed');
 
         successEl.classList.add('show');
-        await loadHosts();
+        await loadHostsForEvent(eventId);
+        const evRes = await fetch(
+          `${SUPABASE_URL}/rest/v1/events?id=eq.${eventId}&select=*`,
+          { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } }
+        );
+        const evRows = await evRes.json();
+        if (evRows.length) {
+          const wasOpen = document.getElementById(`panel-${eventId}`).classList.contains('open');
+          renderHostsPanel(evRows[0]);
+          if (wasOpen) {
+            document.getElementById(`panel-${eventId}`).classList.add('open');
+          }
+        }
       } catch (err) {
         console.error('Failed to submit host:', err);
         errorEl.textContent = 'Something went wrong. Please try again.';
@@ -788,7 +892,7 @@
       }
     }
 
-    loadEvent();
+    loadEvents();
   </script>
 
   <script>
