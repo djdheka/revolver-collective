@@ -912,21 +912,21 @@
           </div>
         </div>
         <div class="guestlist-divider">
-          <div class="card-title" style="margin-bottom:12px;">Guest List (Hosting)</div>
+          <div class="card-title" style="margin-bottom:12px;">Hosting</div>
           <div class="guestlist-toggle-row">
             <label class="toggle-switch">
               <input type="checkbox" ${ev.guestlist_enabled ? 'checked' : ''} onchange="updateEvent(${ev.id},'guestlist_enabled',this.checked)" />
               <span class="toggle-slider"></span>
             </label>
-            <label class="form-label" style="margin:0;">Enable Guest List</label>
+            <label class="form-label" style="margin:0;">Enable Hosting</label>
           </div>
-          <div class="guestlist-toggle-desc">(Shows a "Host" option on the live event so people can request a spot on the guest list)</div>
+          <div class="guestlist-toggle-desc">(Shows a "Host" option on the live event)</div>
           <div class="form-group">
             <label class="form-label">Capacity Per Host</label>
             <input class="form-input guestlist-capacity-input" type="number" min="1" value="${ev.guestlist_capacity||''}" onchange="updateEvent(${ev.id},'guestlist_capacity',this.value ? parseInt(this.value) : null)" placeholder="e.g. 6" />
           </div>
           <div class="btn-row">
-            <button class="guestlist-view-btn" onclick="toggleHostsPanel(${ev.id})" id="hosts-btn-${ev.id}">👥 View Guest List</button>
+            <button class="guestlist-view-btn" onclick="toggleHostsPanel(${ev.id})" id="hosts-btn-${ev.id}">👥 View Hosting</button>
           </div>
           <div class="hosts-admin-panel" id="hosts-panel-${ev.id}"></div>
         </div>
@@ -1369,7 +1369,7 @@
 
     if (isOpen) {
       panel.classList.remove('open');
-      btn.textContent = '👥 View Guest List';
+      btn.textContent = '👥 View Hosting';
       return;
     }
 
@@ -1378,11 +1378,11 @@
       hostsCache[eventId] = await fetchHosts(eventId);
       renderHostsPanel(eventId);
       panel.classList.add('open');
-      btn.textContent = '👥 Hide Guest List';
+      btn.textContent = '👥 Hide Hosting';
     } catch (err) {
       panel.innerHTML = '<div class="hosts-admin-empty">Failed to load guest list</div>';
       panel.classList.add('open');
-      btn.textContent = '👥 Hide Guest List';
+      btn.textContent = '👥 Hide Hosting';
     }
   }
 
