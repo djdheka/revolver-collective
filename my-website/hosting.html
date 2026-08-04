@@ -184,33 +184,57 @@
 
     .event-card-venue {
       flex-shrink: 0;
-      width: 220px;
+      width: 260px;
       margin-left: 28px;
       border: 1px solid rgba(201,168,76,0.2);
-      padding: 24px 20px;
+      background: rgba(201,168,76,0.04);
+      padding: 40px 32px;
       display: flex;
       flex-direction: column;
+      justify-content: space-between;
       align-items: center;
-      justify-content: center;
       text-align: center;
-      gap: 18px;
     }
-    .event-card-venue-name {
-      font-size: 13px;
-      letter-spacing: 1.5px;
+    .event-day {
+      font-family: 'Anton', sans-serif;
+      font-size: 80px;
+      color: var(--gold);
+      line-height: 1;
+      letter-spacing: 2px;
+    }
+    .event-month-year {
+      font-size: 11px;
+      letter-spacing: 5px;
+      color: rgba(255,255,255,0.4);
+      text-transform: uppercase;
+      margin-top: 6px;
+    }
+    .event-venue-info { margin-top: 32px; }
+    .event-venue-label {
+      font-size: 9px;
+      letter-spacing: 4px;
+      color: var(--gold);
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+    .event-venue-name {
+      font-size: 16px;
+      letter-spacing: 2px;
       color: var(--white);
       text-transform: uppercase;
     }
-    .event-card-venue-time {
-      font-size: 11px;
-      letter-spacing: 1.5px;
-      color: rgba(255,255,255,0.5);
-      text-transform: uppercase;
-    }
-    .event-card-venue-time span { display: block; color: var(--gold); margin-top: 4px; font-size: 12px; }
-    .event-card-directions {
-      font-size: 9px;
+    .event-venue-address {
+      font-size: 10px;
       letter-spacing: 2px;
+      color: rgba(255,255,255,0.4);
+      text-transform: uppercase;
+      margin-top: 4px;
+    }
+    .event-directions {
+      display: inline-block;
+      margin-top: 10px;
+      font-size: 8px;
+      letter-spacing: 3px;
       color: var(--gold);
       text-transform: uppercase;
       text-decoration: none;
@@ -218,7 +242,31 @@
       padding-bottom: 2px;
       transition: border-color 0.3s;
     }
-    .event-card-directions:hover { border-color: var(--gold); }
+    .event-directions:hover { border-color: var(--gold); }
+    .event-time {
+      margin-top: 32px;
+      font-size: 10px;
+      letter-spacing: 3px;
+      color: rgba(255,255,255,0.35);
+      text-transform: uppercase;
+    }
+    .event-time span {
+      display: block;
+      font-size: 16px;
+      letter-spacing: 2px;
+      color: var(--white);
+      margin-top: 4px;
+    }
+    .event-tag {
+      display: inline-block;
+      margin-top: 24px;
+      font-size: 8px;
+      letter-spacing: 3px;
+      color: var(--gold);
+      text-transform: uppercase;
+      border: 1px solid rgba(201,168,76,0.35);
+      padding: 5px 12px;
+    }
 
     /* ── TOGGLE BAR ── */
     .guestlist-toggle {
@@ -678,7 +726,8 @@
 
     function renderEventCard(ev) {
       const d = ev.date ? new Date(ev.date) : null;
-      const dateStr = d ? `${d.getDate().toString().padStart(2,'0')} ${MONTHS[d.getMonth()]} ${d.getFullYear()}` : '';
+      const day = d ? d.getDate().toString().padStart(2,'0') : '';
+      const monthYear = d ? `${MONTHS[d.getMonth()]} ${d.getFullYear()}` : '';
       const flyerHtml = ev.flyer_url
         ? `<img src="${cdnUrl(ev.flyer_url, 500)}" alt="${ev.name} flyer" onclick="openFlyerLightbox('${cdnUrl(ev.flyer_url, 1400)}')" />`
         : '';
@@ -692,9 +741,18 @@
               <div class="event-card-desc">${ev.description || ''}</div>
             </div>
             <div class="event-card-venue">
-              <div class="event-card-venue-name">${ev.venue || ''}</div>
-              <div class="event-card-venue-time">Door Open<span>${ev.time || '21:00'} WIB · ${dateStr}</span></div>
-              <a class="event-card-directions" href="https://maps.google.com/?q=${encodeURIComponent((ev.venue || '') + ' ' + (ev.city || ''))}" target="_blank" rel="noopener">↗ Get Directions</a>
+              <div>
+                <div class="event-day">${day}</div>
+                <div class="event-month-year">${monthYear}</div>
+                <div class="event-venue-info">
+                  <div class="event-venue-label">Venue</div>
+                  <div class="event-venue-name">${ev.venue || ''}</div>
+                  <div class="event-venue-address">${ev.city || ''}, Indonesia</div>
+                  <a class="event-directions" href="https://maps.google.com/?q=${encodeURIComponent((ev.venue || '') + ' ' + (ev.city || ''))}" target="_blank" rel="noopener">↗ Get Directions</a>
+                </div>
+                <div class="event-time">Door Open<span>${ev.time || '21:00'} WIB</span></div>
+                ${ev.tag ? `<span class="event-tag">${ev.tag}</span>` : ''}
+              </div>
             </div>
           </div>
           <button class="guestlist-toggle" id="toggle-${ev.id}" onclick="toggleGuestList(${ev.id})">
