@@ -225,6 +225,70 @@
     }
     .add-btn:hover { border-color: var(--gold); }
 
+    /* ── GUEST LIST (HOSTING) ── */
+    .guestlist-divider {
+      border-top: 1px solid var(--border);
+      margin: 20px 0 16px;
+      padding-top: 16px;
+    }
+    .guestlist-toggle-row {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 16px; margin-bottom: 16px;
+    }
+    .toggle-switch {
+      position: relative; display: inline-block; width: 42px; height: 24px; flex-shrink: 0;
+    }
+    .toggle-switch input { opacity: 0; width: 0; height: 0; }
+    .toggle-slider {
+      position: absolute; cursor: pointer; inset: 0;
+      background: #2a2a2a; border: 1px solid var(--border);
+      transition: 0.3s;
+    }
+    .toggle-slider::before {
+      content: ''; position: absolute; height: 16px; width: 16px;
+      left: 3px; top: 2px; background: rgba(255,255,255,0.5);
+      transition: 0.3s;
+    }
+    .toggle-switch input:checked + .toggle-slider { background: rgba(201,168,76,0.25); border-color: var(--gold); }
+    .toggle-switch input:checked + .toggle-slider::before { transform: translateX(17px); background: var(--gold); }
+
+    .guestlist-view-btn {
+      font-family: 'Oswald', sans-serif; font-size: 9px; letter-spacing: 3px;
+      color: var(--gold); text-transform: uppercase; background: transparent;
+      border: 1px solid rgba(201,168,76,0.3); padding: 10px 18px; cursor: pointer;
+      transition: border-color 0.3s, background 0.3s;
+    }
+    .guestlist-view-btn:hover { border-color: var(--gold); background: rgba(201,168,76,0.08); }
+
+    .hosts-admin-panel {
+      display: none; margin-top: 16px; border: 1px solid var(--border); padding: 16px;
+    }
+    .hosts-admin-panel.open { display: block; }
+    .hosts-admin-group { margin-bottom: 16px; }
+    .hosts-admin-group:last-child { margin-bottom: 0; }
+    .hosts-admin-group-title {
+      font-size: 10px; letter-spacing: 2px; color: var(--gold);
+      text-transform: uppercase; margin-bottom: 8px;
+    }
+    .host-entry-row {
+      display: flex; align-items: center; gap: 12px;
+      padding: 8px 0; border-bottom: 1px solid var(--border);
+      font-size: 11px; letter-spacing: 0.5px; color: rgba(255,255,255,0.8);
+    }
+    .host-entry-row:last-child { border-bottom: none; }
+    .host-entry-names { flex: 1; text-transform: uppercase; }
+    .host-entry-checkin { display: flex; align-items: center; gap: 6px; font-size: 9px; letter-spacing: 1.5px; color: rgba(255,255,255,0.5); text-transform: uppercase; cursor: pointer; }
+    .host-entry-delete {
+      font-size: 8px; letter-spacing: 1.5px; color: rgba(255,100,100,0.6);
+      text-transform: uppercase; cursor: pointer; background: none; border: none;
+      transition: color 0.2s;
+    }
+    .host-entry-delete:hover { color: #f55; }
+    .hosts-admin-empty {
+      font-size: 10px; letter-spacing: 1.5px; color: rgba(255,255,255,0.3);
+      text-transform: uppercase; text-align: center; padding: 12px 0;
+    }
+
     /* ── MIXTAPE PREVIEW ── */
     .yt-preview {
       width: 180px; aspect-ratio: 16/9;
@@ -843,6 +907,26 @@
             <button class="btn btn-gold" onclick="addLineup(${ev.id})">Add</button>
           </div>
         </div>
+        <div class="guestlist-divider">
+          <div class="card-title" style="margin-bottom:12px;">Guest List (Hosting)</div>
+          <div class="guestlist-toggle-row">
+            <label class="form-label" style="margin:0;">Enable Guest List</label>
+            <label class="toggle-switch">
+              <input type="checkbox" ${ev.guestlist_enabled ? 'checked' : ''} onchange="updateEvent(${ev.id},'guestlist_enabled',this.checked)" />
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Capacity Per Host</label>
+              <input class="form-input" type="number" min="1" value="${ev.guestlist_capacity||''}" onchange="updateEvent(${ev.id},'guestlist_capacity',this.value ? parseInt(this.value) : null)" placeholder="e.g. 6" />
+            </div>
+          </div>
+          <div class="btn-row">
+            <button class="guestlist-view-btn" onclick="toggleHostsPanel(${ev.id})" id="hosts-btn-${ev.id}">👥 View Guest List</button>
+          </div>
+          <div class="hosts-admin-panel" id="hosts-panel-${ev.id}"></div>
+        </div>
         <div class="btn-row">
           <button class="btn btn-gold" onclick="saveEvent(${ev.id}, this)">💾 Save to Live Site</button>
         </div>
@@ -1206,7 +1290,9 @@
         venue: ev.venue, city: ev.city, tag: ev.tag,
         entry: ev.entry, description: ev.description, lineup: ev.lineup,
         lat: ev.lat || null, lng: ev.lng || null,
-        flyer_url: ev.flyer_url || null
+        flyer_url: ev.flyer_url || null,
+        guestlist_enabled: !!ev.guestlist_enabled,
+        guestlist_capacity: ev.guestlist_capacity || null
       });
       renderArchive();
       btn.style.background = '#3a7d44';
@@ -1260,6 +1346,102 @@
   function removeLineup(id, member) {
     const ev = data.events.find(e => e.id === id);
     if (ev) { ev.lineup = (ev.lineup||[]).filter(m => m !== member); save(); renderEvents(); }
+  }
+
+  // ── GUEST LIST (HOSTING) ──
+  const hostsCache = {}; // event id -> array of host rows, loaded on demand
+
+  async function fetchHosts(eventId) {
+    const r = await fetch(
+      `${SUPABASE_URL}/rest/v1/hosts?event_id=eq.${eventId}&order=host_number.asc,created_at.asc`,
+      { headers: sbHeaders() }
+    );
+    return r.json();
+  }
+
+  async function toggleHostsPanel(eventId) {
+    const panel = document.getElementById(`hosts-panel-${eventId}`);
+    const btn = document.getElementById(`hosts-btn-${eventId}`);
+    const isOpen = panel.classList.contains('open');
+
+    if (isOpen) {
+      panel.classList.remove('open');
+      btn.textContent = '👥 View Guest List';
+      return;
+    }
+
+    btn.textContent = 'Loading…';
+    try {
+      hostsCache[eventId] = await fetchHosts(eventId);
+      renderHostsPanel(eventId);
+      panel.classList.add('open');
+      btn.textContent = '👥 Hide Guest List';
+    } catch (err) {
+      panel.innerHTML = '<div class="hosts-admin-empty">Failed to load guest list</div>';
+      panel.classList.add('open');
+      btn.textContent = '👥 Hide Guest List';
+    }
+  }
+
+  function renderHostsPanel(eventId) {
+    const panel = document.getElementById(`hosts-panel-${eventId}`);
+    const hosts = hostsCache[eventId] || [];
+
+    if (!hosts.length) {
+      panel.innerHTML = '<div class="hosts-admin-empty">No one has joined the guest list yet</div>';
+      return;
+    }
+
+    const grouped = {};
+    hosts.forEach(h => {
+      if (!grouped[h.host_number]) grouped[h.host_number] = [];
+      grouped[h.host_number].push(h);
+    });
+
+    panel.innerHTML = Object.keys(grouped).sort((a,b) => a - b).map(n => {
+      const entries = grouped[n];
+      const totalPeople = entries.reduce((sum, e) => sum + (e.total_people || 0), 0);
+      const rows = entries.map(e => {
+        const allNames = [e.submitter_name, ...(e.other_names || [])].join(', ');
+        return `
+          <div class="host-entry-row">
+            <label class="host-entry-checkin">
+              <input type="checkbox" ${e.checked_in ? 'checked' : ''} onchange="toggleCheckin(${e.id},${eventId},this.checked)" />
+              Checked In
+            </label>
+            <div class="host-entry-names">${allNames} (${e.total_people})</div>
+            <button class="host-entry-delete" onclick="deleteHostEntry(${e.id},${eventId})">✕ Remove</button>
+          </div>`;
+      }).join('');
+      return `
+        <div class="hosts-admin-group">
+          <div class="hosts-admin-group-title">Host ${n} · ${totalPeople} people</div>
+          ${rows}
+        </div>`;
+    }).join('');
+  }
+
+  async function toggleCheckin(hostRowId, eventId, checked) {
+    try {
+      await sbUpdate('hosts', hostRowId, { checked_in: checked });
+      const row = (hostsCache[eventId] || []).find(h => h.id === hostRowId);
+      if (row) row.checked_in = checked;
+      setStatus(checked ? 'Marked as checked in ✓' : 'Checked-in status removed');
+    } catch (err) {
+      setStatus('Failed to update check-in status');
+    }
+  }
+
+  async function deleteHostEntry(hostRowId, eventId) {
+    if (!confirm('Remove this guest list entry? This cannot be undone.')) return;
+    try {
+      await sbDelete('hosts', hostRowId);
+      hostsCache[eventId] = (hostsCache[eventId] || []).filter(h => h.id !== hostRowId);
+      renderHostsPanel(eventId);
+      setStatus('Guest removed ✓');
+    } catch (err) {
+      setStatus('Failed to remove guest');
+    }
   }
 
   // ── MEMBERS (Supabase) ──
