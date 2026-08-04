@@ -232,9 +232,13 @@
       padding-top: 16px;
     }
     .guestlist-toggle-row {
-      display: flex; align-items: center; justify-content: space-between;
-      gap: 16px; margin-bottom: 16px;
+      display: flex; align-items: center; gap: 12px; margin-bottom: 6px;
     }
+    .guestlist-toggle-desc {
+      font-size: 10px; letter-spacing: 1px; color: rgba(255,255,255,0.4);
+      text-transform: none; margin-bottom: 16px;
+    }
+    .guestlist-capacity-input { max-width: 260px; }
     .toggle-switch {
       position: relative; display: inline-block; width: 42px; height: 24px; flex-shrink: 0;
     }
@@ -910,17 +914,16 @@
         <div class="guestlist-divider">
           <div class="card-title" style="margin-bottom:12px;">Guest List (Hosting)</div>
           <div class="guestlist-toggle-row">
-            <label class="form-label" style="margin:0;">Enable Guest List</label>
             <label class="toggle-switch">
               <input type="checkbox" ${ev.guestlist_enabled ? 'checked' : ''} onchange="updateEvent(${ev.id},'guestlist_enabled',this.checked)" />
               <span class="toggle-slider"></span>
             </label>
+            <label class="form-label" style="margin:0;">Enable Guest List</label>
           </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label class="form-label">Capacity Per Host</label>
-              <input class="form-input" type="number" min="1" value="${ev.guestlist_capacity||''}" onchange="updateEvent(${ev.id},'guestlist_capacity',this.value ? parseInt(this.value) : null)" placeholder="e.g. 6" />
-            </div>
+          <div class="guestlist-toggle-desc">(Shows a "Host" option on the live event so people can request a spot on the guest list)</div>
+          <div class="form-group">
+            <label class="form-label">Capacity Per Host</label>
+            <input class="form-input guestlist-capacity-input" type="number" min="1" value="${ev.guestlist_capacity||''}" onchange="updateEvent(${ev.id},'guestlist_capacity',this.value ? parseInt(this.value) : null)" placeholder="e.g. 6" />
           </div>
           <div class="btn-row">
             <button class="guestlist-view-btn" onclick="toggleHostsPanel(${ev.id})" id="hosts-btn-${ev.id}">👥 View Guest List</button>
@@ -1403,13 +1406,14 @@
       const totalPeople = entries.reduce((sum, e) => sum + (e.total_people || 0), 0);
       const rows = entries.map(e => {
         const allNames = [e.submitter_name, ...(e.other_names || [])].join(', ');
+        const label = (e.total_people && e.total_people > 1) ? `${allNames} (${e.total_people})` : allNames;
         return `
           <div class="host-entry-row">
             <label class="host-entry-checkin">
               <input type="checkbox" ${e.checked_in ? 'checked' : ''} onchange="toggleCheckin(${e.id},${eventId},this.checked)" />
               Checked In
             </label>
-            <div class="host-entry-names">${allNames} (${e.total_people})</div>
+            <div class="host-entry-names">${label}</div>
             <button class="host-entry-delete" onclick="deleteHostEntry(${e.id},${eventId})">✕ Remove</button>
           </div>`;
       }).join('');

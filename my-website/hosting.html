@@ -989,6 +989,19 @@
 
       submitBtn.disabled = true;
       try {
+        // One row per person (not one grouped row) — this is what lets the
+        // admin panel check in or remove each guest individually, even when
+        // they joined together as a group.
+        const allNames = [submitterName, ...otherNames];
+        const rows = allNames.map(personName => ({
+          event_id: eventId,
+          host_number: n,
+          submitter_name: personName,
+          total_people: 1,
+          other_names: [],
+          checked_in: false
+        }));
+
         const res = await fetch(`${SUPABASE_URL}/rest/v1/hosts`, {
           method: 'POST',
           headers: {
@@ -997,14 +1010,7 @@
             'Content-Type': 'application/json',
             'Prefer': 'return=representation'
           },
-          body: JSON.stringify({
-            event_id: eventId,
-            host_number: n,
-            submitter_name: submitterName,
-            total_people: totalPeople,
-            other_names: otherNames,
-            checked_in: false
-          })
+          body: JSON.stringify(rows)
         });
         if (!res.ok) throw new Error('Insert failed');
 
