@@ -139,7 +139,7 @@
       flex-shrink: 0;
       width: 220px;
       display: flex;
-      align-items: flex-start;
+      align-items: center;
       justify-content: center;
     }
     .event-card-flyer img {
@@ -160,7 +160,6 @@
       display: flex;
       flex-direction: column;
       margin-left: 28px;
-      border: 1px solid rgba(201,168,76,0.2);
     }
     .event-card-name {
       font-family: 'Anton', sans-serif;
@@ -168,12 +167,10 @@
       letter-spacing: 3px;
       color: var(--gold);
       text-transform: uppercase;
-      padding: 18px 24px;
-      border-bottom: 1px solid rgba(201,168,76,0.15);
+      padding-bottom: 18px;
     }
     .event-card-desc {
       flex: 1;
-      padding: 20px 24px;
       font-size: 11px;
       letter-spacing: 1.5px;
       line-height: 1.9;
@@ -471,17 +468,18 @@
 
     /* ── NOTE ── */
     .hosting-note {
-      margin-top: 20px;
-      border-left: 2px solid var(--gold);
+      margin-bottom: 40px;
+      border-left: 2px solid #ff3b3b;
       padding: 16px 24px;
-      background: rgba(201,168,76,0.03);
+      background: rgba(255,59,59,0.06);
     }
     .hosting-note p {
-      font-size: 11px;
+      font-size: 12px;
       letter-spacing: 1px;
       line-height: 1.9;
-      color: rgba(255,255,255,0.55);
+      color: #ff5c5c;
       text-transform: none;
+      font-weight: 600;
     }
     .hosting-note p + p { margin-top: 6px; }
 
@@ -636,15 +634,15 @@
     <div class="page-header-rule"><div class="page-header-rule-diamond"></div></div>
   </div>
 
-  <div class="hosting-wrapper" id="hosting-wrapper">
-    <div class="status-msg">LOADING EVENTS...</div>
+  <div class="hosting-wrapper" style="padding-bottom:0;">
+    <div class="hosting-note">
+      <p>⚠️ Hosting harus perempuan.</p>
+      <p>⚠️ Pembatalan hosting hanya bisa dilakukan melalui konfirmasi admin.</p>
+    </div>
   </div>
 
-  <div class="hosting-wrapper" style="padding-top:0;">
-    <div class="hosting-note">
-      <p>Hosting harus perempuan.</p>
-      <p>Pembatalan hosting hanya bisa dilakukan melalui konfirmasi admin.</p>
-    </div>
+  <div class="hosting-wrapper" id="hosting-wrapper" style="padding-top:0;">
+    <div class="status-msg">LOADING EVENTS...</div>
   </div>
 
   <div class="flyer-lightbox" id="flyer-lightbox" onclick="closeFlyerLightbox()">
