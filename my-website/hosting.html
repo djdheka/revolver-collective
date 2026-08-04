@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Guest List – Revolver Collective</title>
+  <title>Hosting – Revolver Collective</title>
   <link rel="icon" href="favicon.ico?v=1" sizes="any">
   <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png?v=1">
   <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png?v=1">
@@ -630,7 +630,7 @@
 
   <div class="page-header">
     <div class="page-header-label">Revolver Collective</div>
-    <div class="page-header-title">Guest List</div>
+    <div class="page-header-title">Hosting</div>
     <div class="page-header-rule"><div class="page-header-rule-diamond"></div></div>
   </div>
 
@@ -754,7 +754,7 @@
             </div>
           </div>
           <button class="guestlist-toggle" id="toggle-${ev.id}" onclick="toggleGuestList(${ev.id})">
-            <span>Show Guest List</span><span class="arrow">▼</span>
+            <span>Show Hosting</span><span class="arrow">▼</span>
           </button>
           <div class="hosts-panel" id="panel-${ev.id}">
             ${!ev.guestlist_capacity
@@ -769,7 +769,7 @@
       const btn = document.getElementById(`toggle-${eventId}`);
       panel.classList.toggle('open');
       btn.classList.toggle('open');
-      btn.querySelector('span').textContent = panel.classList.contains('open') ? 'Hide Guest List' : 'Show Guest List';
+      btn.querySelector('span').textContent = panel.classList.contains('open') ? 'Hide Hosting' : 'Show Hosting';
     }
 
     async function loadHostsForEvent(eventId) {
