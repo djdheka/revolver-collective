@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Guest List – Revolver Collective</title>
+  <link rel="icon" href="favicon.ico?v=1" sizes="any">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png?v=1">
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png?v=1">
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png?v=1">
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Oswald:wght@300;400;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --gold: #c9a84c;
+      --black: #070707;
+      --white: #f0ede6;
+    }
+
+    body {
+      background: var(--black);
+      color: var(--white);
+      font-family: 'Oswald', sans-serif;
+      min-height: 100dvh;
+    }
+
+    /* ── NAV ── */
+    .nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 9000;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 40px;
+      height: 70px;
+      background: rgba(7,7,7,0.88);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(201,168,76,0.12);
+    }
+    .nav-logo { text-decoration: none; }
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 36px;
+      list-style: none;
+    }
+    .nav-logo-item { display: none; }
+    .nav-links > li > a {
+      font-family: 'Oswald', sans-serif;
+      font-weight: 400;
+      font-size: 13px;
+      letter-spacing: 2px;
+      color: rgba(240,237,230,0.5);
+      text-decoration: none;
+      text-transform: uppercase;
+      transition: color 0.3s;
+      white-space: nowrap;
+    }
+    .nav-links > li > a:hover { color: var(--gold); }
+
+    /* ── PAGE HEADER ── */
+    .page-header {
+      padding: 120px 40px 60px;
+      text-align: center;
+      border-bottom: 1px solid rgba(201,168,76,0.1);
+    }
+    .page-header-label {
+      font-size: 10px;
+      letter-spacing: 6px;
+      color: var(--gold);
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+    .page-header-title {
+      font-family: 'Anton', sans-serif;
+      font-size: clamp(32px, 6vw, 60px);
+      letter-spacing: 6px;
+      text-transform: uppercase;
+      color: var(--white);
+    }
+    .page-header-rule {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 200px;
+      margin: 24px auto 0;
+    }
+    .page-header-rule::before, .page-header-rule::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+    }
+    .page-header-rule::before { background: linear-gradient(to right, transparent, var(--gold)); }
+    .page-header-rule::after  { background: linear-gradient(to left,  transparent, var(--gold)); }
+    .page-header-rule-diamond {
+      width: 5px; height: 5px;
+      background: var(--gold);
+      transform: rotate(45deg);
+      margin: 0 10px;
+      flex-shrink: 0;
+    }
+
+    /* ── WRAPPER ── */
+    .hosting-wrapper {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 50px 40px 100px;
+    }
+
+    /* event context card */
+    .event-context {
+      border: 1px solid rgba(201,168,76,0.25);
+      background: rgba(201,168,76,0.04);
+      padding: 28px 32px;
+      margin-bottom: 44px;
+      text-align: center;
+    }
+    .event-context-name {
+      font-family: 'Anton', sans-serif;
+      font-size: clamp(22px, 4vw, 32px);
+      letter-spacing: 3px;
+      color: var(--gold);
+      text-transform: uppercase;
+    }
+    .event-context-meta {
+      margin-top: 10px;
+      font-size: 11px;
+      letter-spacing: 2px;
+      color: rgba(255,255,255,0.5);
+      text-transform: uppercase;
+    }
+
+    .status-msg {
+      text-align: center;
+      padding: 60px 20px;
+      font-size: 11px;
+      letter-spacing: 3px;
+      color: rgba(255,255,255,0.4);
+      text-transform: uppercase;
+    }
+    .status-msg.error { color: rgba(255,120,120,0.6); }
+
+    /* ── HOST CARDS ── */
+    .hosts-list {
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+    .host-card {
+      border: 1px solid rgba(201,168,76,0.2);
+      background: rgba(255,255,255,0.02);
+      transition: border-color 0.3s;
+    }
+    .host-card.full { border-color: rgba(255,255,255,0.1); }
+    .host-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 22px 28px;
+      border-bottom: 1px solid rgba(201,168,76,0.12);
+    }
+    .host-card-title {
+      font-family: 'Anton', sans-serif;
+      font-size: 20px;
+      letter-spacing: 3px;
+      color: var(--white);
+      text-transform: uppercase;
+    }
+    .host-card-count {
+      font-size: 12px;
+      letter-spacing: 2px;
+      color: var(--gold);
+      text-transform: uppercase;
+    }
+    .host-card-count.is-full { color: rgba(255,120,120,0.7); }
+
+    .host-card-body {
+      padding: 22px 28px 26px;
+    }
+    .host-names {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    .host-names:empty { display: none; }
+    .host-name-row {
+      font-size: 12px;
+      letter-spacing: 1.5px;
+      color: rgba(255,255,255,0.7);
+      text-transform: uppercase;
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+    }
+    .host-name-row .dot {
+      width: 4px; height: 4px;
+      background: var(--gold);
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .host-name-sub {
+      font-size: 10px;
+      letter-spacing: 1px;
+      color: rgba(255,255,255,0.35);
+    }
+
+    .host-join-btn {
+      font-family: 'Oswald', sans-serif;
+      font-size: 10px;
+      letter-spacing: 4px;
+      color: var(--black);
+      text-transform: uppercase;
+      background: var(--gold);
+      padding: 12px 26px;
+      border: none;
+      cursor: pointer;
+      transition: background 0.3s, color 0.3s;
+    }
+    .host-join-btn:hover { background: var(--white); }
+    .host-full-label {
+      font-size: 10px;
+      letter-spacing: 3px;
+      color: rgba(255,255,255,0.3);
+      text-transform: uppercase;
+    }
+
+    /* join form */
+    .host-form {
+      display: none;
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px solid rgba(201,168,76,0.1);
+      flex-direction: column;
+      gap: 16px;
+    }
+    .host-form.open { display: flex; }
+    .host-form label {
+      display: block;
+      font-size: 9px;
+      letter-spacing: 3px;
+      color: var(--gold);
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+    .host-form input, .host-form select {
+      width: 100%;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(201,168,76,0.25);
+      color: var(--white);
+      font-family: 'Oswald', sans-serif;
+      font-size: 13px;
+      letter-spacing: 1px;
+      padding: 12px 14px;
+    }
+    .host-form input:focus, .host-form select:focus {
+      outline: none;
+      border-color: var(--gold);
+    }
+    .host-form-extra-names {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .host-form-actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 4px;
+    }
+    .host-form-submit {
+      font-family: 'Oswald', sans-serif;
+      font-size: 10px;
+      letter-spacing: 4px;
+      color: var(--black);
+      text-transform: uppercase;
+      background: var(--gold);
+      padding: 12px 28px;
+      border: none;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    .host-form-submit:hover { background: var(--white); }
+    .host-form-submit:disabled { opacity: 0.4; cursor: not-allowed; }
+    .host-form-cancel {
+      font-family: 'Oswald', sans-serif;
+      font-size: 10px;
+      letter-spacing: 4px;
+      color: rgba(255,255,255,0.5);
+      text-transform: uppercase;
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.15);
+      padding: 12px 22px;
+      cursor: pointer;
+      transition: border-color 0.3s, color 0.3s;
+    }
+    .host-form-cancel:hover { color: var(--white); border-color: rgba(255,255,255,0.35); }
+    .host-form-error {
+      font-size: 10px;
+      letter-spacing: 1px;
+      color: rgba(255,120,120,0.8);
+      text-transform: none;
+      display: none;
+    }
+    .host-form-error.show { display: block; }
+    .host-form-success {
+      font-size: 11px;
+      letter-spacing: 2px;
+      color: var(--gold);
+      text-transform: uppercase;
+      display: none;
+      text-align: center;
+      padding: 14px 0;
+    }
+    .host-form-success.show { display: block; }
+
+    /* ── NOTE ── */
+    .hosting-note {
+      margin-top: 44px;
+      border-left: 2px solid var(--gold);
+      padding: 16px 24px;
+      background: rgba(201,168,76,0.03);
+    }
+    .hosting-note p {
+      font-size: 11px;
+      letter-spacing: 1px;
+      line-height: 1.9;
+      color: rgba(255,255,255,0.55);
+      text-transform: none;
+    }
+    .hosting-note p + p { margin-top: 6px; }
+
+    /* ── FOOTER ── */
+    footer {
+      border-top: 1px solid rgba(201,168,76,0.1);
+      text-align: center;
+      padding: 32px 40px;
+      font-size: 9px;
+      letter-spacing: 4px;
+      color: rgba(255,255,255,0.2);
+      text-transform: uppercase;
+    }
+
+    /* Hamburger - hidden on desktop */
+    .hamburger { display: none; }
+
+    @media (max-width: 800px) {
+      .page-header { padding: 100px 24px 40px; }
+      .hosting-wrapper { padding: 36px 20px 80px; }
+      .event-context { padding: 22px 20px; }
+      .host-card-header { padding: 18px 20px; }
+      .host-card-body { padding: 18px 20px 22px; }
+      .nav { padding: 0 20px; }
+
+      .hamburger {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        gap: 5px;
+        z-index: 10000 !important;
+        position: relative !important;
+        width: 36px;
+        height: 36px;
+        cursor: pointer;
+        background: none;
+        border: none;
+        padding: 0;
+      }
+      .hamburger span {
+        display: block;
+        width: 22px;
+        height: 2px;
+        background: var(--white);
+        transition: all 0.3s ease;
+      }
+      .hamburger.open span:nth-child(1) { transform: rotate(45deg) translate(5px, 5px); }
+      .hamburger.open span:nth-child(2) { opacity: 0; }
+      .hamburger.open span:nth-child(3) { transform: rotate(-45deg) translate(5px, -5px); }
+
+      .nav-links {
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        width: 100vw;
+        height: 100vh;
+        background: linear-gradient(160deg, #0d0a00 0%, #1c1400 35%, #2b1e00 65%, #0d0a00 100%);
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 0;
+        z-index: 9999;
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: flex;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.4s ease;
+      }
+      .nav-links.open { opacity: 1; pointer-events: all; }
+      .nav-links > li { width: 100%; text-align: center; }
+      .nav-links > li > a {
+        font-size: 24px;
+        letter-spacing: 6px;
+        padding: 15px 0;
+        display: block;
+        color: #f0ede6;
+        text-transform: uppercase;
+        font-family: 'Anton', sans-serif;
+        border-bottom: 1px solid rgba(201,168,76,0.15);
+        transition: color 0.25s, letter-spacing 0.25s;
+      }
+      .nav-links > li.nav-logo-item { display: list-item; border: none !important; padding: 0 0 40px 0; }
+      .nav-links > li.nav-logo-item img { height: 100px; opacity: 0.9; display: block; margin: 0 auto; }
+      .nav-links > li:nth-child(2) > a { border-top: 1px solid rgba(201,168,76,0.15) !important; }
+      .nav-links > li > a:hover { color: #c9a84c; letter-spacing: 8px; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="nav">
+    <a class="nav-logo" href="index.html">
+      <img src="REVOLVER_NEW__PUTIH_.png" alt="Revolver Collective" style="height:32px; display:block;" />
+    </a>
+    <button class="hamburger" id="hamburger" onclick="toggleMenu()">
+      <span></span><span></span><span></span>
+    </button>
+    <ul class="nav-links" id="nav-links">
+      <li class="nav-logo-item"><img src="REVOLVER_NEW__PUTIH_.png" alt="Revolver Collective" /></li>
+      <li><a href="index.html#top">Home</a></li>
+      <li><a href="upcoming-events.html">Upcoming Events</a></li>
+      <li><a href="recap-photo.html">Recap Photo</a></li>
+      <li><a href="index.html#members">Members</a></li>
+      <li><a href="mixtape.html">Mixtape</a></li>
+      <li><a href="index.html#about">About</a></li>
+      <li><a href="index.html#contact">Contact</a></li>
+    </ul>
+  </nav>
+
+  <div class="page-header">
+    <div class="page-header-label">Revolver Collective</div>
+    <div class="page-header-title">Guest List</div>
+    <div class="page-header-rule"><div class="page-header-rule-diamond"></div></div>
+  </div>
+
+  <div class="hosting-wrapper">
+    <div id="event-context">
+      <div class="status-msg">LOADING EVENT...</div>
+    </div>
+
+    <div class="hosts-list" id="hosts-list"></div>
+
+    <div class="hosting-note" id="hosting-note" style="display:none;">
+      <p>Hosting harus perempuan.</p>
+      <p>Pembatalan hosting hanya bisa dilakukan melalui konfirmasi admin.</p>
+    </div>
+  </div>
+
+  <footer>
+    © 2026 Revolver Collective &nbsp;·&nbsp; Yogyakarta, Indonesia
+  </footer>
+
+  <script>
+    const SUPABASE_URL = 'https://bglpsruvpscbupltihzs.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJnbHBzcnV2cHNjYnVwbHRpaHpzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE1MzkzMjgsImV4cCI6MjA5NzExNTMyOH0.C2d3XtZdE2XSoSKVIDnJU1OQng5tuv_e9Ld8i3vM53E';
+
+    const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+    const params = new URLSearchParams(window.location.search);
+    const eventId = params.get('event');
+
+    let currentEvent = null;
+    let currentHosts = [];
+
+    function renderStatus(el, message, isError) {
+      el.innerHTML = `<div class="status-msg${isError ? ' error' : ''}">${message}</div>`;
+    }
+
+    async function loadEvent() {
+      const contextEl = document.getElementById('event-context');
+      const listEl = document.getElementById('hosts-list');
+
+      if (!eventId) {
+        renderStatus(contextEl, 'NO EVENT SPECIFIED', true);
+        return;
+      }
+
+      try {
+        const res = await fetch(
+          `${SUPABASE_URL}/rest/v1/events?id=eq.${encodeURIComponent(eventId)}&select=*`,
+          { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } }
+        );
+        const rows = await res.json();
+        if (!rows.length) {
+          renderStatus(contextEl, 'EVENT NOT FOUND', true);
+          return;
+        }
+        currentEvent = rows[0];
+
+        if (!currentEvent.guestlist_enabled) {
+          contextEl.innerHTML = `
+            <div class="event-context">
+              <div class="event-context-name">${currentEvent.name}</div>
+            </div>`;
+          renderStatus(listEl, 'GUEST LIST IS NOT AVAILABLE FOR THIS EVENT');
+          return;
+        }
+
+        const d = currentEvent.date ? new Date(currentEvent.date) : null;
+        const dateStr = d ? `${d.getDate().toString().padStart(2,'0')} ${MONTHS[d.getMonth()]} ${d.getFullYear()}` : '';
+
+        contextEl.innerHTML = `
+          <div class="event-context">
+            <div class="event-context-name">${currentEvent.name}</div>
+            <div class="event-context-meta">${dateStr}${currentEvent.venue ? ' · ' + currentEvent.venue : ''}</div>
+          </div>`;
+
+        if (!currentEvent.guestlist_capacity) {
+          renderStatus(listEl, 'GUEST LIST CAPACITY NOT SET YET — PLEASE CONTACT ADMIN', true);
+          return;
+        }
+
+        document.getElementById('hosting-note').style.display = 'block';
+        await loadHosts();
+
+      } catch (err) {
+        console.error('Failed to load event:', err);
+        renderStatus(contextEl, 'FAILED TO LOAD EVENT', true);
+      }
+    }
+
+    async function loadHosts() {
+      try {
+        const res = await fetch(
+          `${SUPABASE_URL}/rest/v1/hosts?event_id=eq.${encodeURIComponent(eventId)}&order=host_number.asc,created_at.asc`,
+          { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } }
+        );
+        currentHosts = await res.json();
+        renderHosts();
+      } catch (err) {
+        console.error('Failed to load hosts:', err);
+        renderStatus(document.getElementById('hosts-list'), 'FAILED TO LOAD GUEST LIST', true);
+      }
+    }
+
+    function renderHosts() {
+      const listEl = document.getElementById('hosts-list');
+      const capacity = currentEvent.guestlist_capacity;
+
+      // Group existing entries by host_number
+      const grouped = {};
+      currentHosts.forEach(h => {
+        if (!grouped[h.host_number]) grouped[h.host_number] = [];
+        grouped[h.host_number].push(h);
+      });
+
+      const existingNumbers = Object.keys(grouped).map(Number);
+      const maxExisting = existingNumbers.length ? Math.max(...existingNumbers) : 0;
+
+      // Hosts 1..maxExisting are already unlocked (they have data).
+      // One more empty host unlocks after them, since the rule is "host N+1
+      // opens once host N has at least 1 person" — and any host present in
+      // the data already has at least 1 person by definition.
+      const hostsToShow = maxExisting + 1;
+
+      let html = '';
+      for (let n = 1; n <= hostsToShow; n++) {
+        const entries = grouped[n] || [];
+        const totalPeople = entries.reduce((sum, e) => sum + (e.total_people || 0), 0);
+        const isFull = totalPeople >= capacity;
+        const remaining = Math.max(0, capacity - totalPeople);
+
+        const namesHtml = entries.map(e => {
+          const allNames = [e.submitter_name, ...(e.other_names || [])];
+          return `<div class="host-name-row"><span class="dot"></span>${allNames.join(', ')}</div>`;
+        }).join('');
+
+        html += `
+          <div class="host-card ${isFull ? 'full' : ''}" data-host="${n}">
+            <div class="host-card-header">
+              <div class="host-card-title">Host ${n}</div>
+              <div class="host-card-count ${isFull ? 'is-full' : ''}">${totalPeople}/${capacity}${isFull ? ' · FULL' : ''}</div>
+            </div>
+            <div class="host-card-body">
+              <div class="host-names">${namesHtml}</div>
+              ${isFull
+                ? `<div class="host-full-label">This host is full</div>`
+                : `<button class="host-join-btn" onclick="toggleForm(${n})">+ Join Host ${n}</button>`}
+              <div class="host-form" id="form-${n}">
+                <div>
+                  <label>Name</label>
+                  <input type="text" id="name-${n}" placeholder="Your name" />
+                </div>
+                <div>
+                  <label>How many person</label>
+                  <select id="count-${n}" onchange="renderExtraNames(${n})">
+                    ${Array.from({length: remaining}, (_, i) => i + 1).map(i => `<option value="${i}">${i}</option>`).join('')}
+                  </select>
+                </div>
+                <div class="host-form-extra-names" id="extra-names-${n}"></div>
+                <div class="host-form-error" id="error-${n}"></div>
+                <div class="host-form-success" id="success-${n}">Joined Host ${n} successfully!</div>
+                <div class="host-form-actions">
+                  <button class="host-form-submit" id="submit-${n}" onclick="submitHost(${n}, ${remaining})">Submit</button>
+                  <button class="host-form-cancel" onclick="toggleForm(${n})">Cancel</button>
+                </div>
+              </div>
+            </div>
+          </div>`;
+      }
+
+      listEl.innerHTML = html;
+    }
+
+    function toggleForm(n) {
+      const form = document.getElementById(`form-${n}`);
+      const wasOpen = form.classList.contains('open');
+      document.querySelectorAll('.host-form.open').forEach(f => f.classList.remove('open'));
+      if (!wasOpen) {
+        form.classList.add('open');
+        renderExtraNames(n);
+      }
+    }
+
+    function renderExtraNames(n) {
+      const count = parseInt(document.getElementById(`count-${n}`).value, 10);
+      const wrap = document.getElementById(`extra-names-${n}`);
+      let html = '';
+      for (let i = 2; i <= count; i++) {
+        html += `<div><label>Name of person ${i}</label><input type="text" id="extra-${n}-${i}" placeholder="Name" /></div>`;
+      }
+      wrap.innerHTML = html;
+    }
+
+    async function submitHost(n, remaining) {
+      const nameInput = document.getElementById(`name-${n}`);
+      const countSelect = document.getElementById(`count-${n}`);
+      const errorEl = document.getElementById(`error-${n}`);
+      const successEl = document.getElementById(`success-${n}`);
+      const submitBtn = document.getElementById(`submit-${n}`);
+
+      const submitterName = nameInput.value.trim();
+      const totalPeople = parseInt(countSelect.value, 10);
+
+      errorEl.classList.remove('show');
+
+      if (!submitterName) {
+        errorEl.textContent = 'Please enter your name.';
+        errorEl.classList.add('show');
+        return;
+      }
+      if (totalPeople > remaining) {
+        errorEl.textContent = `Only ${remaining} spot(s) left in this host.`;
+        errorEl.classList.add('show');
+        return;
+      }
+
+      const otherNames = [];
+      for (let i = 2; i <= totalPeople; i++) {
+        const val = document.getElementById(`extra-${n}-${i}`).value.trim();
+        if (!val) {
+          errorEl.textContent = `Please enter the name of person ${i}.`;
+          errorEl.classList.add('show');
+          return;
+        }
+        otherNames.push(val);
+      }
+
+      submitBtn.disabled = true;
+      try {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/hosts`, {
+          method: 'POST',
+          headers: {
+            'apikey': SUPABASE_KEY,
+            'Authorization': `Bearer ${SUPABASE_KEY}`,
+            'Content-Type': 'application/json',
+            'Prefer': 'return=representation'
+          },
+          body: JSON.stringify({
+            event_id: eventId,
+            host_number: n,
+            submitter_name: submitterName,
+            total_people: totalPeople,
+            other_names: otherNames,
+            checked_in: false
+          })
+        });
+        if (!res.ok) throw new Error('Insert failed');
+
+        successEl.classList.add('show');
+        await loadHosts();
+      } catch (err) {
+        console.error('Failed to submit host:', err);
+        errorEl.textContent = 'Something went wrong. Please try again.';
+        errorEl.classList.add('show');
+        submitBtn.disabled = false;
+      }
+    }
+
+    loadEvent();
+  </script>
+
+  <script>
+    function toggleMenu() {
+      const nav = document.getElementById('nav-links');
+      const btn = document.getElementById('hamburger');
+      nav.classList.toggle('open');
+      btn.classList.toggle('open');
+    }
+    document.querySelectorAll('.nav-links a').forEach(a => {
+      a.addEventListener('click', () => {
+        document.getElementById('nav-links').classList.remove('open');
+        document.getElementById('hamburger').classList.remove('open');
+      });
+    });
+  </script>
+</body>
+</html>
