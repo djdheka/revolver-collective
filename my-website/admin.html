@@ -989,7 +989,9 @@
         </div>
         <div class="btn-row">
           <button class="btn btn-outline" onclick="downloadArchivePDF('${ev.id}')">⬇ Download PDF</button>
+          ${ev.guestlist_enabled ? `<button class="guestlist-view-btn" onclick="toggleHostsPanel(${ev.id})" id="hosts-btn-${ev.id}">👥 View Hosting</button>` : ''}
         </div>
+        ${ev.guestlist_enabled ? `<div class="hosts-admin-panel" id="hosts-panel-${ev.id}"></div>` : ''}
       </div>
     `).join('');
   }
@@ -1401,7 +1403,14 @@
       grouped[h.host_number].push(h);
     });
 
-    panel.innerHTML = Object.keys(grouped).sort((a,b) => a - b).map(n => {
+    const totalRegistered = hosts.reduce((sum, h) => sum + (h.total_people || 0), 0);
+    const totalCheckedIn = hosts.filter(h => h.checked_in).reduce((sum, h) => sum + (h.total_people || 0), 0);
+    const summaryHtml = `
+      <div class="hosts-admin-group-title" style="margin-bottom:14px; font-size:11px;">
+        ${totalRegistered} registered · ${totalCheckedIn} checked in
+      </div>`;
+
+    const groupsHtml = Object.keys(grouped).sort((a,b) => a - b).map(n => {
       const entries = grouped[n];
       const totalPeople = entries.reduce((sum, e) => sum + (e.total_people || 0), 0);
       const rows = entries.map(e => {
@@ -1423,6 +1432,8 @@
           ${rows}
         </div>`;
     }).join('');
+
+    panel.innerHTML = summaryHtml + groupsHtml;
   }
 
   async function toggleCheckin(hostRowId, eventId, checked) {
