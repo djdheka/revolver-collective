@@ -191,6 +191,20 @@
       margin-bottom: 40px;
     }
 
+    /* ── ENTRANCE ANIMATION ── */
+    .guestlist-event {
+      opacity: 0;
+      transform: translateY(32px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+    .guestlist-event.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .guestlist-event { opacity: 1; transform: none; transition: none; }
+    }
+
     .event-card-row {
       display: flex;
       align-items: stretch;
@@ -1037,6 +1051,42 @@
     }
 
     loadEvents();
+  </script>
+
+  <script>
+    // Observe event cards and add .visible once they enter the viewport,
+    // triggering a smooth slide-up entrance. Same pattern as upcoming-events.html.
+    function observeGuestlistCards() {
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+            observer.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.08 });
+
+      document.querySelectorAll('.guestlist-event').forEach((card, i) => {
+        card.style.transitionDelay = `${i * 0.1}s`;
+        const rect = card.getBoundingClientRect();
+        if (rect.top < window.innerHeight && rect.bottom > 0) {
+          card.classList.add('visible');
+        } else {
+          observer.observe(card);
+        }
+      });
+    }
+
+    // Events load asynchronously from Supabase — wait for the DOM to be
+    // populated before setting up the observer.
+    const hostingWrapperEl = document.getElementById('hosting-wrapper');
+    const guestlistMutationObserver = new MutationObserver(() => {
+      if (document.querySelectorAll('.guestlist-event').length > 0) {
+        guestlistMutationObserver.disconnect();
+        setTimeout(observeGuestlistCards, 50);
+      }
+    });
+    guestlistMutationObserver.observe(hostingWrapperEl, { childList: true });
   </script>
 
   <script>
