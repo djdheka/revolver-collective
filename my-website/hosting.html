@@ -919,24 +919,13 @@
 
       if (isOpen) {
         // Wait a beat for the panel's height to actually expand, then scroll
-        // so the whole card (including the newly revealed host boxes) is
-        // brought into view rather than leaving it cut off below the fold.
+        // so the toggle bar (where the note + host boxes start) sits right
+        // under the nav — skipping past the flyer/description/venue info the
+        // person already read, giving the panel itself the most room to fit.
         setTimeout(() => {
-          const cardEl = document.getElementById(`event-${eventId}`);
           const navOffset = 90; // clears the fixed nav bar
-          const cardRect = cardEl.getBoundingClientRect();
-          const cardBottom = window.pageYOffset + cardRect.bottom;
-          const cardTop = window.pageYOffset + cardRect.top - navOffset;
-          const viewportBottom = window.pageYOffset + window.innerHeight;
-
-          // If the card doesn't fully fit even when scrolled to its top,
-          // just align its top under the nav. Otherwise scroll only as much
-          // as needed so the card's bottom becomes visible.
-          const fitsInViewport = (cardRect.bottom - cardRect.top + navOffset) <= window.innerHeight;
-          const targetY = fitsInViewport
-            ? Math.min(cardTop, cardBottom - window.innerHeight)
-            : cardTop;
-
+          const btnRect = btn.getBoundingClientRect();
+          const targetY = window.pageYOffset + btnRect.top - navOffset;
           window.scrollTo({ top: Math.max(0, targetY), behavior: 'smooth' });
         }, 60);
       }
