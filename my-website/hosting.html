@@ -445,6 +445,19 @@
       transition: background 0.3s, color 0.3s;
     }
     .host-col-join:hover { background: var(--white); }
+    .host-col-choice {
+      margin-top: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .host-col-choice .host-col-join { margin-top: 0; }
+    .host-col-join-gl {
+      background: transparent;
+      color: var(--gold);
+      border: 1px solid rgba(201,168,76,0.5);
+    }
+    .host-col-join-gl:hover { background: rgba(201,168,76,0.1); color: var(--white); }
     .host-col-full-label {
       margin-top: auto;
       font-size: 9px;
@@ -929,26 +942,40 @@
       let html = '';
       for (let n = 1; n <= hostsToShow; n++) {
         const entries = grouped[n] || [];
+        const boxType = entries.length ? (entries[0].list_type || 'hosting') : null; // null = not yet chosen
         const totalPeople = entries.reduce((sum, e) => sum + (e.total_people || 0), 0);
         const isFull = totalPeople >= capacity;
         const remaining = Math.max(0, capacity - totalPeople);
+        const title = boxType === 'gl' ? `GL ${n}` : `Host ${n}`;
 
         const namesHtml = entries.map(e => {
           const allNames = [e.submitter_name, ...(e.other_names || [])];
           return `<div class="host-col-name-row"><span class="dot"></span>${allNames.join(', ')}</div>`;
         }).join('');
 
+        let actionHtml;
+        if (isFull) {
+          actionHtml = `<div class="host-col-full-label">Full</div>`;
+        } else if (!boxType) {
+          // No one has joined this box yet — first person picks Host or GL for everyone after them.
+          actionHtml = `
+            <div class="host-col-choice">
+              <button class="host-col-join" onclick="toggleForm(${ev.id}, ${n}, 'hosting')">+ Join as Host</button>
+              <button class="host-col-join host-col-join-gl" onclick="toggleForm(${ev.id}, ${n}, 'gl')">+ Join as GL</button>
+            </div>`;
+        } else {
+          actionHtml = `<button class="host-col-join" onclick="toggleForm(${ev.id}, ${n}, '${boxType}')">+ Join</button>`;
+        }
+
         html += `
           <div class="host-col ${isFull ? 'full' : ''}">
             <div class="host-col-header">
-              <div class="host-col-title">Host ${n}</div>
+              <div class="host-col-title">${title}</div>
               <div class="host-col-count ${isFull ? 'is-full' : ''}">${totalPeople}/${capacity}${isFull ? ' · FULL' : ''}</div>
             </div>
             <div class="host-col-body">
               <div class="host-col-names">${namesHtml}</div>
-              ${isFull
-                ? `<div class="host-col-full-label">Full</div>`
-                : `<button class="host-col-join" onclick="toggleForm(${ev.id}, ${n})">+ Join</button>`}
+              ${actionHtml}
               <div class="host-form" id="form-${ev.id}-${n}">
                 <div>
                   <label>Name</label>
@@ -975,11 +1002,14 @@
       rowEl.innerHTML = html;
     }
 
-    function toggleForm(eventId, n) {
+    function toggleForm(eventId, n, listType) {
       const form = document.getElementById(`form-${eventId}-${n}`);
       const wasOpen = form.classList.contains('open');
       document.querySelectorAll('.host-form.open').forEach(f => f.classList.remove('open'));
       if (!wasOpen) {
+        // Remember which type (host/gl) this join is for, set by whichever
+        // button opened the form — read back in submitHost().
+        if (listType) form.dataset.listType = listType;
         form.classList.add('open');
         renderExtraNames(eventId, n);
       }
@@ -1031,6 +1061,11 @@
 
       submitBtn.disabled = true;
       try {
+        // The type (host/gl) chosen when this box's form was opened —
+        // either just picked (undecided box) or already locked in by
+        // whoever joined first.
+        const listType = document.getElementById(`form-${eventId}-${n}`).dataset.listType || 'hosting';
+
         // One row per person (not one grouped row) — this is what lets the
         // admin panel check in or remove each guest individually, even when
         // they joined together as a group.
@@ -1041,7 +1076,8 @@
           submitter_name: personName,
           total_people: 1,
           other_names: [],
-          checked_in: false
+          checked_in: false,
+          list_type: listType
         }));
 
         const res = await fetch(`${SUPABASE_URL}/rest/v1/hosts`, {

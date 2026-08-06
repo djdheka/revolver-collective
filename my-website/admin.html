@@ -1421,6 +1421,8 @@
 
     const groupsHtml = Object.keys(grouped).sort((a,b) => a - b).map(n => {
       const entries = grouped[n];
+      const boxType = entries.length ? (entries[0].list_type || 'hosting') : 'hosting';
+      const groupLabel = boxType === 'gl' ? `GL ${n}` : `Host ${n}`;
       const totalPeople = entries.reduce((sum, e) => sum + (e.total_people || 0), 0);
       const rows = entries.map(e => {
         const allNames = [e.submitter_name, ...(e.other_names || [])].join(', ');
@@ -1437,7 +1439,7 @@
       }).join('');
       return `
         <div class="hosts-admin-group">
-          <div class="hosts-admin-group-title">Host ${n} · ${totalPeople} people</div>
+          <div class="hosts-admin-group-title">${groupLabel} · ${totalPeople} people</div>
           ${rows}
         </div>`;
     }).join('');
