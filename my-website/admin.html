@@ -1419,10 +1419,12 @@
         ${totalRegistered} registered · ${totalCheckedIn} checked in
       </div>`;
 
+    const typeCounters = { hosting: 0, gl: 0 }; // independent numbering per type
     const groupsHtml = Object.keys(grouped).sort((a,b) => a - b).map(n => {
       const entries = grouped[n];
       const boxType = entries.length ? (entries[0].list_type || 'hosting') : 'hosting';
-      const groupLabel = boxType === 'gl' ? `GL ${n}` : `Host ${n}`;
+      typeCounters[boxType]++;
+      const groupLabel = boxType === 'gl' ? `GL ${typeCounters.gl}` : `Host ${typeCounters.hosting}`;
       const totalPeople = entries.reduce((sum, e) => sum + (e.total_people || 0), 0);
       const rows = entries.map(e => {
         const allNames = [e.submitter_name, ...(e.other_names || [])].join(', ');

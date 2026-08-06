@@ -940,13 +940,21 @@
       const hostsToShow = maxExisting + 1;
 
       let html = '';
+      const typeCounters = { hosting: 0, gl: 0 }; // independent numbering per type
       for (let n = 1; n <= hostsToShow; n++) {
         const entries = grouped[n] || [];
         const boxType = entries.length ? (entries[0].list_type || 'hosting') : null; // null = not yet chosen
         const totalPeople = entries.reduce((sum, e) => sum + (e.total_people || 0), 0);
         const isFull = totalPeople >= capacity;
         const remaining = Math.max(0, capacity - totalPeople);
-        const title = boxType === 'gl' ? `GL ${n}` : `Host ${n}`;
+
+        let title;
+        if (boxType) {
+          typeCounters[boxType]++;
+          title = boxType === 'gl' ? `GL ${typeCounters.gl}` : `Host ${typeCounters.hosting}`;
+        } else {
+          title = 'New List';
+        }
 
         const namesHtml = entries.map(e => {
           const allNames = [e.submitter_name, ...(e.other_names || [])];
