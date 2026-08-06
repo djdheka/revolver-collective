@@ -268,7 +268,16 @@
       display: none; margin-top: 16px; border: 1px solid var(--border); padding: 16px;
     }
     .hosts-admin-panel.open { display: block; }
-    .hosts-admin-group { margin-bottom: 16px; }
+    .hosts-admin-columns {
+      column-width: 280px;
+      column-gap: 40px;
+    }
+    .hosts-admin-group {
+      margin-bottom: 16px;
+      break-inside: avoid;
+      -webkit-column-break-inside: avoid;
+      page-break-inside: avoid;
+    }
     .hosts-admin-group:last-child { margin-bottom: 0; }
     .hosts-admin-group-title {
       font-size: 10px; letter-spacing: 2px; color: var(--gold);
@@ -1433,7 +1442,7 @@
         </div>`;
     }).join('');
 
-    panel.innerHTML = summaryHtml + groupsHtml;
+    panel.innerHTML = summaryHtml + `<div class="hosts-admin-columns">${groupsHtml}</div>`;
   }
 
   async function toggleCheckin(hostRowId, eventId, checked) {
