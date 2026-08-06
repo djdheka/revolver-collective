@@ -127,6 +127,15 @@
       color: var(--white);
       position: relative;
       z-index: 2;
+      line-height: 1.15;
+    }
+    .page-header-title-and {
+      display: inline-block;
+      font-size: 0.4em;
+      letter-spacing: 8px;
+      color: var(--gold);
+      vertical-align: middle;
+      margin: 6px 0;
     }
     .page-header-rule {
       display: flex;
@@ -752,20 +761,12 @@
       <span class="page-header-particle" style="left:63%; top:80%; --dx:160px; --dy:400px;  animation-duration:9s;  animation-delay:-4.6s;"></span>
       <span class="page-header-particle" style="left:75%; top:72%; --dx:300px; --dy:300px;  animation-duration:11s; animation-delay:-9.9s;"></span>
       <span class="page-header-particle" style="left:82%; top:60%; --dx:390px; --dy:160px;  animation-duration:10s; animation-delay:-3.6s;"></span>
-      <div class="page-header-title">Hosting</div>
+      <div class="page-header-title">HOSTING<br/><span class="page-header-title-and">AND</span><br/>GUEST LIST</div>
     </div>
     <div class="page-header-rule"><div class="page-header-rule-diamond"></div></div>
   </div>
 
-  <div class="hosting-wrapper" style="padding-top:20px; padding-bottom:0;">
-    <div class="hosting-note">
-      <p>⚠️ Scroll ke bawah untuk lihat & join host list.</p>
-      <p>⚠️ Hosting harus perempuan.</p>
-      <p>⚠️ Pembatalan hosting hanya bisa dilakukan melalui konfirmasi admin.</p>
-    </div>
-  </div>
-
-  <div class="hosting-wrapper" id="hosting-wrapper" style="padding-top:0;">
+  <div class="hosting-wrapper" id="hosting-wrapper" style="padding-top:20px;">
     <div class="status-msg">LOADING EVENTS...</div>
   </div>
 
@@ -890,9 +891,16 @@
             </div>
           </div>
           <button class="guestlist-toggle" id="toggle-${ev.id}" onclick="toggleGuestList(${ev.id})">
-            <span>Show Hosting</span><span class="arrow">▼</span>
+            <span>Show Hosting & Guest List</span><span class="arrow">▼</span>
           </button>
           <div class="hosts-panel" id="panel-${ev.id}">
+            <div class="hosting-note">
+              <p>⚠️ Hosting harus perempuan.</p>
+              <p>⚠️ Max dateng jam 23.30</p>
+              <p>⚠️ No kaos & sendal‼️</p>
+              <p>⚠️ Wangi</p>
+              <p>⚠️ Pembatalan hosting & GL hanya bisa dilakukan melalui konfirmasi admin.</p>
+            </div>
             ${!ev.guestlist_capacity
               ? '<div class="status-msg error">GUEST LIST CAPACITY NOT SET YET — PLEASE CONTACT ADMIN</div>'
               : `<div class="hosts-row" id="hosts-row-${ev.id}"></div>`}
@@ -906,7 +914,7 @@
       const btn = document.getElementById(`toggle-${eventId}`);
       panel.classList.toggle('open');
       btn.classList.toggle('open');
-      btn.querySelector('span').textContent = panel.classList.contains('open') ? 'Hide Hosting' : 'Show Hosting';
+      btn.querySelector('span').textContent = panel.classList.contains('open') ? 'Hide Hosting & Guest List' : 'Show Hosting & Guest List';
     }
 
     async function loadHostsForEvent(eventId) {
