@@ -245,26 +245,42 @@
       transition: background 0.25s, color 0.25s;
     }
     .event-hosting-badge:hover { background: var(--white); }
-    .event-hosting-badge-icon { font-size: 12px; }
+    .event-hosting-badge-icon { font-size: 12px; position: relative; z-index: 2; }
+    .event-hosting-badge::after {
+      content: '';
+      position: absolute;
+      top: 0; left: -60%;
+      width: 40%; height: 100%;
+      background: linear-gradient(115deg, transparent, rgba(255,255,255,0.75), transparent);
+      transform: skewX(-20deg);
+      animation: event-hosting-badge-shine 3.2s ease-in-out infinite;
+      pointer-events: none;
+    }
     @keyframes event-hosting-badge-pulse {
       0%   { box-shadow: 0 0 0 0 rgba(201,168,76,0.55); }
       70%  { box-shadow: 0 0 0 10px rgba(201,168,76,0); }
       100% { box-shadow: 0 0 0 0 rgba(201,168,76,0); }
     }
+    @keyframes event-hosting-badge-shine {
+      0%   { left: -60%; }
+      35%  { left: 130%; }
+      100% { left: 130%; }
+    }
     @media (prefers-reduced-motion: reduce) {
       .event-hosting-badge { animation: none; }
+      .event-hosting-badge::after { display: none; }
     }
     @media (max-width: 800px) {
       .event-hosting-badge {
-        font-size: 7px;
-        letter-spacing: 1px;
-        padding: 5px 10px 5px 8px;
+        font-size: 10px;
+        letter-spacing: 1.2px;
+        padding: 7px 14px 7px 11px;
         flex-wrap: wrap;
-        max-width: 34%;
-        clip-path: polygon(0 0, 100% 0, 100% 100%, 8px 100%, 0 calc(100% - 8px));
+        max-width: 46%;
+        clip-path: polygon(0 0, 100% 0, 100% 100%, 10px 100%, 0 calc(100% - 10px));
       }
-      .event-hosting-badge-icon { font-size: 8px; }
-      .event-hosting-badge-open { flex-basis: 100%; text-align: center; margin-top: 0; }
+      .event-hosting-badge-icon { font-size: 11px; }
+      .event-hosting-badge-open { flex-basis: 100%; text-align: center; margin-top: 1px; }
     }
 
     /* LEFT column wrapper: date panel + flyer stack vertically, always matches the right column's height */
