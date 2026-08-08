@@ -229,7 +229,7 @@
       z-index: 6;
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 12px;
       background: var(--gold);
       color: var(--black);
       font-family: 'Oswald', sans-serif;
@@ -245,7 +245,7 @@
       transition: background 0.25s, color 0.25s;
     }
     .event-hosting-badge:hover { background: var(--white); }
-    .event-hosting-badge-icon { font-size: 12px; position: relative; z-index: 2; }
+    .event-hosting-badge-icon { font-size: 12px; position: relative; z-index: 2; display: inline-block; transform: rotate(90deg); }
     .event-hosting-badge::after {
       content: '';
       position: absolute;
@@ -275,7 +275,7 @@
       .event-hosting-badge {
         font-size: 10px;
         letter-spacing: 1.2px;
-        padding: 7px 10px 7px 8px;
+        padding: 7px 10px 7px 12px;
         flex-wrap: wrap;
         max-width: 38%;
         clip-path: polygon(0 0, 100% 0, 100% 100%, 16px 100%, 0 calc(100% - 16px));
