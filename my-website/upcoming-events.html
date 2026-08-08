@@ -246,7 +246,7 @@
       transition: background 0.25s, color 0.25s;
     }
     .event-hosting-badge:hover { background: var(--white); }
-    .event-hosting-badge-icon { font-size: 12px; position: relative; z-index: 2; display: inline-block; transform: rotate(90deg); }
+    .event-hosting-badge-icon { position: relative; z-index: 2; display: block; width: 9px; height: 18px; flex-shrink: 0; }
     .event-hosting-badge::after {
       content: '';
       position: absolute;
@@ -281,7 +281,7 @@
         max-width: 38%;
         clip-path: polygon(0 0, 100% 0, 100% 100%, 16px 100%, 0 calc(100% - 16px));
       }
-      .event-hosting-badge-icon { font-size: 11px; }
+      .event-hosting-badge-icon { width: 12px; height: 24px; }
       .event-hosting-badge-open { flex-basis: 100%; text-align: center; margin-top: 1px; }
     }
 
@@ -962,7 +962,7 @@
           return `
           <div class="event-card-glow">
           <div class="event-block">
-            ${ev.guestlist_enabled ? `<a class="event-hosting-badge" href="hosting.html?event=${ev.id}"><span class="event-hosting-badge-icon">🎟️</span>Hosting & GL <span class="event-hosting-badge-open">Open</span></a>` : ''}
+            ${ev.guestlist_enabled ? `<a class="event-hosting-badge" href="hosting.html?event=${ev.id}"><svg class="event-hosting-badge-icon" viewBox="0 0 10 20" xmlns="http://www.w3.org/2000/svg"><rect x="0" y="0" width="10" height="20" rx="2" fill="#e0435c"/><circle cx="5" cy="6.5" r="1.3" fill="#070707"/><circle cx="5" cy="13.5" r="1.3" fill="#070707"/></svg>Hosting & GL <span class="event-hosting-badge-open">Open</span></a>` : ''}
             <div class="event-left-col">
               <div class="event-date-panel">
                 <div>
