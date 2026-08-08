@@ -246,6 +246,15 @@
     }
     .event-hosting-badge:hover { background: var(--white); }
     .event-hosting-badge-icon { font-size: 12px; position: relative; z-index: 2; }
+    .event-hosting-badge-fold {
+      position: absolute;
+      left: 0; bottom: 0;
+      width: 0; height: 0;
+      border-style: solid;
+      border-width: 0 0 14px 14px;
+      border-color: transparent transparent var(--black) transparent;
+      z-index: 1;
+    }
     .event-hosting-badge::after {
       content: '';
       position: absolute;
@@ -281,6 +290,7 @@
       }
       .event-hosting-badge-icon { font-size: 11px; }
       .event-hosting-badge-open { flex-basis: 100%; text-align: center; margin-top: 1px; }
+      .event-hosting-badge-fold { border-width: 0 0 10px 10px; }
     }
 
     /* LEFT column wrapper: date panel + flyer stack vertically, always matches the right column's height */
@@ -960,7 +970,7 @@
           return `
           <div class="event-card-glow">
           <div class="event-block">
-            ${ev.guestlist_enabled ? `<a class="event-hosting-badge" href="hosting.html?event=${ev.id}"><span class="event-hosting-badge-icon">🎟️</span>Hosting & GL <span class="event-hosting-badge-open">Open</span></a>` : ''}
+            ${ev.guestlist_enabled ? `<a class="event-hosting-badge" href="hosting.html?event=${ev.id}"><span class="event-hosting-badge-icon">🎟️</span>Hosting & GL <span class="event-hosting-badge-open">Open</span><span class="event-hosting-badge-fold"></span></a>` : ''}
             <div class="event-left-col">
               <div class="event-date-panel">
                 <div>
