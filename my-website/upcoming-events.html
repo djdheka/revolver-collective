@@ -229,7 +229,6 @@
       z-index: 6;
       display: flex;
       align-items: center;
-      column-gap: 12px;
       row-gap: 0px;
       background: var(--gold);
       color: var(--black);
@@ -239,14 +238,14 @@
       letter-spacing: 3px;
       text-transform: uppercase;
       text-decoration: none;
-      padding: 10px 20px 10px 26px;
+      padding: 10px 26px 10px 18px;
       clip-path: polygon(0 0, 100% 0, 100% 100%, 20px 100%, 0 calc(100% - 20px));
       box-shadow: 0 0 0 0 rgba(201,168,76,0.6);
       animation: event-hosting-badge-pulse 2.2s ease-in-out infinite;
       transition: background 0.25s, color 0.25s;
     }
     .event-hosting-badge:hover { background: var(--white); }
-    .event-hosting-badge-icon { position: absolute; left: 8px; top: 50%; transform: translateY(-50%); z-index: 2; width: 9px; height: 18px; }
+    .event-hosting-badge-icon { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); z-index: 2; width: 9px; height: 18px; }
     .event-hosting-badge::after {
       content: '';
       position: absolute;
@@ -276,12 +275,13 @@
       .event-hosting-badge {
         font-size: 10px;
         letter-spacing: 1.2px;
-        padding: 7px 10px 7px 24px;
+        padding: 7px 24px 7px 10px;
         flex-wrap: wrap;
         max-width: 38%;
         clip-path: polygon(0 0, 100% 0, 100% 100%, 16px 100%, 0 calc(100% - 16px));
       }
-      .event-hosting-badge-icon { left: 7px; width: 10px; height: 20px; }
+      .event-hosting-badge-icon { right: 7px; left: auto; width: 10px; height: 20px; }
+      .event-hosting-badge-line1 { flex-basis: 100%; text-align: center; }
       .event-hosting-badge-open { flex-basis: 100%; text-align: center; margin-top: 1px; }
     }
 
@@ -962,7 +962,7 @@
           return `
           <div class="event-card-glow">
           <div class="event-block">
-            ${ev.guestlist_enabled ? `<a class="event-hosting-badge" href="hosting.html?event=${ev.id}"><svg class="event-hosting-badge-icon" viewBox="0 0 10 20" xmlns="http://www.w3.org/2000/svg"><rect x="0" y="0" width="10" height="20" rx="2" fill="#e0435c"/><circle cx="5" cy="6.5" r="1.3" fill="#070707"/><circle cx="5" cy="13.5" r="1.3" fill="#070707"/></svg>Hosting & GL <span class="event-hosting-badge-open">Open</span></a>` : ''}
+            ${ev.guestlist_enabled ? `<a class="event-hosting-badge" href="hosting.html?event=${ev.id}"><svg class="event-hosting-badge-icon" viewBox="0 0 10 20" xmlns="http://www.w3.org/2000/svg"><rect x="0" y="0" width="10" height="20" rx="2" fill="#e0435c"/><circle cx="5" cy="6.5" r="1.3" fill="#070707"/><circle cx="5" cy="13.5" r="1.3" fill="#070707"/></svg><span class="event-hosting-badge-line1">Hosting & GL</span><span class="event-hosting-badge-open">Open</span></a>` : ''}
             <div class="event-left-col">
               <div class="event-date-panel">
                 <div>
