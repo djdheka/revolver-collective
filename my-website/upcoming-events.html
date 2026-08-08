@@ -255,9 +255,16 @@
       .event-hosting-badge { animation: none; }
     }
     @media (max-width: 800px) {
-      .event-hosting-badge { font-size: 8px; letter-spacing: 1.5px; padding: 7px 14px 7px 12px; flex-wrap: wrap; max-width: 42%; }
-      .event-hosting-badge-icon { font-size: 10px; }
-      .event-hosting-badge-open { flex-basis: 100%; text-align: center; margin-top: 1px; }
+      .event-hosting-badge {
+        font-size: 7px;
+        letter-spacing: 1px;
+        padding: 5px 10px 5px 8px;
+        flex-wrap: wrap;
+        max-width: 34%;
+        clip-path: polygon(0 0, 100% 0, 100% 100%, 8px 100%, 0 calc(100% - 8px));
+      }
+      .event-hosting-badge-icon { font-size: 8px; }
+      .event-hosting-badge-open { flex-basis: 100%; text-align: center; margin-top: 0; }
     }
 
     /* LEFT column wrapper: date panel + flyer stack vertically, always matches the right column's height */
