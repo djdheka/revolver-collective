@@ -1099,35 +1099,44 @@
 </script>
 
 <script>
-  // "Slide down" effect: 2 seconds after the first event card appears, auto-scroll
-  // past the "UPCOMING EVENTS" title so the full event card comes into view —
-  // desktop only, and cancels itself if the person starts scrolling on their own first.
+  // "Slide down" effect: every 2 seconds, auto-scroll to the next event card in
+  // sequence (title → event 1 → event 2 → ...) — desktop only, and the whole
+  // sequence stops permanently the moment the person scrolls on their own.
   (function() {
     if (window.innerWidth <= 800) return; // matches the site's mobile breakpoint — skip on phone
 
     let userScrolled = false;
     window.addEventListener('scroll', () => { userScrolled = true; }, { once: true, passive: true });
 
-    function scheduleSlideDown() {
+    function scrollToEvent(el) {
+      const navOffset = 90; // clears the fixed nav bar
+      const targetY = el.getBoundingClientRect().top + window.pageYOffset - navOffset;
+      window.scrollTo({ top: Math.max(0, targetY), behavior: 'smooth' });
+    }
+
+    function runSlideSequence(events, index) {
+      if (index >= events.length) return; // reached the last event — stop
       setTimeout(() => {
-        if (userScrolled) return;
-        const firstEvent = document.querySelector('.event-card-glow');
-        if (!firstEvent) return;
-        const navOffset = 90; // clears the fixed nav bar
-        const targetY = firstEvent.getBoundingClientRect().top + window.pageYOffset - navOffset;
-        window.scrollTo({ top: Math.max(0, targetY), behavior: 'smooth' });
+        if (userScrolled) return; // person took over — stop the whole sequence
+        scrollToEvent(events[index]);
+        runSlideSequence(events, index + 1);
       }, 2000);
     }
 
+    function startSequence() {
+      const events = Array.from(document.querySelectorAll('.event-card-glow'));
+      if (events.length) runSlideSequence(events, 0);
+    }
+
     if (document.querySelector('.event-card-glow')) {
-      scheduleSlideDown();
+      startSequence();
     } else {
       const list = document.getElementById('events-list');
       if (list) {
         const observer = new MutationObserver(() => {
           if (document.querySelector('.event-card-glow')) {
             observer.disconnect();
-            scheduleSlideDown();
+            startSequence();
           }
         });
         observer.observe(list, { childList: true });
