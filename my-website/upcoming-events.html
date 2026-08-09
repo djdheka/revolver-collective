@@ -1097,5 +1097,43 @@
     });
   });
 </script>
+
+<script>
+  // "Slide down" effect: 2 seconds after the first event card appears, auto-scroll
+  // past the "UPCOMING EVENTS" title so the full event card comes into view —
+  // desktop only, and cancels itself if the person starts scrolling on their own first.
+  (function() {
+    if (window.innerWidth <= 800) return; // matches the site's mobile breakpoint — skip on phone
+
+    let userScrolled = false;
+    window.addEventListener('scroll', () => { userScrolled = true; }, { once: true, passive: true });
+
+    function scheduleSlideDown() {
+      setTimeout(() => {
+        if (userScrolled) return;
+        const firstEvent = document.querySelector('.event-card-glow');
+        if (!firstEvent) return;
+        const navOffset = 90; // clears the fixed nav bar
+        const targetY = firstEvent.getBoundingClientRect().top + window.pageYOffset - navOffset;
+        window.scrollTo({ top: Math.max(0, targetY), behavior: 'smooth' });
+      }, 2000);
+    }
+
+    if (document.querySelector('.event-card-glow')) {
+      scheduleSlideDown();
+    } else {
+      const list = document.getElementById('events-list');
+      if (list) {
+        const observer = new MutationObserver(() => {
+          if (document.querySelector('.event-card-glow')) {
+            observer.disconnect();
+            scheduleSlideDown();
+          }
+        });
+        observer.observe(list, { childList: true });
+      }
+    }
+  })();
+</script>
 </body>
 </html>
