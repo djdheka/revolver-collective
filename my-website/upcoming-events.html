@@ -1106,12 +1106,19 @@
     if (window.innerWidth <= 800) return; // matches the site's mobile breakpoint — skip on phone
 
     let userScrolled = false;
-    window.addEventListener('scroll', () => { userScrolled = true; }, { once: true, passive: true });
+    let isAutoScrolling = false;
+    window.addEventListener('scroll', () => {
+      if (isAutoScrolling) return; // ignore scroll events caused by our own auto-scroll
+      userScrolled = true;
+    }, { passive: true });
 
     function scrollToEvent(el) {
+      isAutoScrolling = true;
       const navOffset = 90; // clears the fixed nav bar
       const targetY = el.getBoundingClientRect().top + window.pageYOffset - navOffset;
       window.scrollTo({ top: Math.max(0, targetY), behavior: 'smooth' });
+      // smooth scroll typically finishes well within 1s — release the guard after
+      setTimeout(() => { isAutoScrolling = false; }, 1000);
     }
 
     function runSlideSequence(events, index) {
