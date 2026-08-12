@@ -1260,7 +1260,12 @@
     locationMaps[id] = { map, marker };
 
     // Leaflet needs a nudge to size correctly inside a freshly-shown container
-    setTimeout(() => map.invalidateSize(), 50);
+    setTimeout(() => {
+      map.invalidateSize();
+      // Bring the newly-revealed map (and its Use This Location / Cancel
+      // buttons) into view instead of leaving the admin to scroll manually.
+      wrap.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 50);
   }
 
   function confirmVenueLocation(id) {
