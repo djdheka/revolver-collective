@@ -1035,6 +1035,89 @@
     }
   }
 
+  // jsPDF's built-in fonts (Helvetica etc.) only support the WinAnsi/Latin-1
+  // character range and can't draw emoji at all — left in place, they come
+  // out as garbled mojibake. Since this PDF doubles as a record that might
+  // get sent to a venue, emoji are worth keeping rather than deleting: the
+  // browser itself can render them (canvas fillText uses the OS's own emoji
+  // font), so each emoji gets captured as a tiny image and dropped inline
+  // with the surrounding text instead.
+  const EMOJI_REGEX = /([\u{1F000}-\u{1FFFF}\u{2600}-\u{27BF}\u{2190}-\u{21FF}\u{2B00}-\u{2BFF}\u{FE0F}\u{200D}]+)/gu;
+
+  function stripEmoji(str) {
+    if (!str) return str;
+    return str
+      .replace(EMOJI_REGEX, '')
+      .replace(/[ \t]+\n/g, '\n')
+      .replace(/\n{3,}/g, '\n\n')
+      .trim();
+  }
+
+  const emojiImageCache = {};
+  function getEmojiImage(emoji, pxSize) {
+    const key = emoji + '_' + pxSize;
+    if (emojiImageCache[key]) return emojiImageCache[key];
+    const scale = 4; // render at higher res than the point size so it stays crisp
+    const canvas = document.createElement('canvas');
+    canvas.width = pxSize * scale;
+    canvas.height = pxSize * scale;
+    const ctx = canvas.getContext('2d');
+    ctx.font = `${Math.round(pxSize * scale * 0.82)}px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif`;
+    ctx.textBaseline = 'middle';
+    ctx.textAlign = 'center';
+    ctx.fillText(emoji, canvas.width / 2, canvas.height / 2 + pxSize * scale * 0.04);
+    const dataUrl = canvas.toDataURL('image/png');
+    emojiImageCache[key] = dataUrl;
+    return dataUrl;
+  }
+
+  // Draws text word-by-word, wrapping at maxWidth like doc.splitTextToSize
+  // would, but any emoji runs are drawn as small inline images instead of
+  // being handed to doc.text (which can't render them). Handles explicit
+  // line breaks in the source text as paragraph breaks. Returns the y
+  // position after the last line drawn.
+  function drawTextWithEmoji(doc, text, x, y, maxWidth, fontSize, lineHeight) {
+    if (!text) return y;
+    const startX = x;
+    const paragraphs = text.split('\n');
+
+    paragraphs.forEach((para, pIdx) => {
+      if (pIdx > 0) y += lineHeight;
+      let cursorX = startX;
+      const runs = para.split(EMOJI_REGEX).filter(r => r !== '');
+
+      runs.forEach(run => {
+        const isEmoji = /^[\u{1F000}-\u{1FFFF}\u{2600}-\u{27BF}\u{2190}-\u{21FF}\u{2B00}-\u{2BFF}\u{FE0F}\u{200D}]+$/u.test(run);
+        if (isEmoji) {
+          const glyphs = Array.from(run); // handles multi-codepoint emoji (e.g. flags, skin tones) as one unit each
+          glyphs.forEach(g => {
+            const size = fontSize * 1.05;
+            if (cursorX + size > startX + maxWidth) { y += lineHeight; cursorX = startX; }
+            try {
+              doc.addImage(getEmojiImage(g, 32), 'PNG', cursorX, y - fontSize * 0.82, size, size);
+            } catch (err) { /* unsupported glyph — skip rather than break the PDF */ }
+            cursorX += size + 1;
+          });
+        } else {
+          const words = run.split(/(\s+)/).filter(w => w !== '');
+          words.forEach(word => {
+            const w = doc.getTextWidth(word);
+            if (/^\s+$/.test(word)) {
+              if (cursorX + w > startX + maxWidth) { y += lineHeight; cursorX = startX; return; }
+              cursorX += w;
+              return;
+            }
+            if (cursorX + w > startX + maxWidth) { y += lineHeight; cursorX = startX; }
+            doc.text(word, cursorX, y);
+            cursorX += w;
+          });
+        }
+      });
+    });
+
+    return y;
+  }
+
   async function downloadArchivePDF(target) {
     const { jsPDF } = window.jspdf;
     const events = target === 'all' ? getPastEvents() : getPastEvents().filter(e => String(e.id) === String(target));
@@ -1071,7 +1154,7 @@
 
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(22);
-      doc.text(ev.name || 'Untitled Event', marginX, y);
+      y = drawTextWithEmoji(doc, ev.name || 'Untitled Event', marginX, y, pageWidth - marginX * 2, 22, 26);
       y += 34;
 
       if (ev.flyer_url) {
@@ -1096,11 +1179,11 @@
       const fields = [
         ['Date', formatEventDate(ev.date)],
         ['Door Open', ev.time ? `${ev.time} WIB` : '—'],
-        ['Venue', ev.venue || '—'],
-        ['City', ev.city || '—'],
-        ['Tag', ev.tag || '—'],
-        ['Entry', ev.entry || '—'],
-        ['Lineup', (ev.lineup || []).join(', ') || '—'],
+        ['Venue', stripEmoji(ev.venue) || '—'],
+        ['City', stripEmoji(ev.city) || '—'],
+        ['Tag', stripEmoji(ev.tag) || '—'],
+        ['Entry', stripEmoji(ev.entry) || '—'],
+        ['Lineup', stripEmoji((ev.lineup || []).join(', ')) || '—'],
       ];
 
       doc.setFontSize(11);
@@ -1119,8 +1202,78 @@
         doc.text('DESCRIPTION', marginX, y);
         y += 18;
         doc.setFont('helvetica', 'normal');
-        const descLines = doc.splitTextToSize(ev.description, pageWidth - marginX * 2);
-        doc.text(descLines, marginX, y);
+        doc.setFontSize(11);
+        y = drawTextWithEmoji(doc, ev.description, marginX, y, pageWidth - marginX * 2, 11, 15);
+        y += 15;
+      }
+
+      if (ev.guestlist_enabled) {
+        const pageBottom = doc.internal.pageSize.getHeight() - 56;
+        const ensureRoom = (needed) => {
+          if (y + needed > pageBottom) { doc.addPage(); y = 70; }
+        };
+
+        let hosts = hostsCache[ev.id];
+        if (!hosts) {
+          try { hosts = await fetchHosts(ev.id); hostsCache[ev.id] = hosts; } catch (err) { hosts = []; }
+        }
+        hosts = hosts || [];
+
+        y += 28;
+        ensureRoom(40);
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(14);
+        doc.text('GUEST LIST', marginX, y);
+        y += 22;
+
+        if (!hosts.length) {
+          doc.setFont('helvetica', 'normal');
+          doc.setFontSize(11);
+          doc.text('No one joined the guest list for this event.', marginX, y);
+          y += 20;
+        } else {
+          const totalRegistered = hosts.reduce((sum, h) => sum + (h.total_people || 0), 0);
+          const totalCheckedIn = hosts.filter(h => h.checked_in).reduce((sum, h) => sum + (h.total_people || 0), 0);
+
+          doc.setFont('helvetica', 'bold');
+          doc.setFontSize(11);
+          doc.text(`${totalRegistered} registered  ·  ${totalCheckedIn} checked in`, marginX, y);
+          y += 22;
+
+          const grouped = {};
+          hosts.forEach(h => {
+            if (!grouped[h.host_number]) grouped[h.host_number] = [];
+            grouped[h.host_number].push(h);
+          });
+          const typeCounters = { hosting: 0, gl: 0 };
+
+          Object.keys(grouped).sort((a, b) => a - b).forEach(n => {
+            const entries = grouped[n];
+            const boxType = entries.length ? (entries[0].list_type || 'hosting') : 'hosting';
+            typeCounters[boxType]++;
+            const groupLabel = boxType === 'gl' ? `GL ${typeCounters.gl}` : `Host ${typeCounters.hosting}`;
+            const totalPeople = entries.reduce((sum, e) => sum + (e.total_people || 0), 0);
+
+            ensureRoom(20);
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(11);
+            doc.text(`${groupLabel} · ${totalPeople} people`, marginX, y);
+            y += 16;
+
+            entries.forEach(e => {
+              const allNames = stripEmoji([e.submitter_name, ...(e.other_names || [])].join(', '));
+              const label = (e.total_people && e.total_people > 1) ? `${allNames} (${e.total_people})` : allNames;
+              const mark = e.checked_in ? '[x]' : '[ ]';
+              ensureRoom(16);
+              doc.setFont('helvetica', 'normal');
+              doc.setFontSize(10);
+              const lines = doc.splitTextToSize(`${mark} ${label}`, pageWidth - marginX * 2 - 16);
+              doc.text(lines, marginX + 16, y);
+              y += Math.max(14, lines.length * 13);
+            });
+            y += 6;
+          });
+        }
       }
     }
 
