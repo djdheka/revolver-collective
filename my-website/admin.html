@@ -161,7 +161,9 @@
       outline: none; transition: border-color 0.3s; width: 100%;
     }
     .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--gold); }
-    .form-textarea { resize: vertical; min-height: 320px; }
+    .form-textarea { overflow-y: auto; min-height: 90px; max-height: 320px; }
+
+
     .form-select option { background: #1a1a1a; }
     input[type="date"] {
       color-scheme: dark;
@@ -906,7 +908,7 @@
         </div>
         <div class="form-group">
           <label class="form-label">Description</label>
-          <textarea class="form-textarea" onchange="updateEvent(${ev.id},'description',this.value)">${ev.description||''}</textarea>
+          <textarea class="form-textarea" oninput="autoGrowTextarea(this)" onchange="updateEvent(${ev.id},'description',this.value)">${ev.description||''}</textarea>
         </div>
         <div class="form-group">
           <label class="form-label">Lineup</label>
@@ -944,6 +946,7 @@
         </div>
       </div>
     `).join('');
+    document.querySelectorAll('#events-list .form-textarea').forEach(autoGrowTextarea);
   }
 
   // ── ARCHIVE ──
@@ -1347,6 +1350,13 @@
     setStatus('Event deleted ✓');
   }
 
+  // Grows a description textarea to fit its content, up to the 320px cap set
+  // in CSS — past that the box stays put and the textarea scrolls internally.
+  function autoGrowTextarea(el) {
+    el.style.height = 'auto';
+    el.style.height = el.scrollHeight + 'px';
+  }
+
   function updateEvent(id, field, value) {
     const ev = data.events.find(e => e.id === id);
     if (ev) { ev[field] = value; save(); }
@@ -1530,7 +1540,7 @@
 
         <div class="form-group">
           <label class="form-label">About</label>
-          <textarea class="form-textarea" onchange="updateMemberField(${m.id},'about',this.value)">${esc(m.about)}</textarea>
+          <textarea class="form-textarea" oninput="autoGrowTextarea(this)" onchange="updateMemberField(${m.id},'about',this.value)">${esc(m.about)}</textarea>
         </div>
 
         <div class="form-row">
@@ -1621,6 +1631,7 @@
         </div>
       </div>
     `).join('');
+    document.querySelectorAll('#members-list .form-textarea').forEach(autoGrowTextarea);
   }
 
   function esc(str) {
