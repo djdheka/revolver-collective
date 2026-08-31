@@ -270,6 +270,15 @@
       display: none; margin-top: 16px; border: 1px solid var(--border); padding: 16px;
     }
     .hosts-admin-panel.open { display: block; }
+    .hosts-admin-section-divider {
+      border-top: 1px solid var(--border);
+      margin: 20px 0 16px;
+      padding-top: 4px;
+    }
+    .hosts-admin-section-title {
+      font-size: 10px; letter-spacing: 3px; color: rgba(255,255,255,0.4);
+      text-transform: uppercase; margin-bottom: 12px;
+    }
     .hosts-admin-columns {
       column-width: 280px;
       column-gap: 40px;
@@ -286,8 +295,8 @@
       text-transform: uppercase; margin-bottom: 8px;
     }
     .host-entry-row {
-      display: flex; align-items: center; gap: 12px;
-      padding: 8px 0; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; gap: 8px;
+      padding: 4px 0; border-bottom: 1px solid var(--border);
       font-size: 11px; letter-spacing: 0.5px; color: rgba(255,255,255,0.8);
     }
     .host-entry-row:last-child { border-bottom: none; }
@@ -1246,8 +1255,11 @@
             grouped[h.host_number].push(h);
           });
           const typeCounters = { hosting: 0, gl: 0 };
+          const sortedKeys = Object.keys(grouped).sort((a, b) => a - b);
+          const hostingKeys = sortedKeys.filter(n => (grouped[n][0].list_type || 'hosting') !== 'gl');
+          const glKeys = sortedKeys.filter(n => (grouped[n][0].list_type || 'hosting') === 'gl');
 
-          Object.keys(grouped).sort((a, b) => a - b).forEach(n => {
+          const renderPdfGroup = (n) => {
             const entries = grouped[n];
             const boxType = entries.length ? (entries[0].list_type || 'hosting') : 'hosting';
             typeCounters[boxType]++;
@@ -1263,7 +1275,7 @@
             entries.forEach(e => {
               const allNames = stripEmoji([e.submitter_name, ...(e.other_names || [])].join(', '));
               const label = (e.total_people && e.total_people > 1) ? `${allNames} (${e.total_people})` : allNames;
-              const mark = e.checked_in ? '[x]' : '[ ]';
+              const mark = e.checked_in ? '[V]' : '[ ]';
               ensureRoom(16);
               doc.setFont('helvetica', 'normal');
               doc.setFontSize(10);
@@ -1272,7 +1284,21 @@
               y += Math.max(14, lines.length * 13);
             });
             y += 6;
-          });
+          };
+
+          hostingKeys.forEach(renderPdfGroup);
+
+          if (glKeys.length) {
+            ensureRoom(24);
+            y += 8;
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(11);
+            doc.setTextColor(120);
+            doc.text('GUEST LIST (GL)', marginX, y);
+            doc.setTextColor(0);
+            y += 18;
+            glKeys.forEach(renderPdfGroup);
+          }
         }
       }
     }
@@ -1588,7 +1614,15 @@
       </div>`;
 
     const typeCounters = { hosting: 0, gl: 0 }; // independent numbering per type
-    const groupsHtml = Object.keys(grouped).sort((a,b) => a - b).map(n => {
+    const hostingKeys = [];
+    const glKeys = [];
+    Object.keys(grouped).sort((a,b) => a - b).forEach(n => {
+      const entries = grouped[n];
+      const boxType = entries.length ? (entries[0].list_type || 'hosting') : 'hosting';
+      (boxType === 'gl' ? glKeys : hostingKeys).push(n);
+    });
+
+    function renderGroup(n) {
       const entries = grouped[n];
       const boxType = entries.length ? (entries[0].list_type || 'hosting') : 'hosting';
       typeCounters[boxType]++;
@@ -1612,9 +1646,24 @@
           <div class="hosts-admin-group-title">${groupLabel} · ${totalPeople} people</div>
           ${rows}
         </div>`;
-    }).join('');
+    }
 
-    panel.innerHTML = summaryHtml + `<div class="hosts-admin-columns">${groupsHtml}</div>`;
+    const hostingGroupsHtml = hostingKeys.map(renderGroup).join('');
+    const glGroupsHtml = glKeys.map(renderGroup).join('');
+
+    let bodyHtml = '';
+    if (hostingGroupsHtml) {
+      bodyHtml += `<div class="hosts-admin-columns">${hostingGroupsHtml}</div>`;
+    }
+    if (glGroupsHtml) {
+      bodyHtml += `
+        <div class="hosts-admin-section-divider">
+          <div class="hosts-admin-section-title">Guest List (GL)</div>
+          <div class="hosts-admin-columns">${glGroupsHtml}</div>
+        </div>`;
+    }
+
+    panel.innerHTML = summaryHtml + bodyHtml;
   }
 
   async function toggleCheckin(hostRowId, eventId, checked) {
