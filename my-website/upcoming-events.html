@@ -977,7 +977,7 @@
                     <div class="event-venue-address">${ev.city}, Indonesia</div>
                     <a class="event-directions" href="https://maps.google.com/?q=${encodeURIComponent(ev.venue + ' ' + ev.city)}" target="_blank" rel="noopener">↗ Get Directions</a>
                   </div>
-                  <div class="event-time">Door Open<span>${ev.time || '21:00'} WIB</span></div>
+                  <div class="event-time">Door Open<span>${ev.time || '21:00'} ${ev.timezone || 'WIB'}</span></div>
                   <span class="event-tag">${ev.tag || ''}</span>
                 </div>
               </div>

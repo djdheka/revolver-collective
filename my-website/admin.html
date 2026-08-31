@@ -163,6 +163,16 @@
     .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--gold); }
     .form-textarea { overflow-y: auto; min-height: 90px; max-height: 320px; }
 
+    .tz-toggle-group { display: flex; flex-shrink: 0; }
+    .tz-toggle-btn {
+      font-family: 'Oswald', sans-serif; font-size: 12px; letter-spacing: 1px;
+      color: rgba(255,255,255,0.6); background: #1a1a1a; border: 1px solid var(--border);
+      padding: 10px 14px; cursor: pointer; transition: background 0.2s, color 0.2s;
+    }
+    .tz-toggle-btn + .tz-toggle-btn { border-left: none; }
+    .tz-toggle-btn:hover { color: var(--white); }
+    .tz-toggle-btn.active { background: var(--gold); color: var(--black); font-weight: bold; }
+
 
     .form-select option { background: #1a1a1a; }
     input[type="date"] {
@@ -867,7 +877,14 @@
           </div>
           <div class="form-group">
             <label class="form-label">Door Open</label>
-            <input class="form-input" value="${ev.time||''}" onchange="updateEvent(${ev.id},'time',this.value)" placeholder="21:00 WIB" />
+            <div style="display:flex;gap:8px;">
+              <input class="form-input" value="${ev.time||''}" onchange="updateEvent(${ev.id},'time',this.value)" placeholder="21:00" style="flex:1;" />
+              <div class="tz-toggle-group">
+                <button type="button" class="tz-toggle-btn ${(ev.timezone||'WIB')==='WIB'?'active':''}" data-tz="WIB" onclick="setEventTimezone(${ev.id},'WIB')">WIB</button>
+                <button type="button" class="tz-toggle-btn ${ev.timezone==='WIT'?'active':''}" data-tz="WIT" onclick="setEventTimezone(${ev.id},'WIT')">WIT</button>
+                <button type="button" class="tz-toggle-btn ${ev.timezone==='WITA'?'active':''}" data-tz="WITA" onclick="setEventTimezone(${ev.id},'WITA')">WITA</button>
+              </div>
+            </div>
           </div>
           <div class="form-group">
             <label class="form-label">Entry</label>
@@ -1187,7 +1204,7 @@
 
       const fields = [
         ['Date', formatEventDate(ev.date)],
-        ['Door Open', ev.time ? `${ev.time} WIB` : '—'],
+        ['Door Open', ev.time ? `${ev.time} ${ev.timezone || 'WIB'}` : '—'],
         ['Venue', stripEmoji(ev.venue) || '—'],
         ['City', stripEmoji(ev.city) || '—'],
         ['Tag', stripEmoji(ev.tag) || '—'],
@@ -1350,7 +1367,7 @@
 
   async function addEvent() {
     setStatus('Creating event...');
-    const newEv = { name: 'New Event', date: '', time: '21:00', venue: '', city: 'Yogyakarta', tag: 'Club Night', entry: 'Free Entry', description: '', lineup: [], flyer_url: null };
+    const newEv = { name: 'New Event', date: '', time: '21:00', timezone: 'WIB', venue: '', city: 'Yogyakarta', tag: 'Club Night', entry: 'Free Entry', description: '', lineup: [], flyer_url: null };
     try {
       const result = await sbInsert('events', newEv);
       if (result && result[0]) {
@@ -1525,7 +1542,7 @@
 
     try {
       await sbUpdate('events', id, {
-        name: ev.name, date: ev.date, time: ev.time,
+        name: ev.name, date: ev.date, time: ev.time, timezone: ev.timezone || 'WIB',
         venue: ev.venue, city: ev.city, tag: ev.tag,
         entry: ev.entry, description: ev.description, lineup: ev.lineup,
         lat: ev.lat || null, lng: ev.lng || null,
@@ -1577,6 +1594,15 @@
   function updateEvent(id, field, value) {
     const ev = data.events.find(e => e.id === id);
     if (ev) { ev[field] = value; save(); }
+  }
+
+  function setEventTimezone(id, tz) {
+    updateEvent(id, 'timezone', tz);
+    const card = document.getElementById(`ev-${id}`);
+    if (!card) return;
+    card.querySelectorAll('.tz-toggle-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.tz === tz);
+    });
   }
 
   function addLineup(id) {
