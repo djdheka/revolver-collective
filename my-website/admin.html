@@ -1259,45 +1259,83 @@
           const hostingKeys = sortedKeys.filter(n => (grouped[n][0].list_type || 'hosting') !== 'gl');
           const glKeys = sortedKeys.filter(n => (grouped[n][0].list_type || 'hosting') === 'gl');
 
-          const renderPdfGroup = (n) => {
+          const colGap = 30;
+          const colWidth = (pageWidth - marginX * 2 - colGap) / 2;
+          const textIndent = 16;
+          const col1X = marginX;
+          const col2X = marginX + colWidth + colGap;
+
+          const groupLines = (n) => {
+            const entries = grouped[n];
+            doc.setFontSize(10);
+            return entries.map(e => {
+              const allNames = stripEmoji([e.submitter_name, ...(e.other_names || [])].join(', '));
+              const label = (e.total_people && e.total_people > 1) ? `${allNames} (${e.total_people})` : allNames;
+              const mark = e.checked_in ? '[V]' : '[ ]';
+              return doc.splitTextToSize(`${mark} ${label}`, colWidth - textIndent);
+            });
+          };
+
+          const measureGroupHeight = (n) => {
+            let h = 16; // title line
+            groupLines(n).forEach(lines => { h += Math.max(14, lines.length * 13); });
+            return h + 6;
+          };
+
+          const renderGroupAt = (n, x, yStart) => {
             const entries = grouped[n];
             const boxType = entries.length ? (entries[0].list_type || 'hosting') : 'hosting';
             typeCounters[boxType]++;
             const groupLabel = boxType === 'gl' ? `GL ${typeCounters.gl}` : `Host ${typeCounters.hosting}`;
             const totalPeople = entries.reduce((sum, e) => sum + (e.total_people || 0), 0);
+            let yy = yStart;
 
-            ensureRoom(20);
             doc.setFont('helvetica', 'bold');
             doc.setFontSize(11);
-            doc.text(`${groupLabel} · ${totalPeople} people`, marginX, y);
-            y += 16;
+            doc.text(`${groupLabel} · ${totalPeople} people`, x, yy);
+            yy += 16;
 
-            entries.forEach(e => {
-              const allNames = stripEmoji([e.submitter_name, ...(e.other_names || [])].join(', '));
-              const label = (e.total_people && e.total_people > 1) ? `${allNames} (${e.total_people})` : allNames;
-              const mark = e.checked_in ? '[V]' : '[ ]';
-              ensureRoom(16);
-              doc.setFont('helvetica', 'normal');
-              doc.setFontSize(10);
-              const lines = doc.splitTextToSize(`${mark} ${label}`, pageWidth - marginX * 2 - 16);
-              doc.text(lines, marginX + 16, y);
-              y += Math.max(14, lines.length * 13);
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(10);
+            groupLines(n).forEach(lines => {
+              doc.text(lines, x + textIndent, yy);
+              yy += Math.max(14, lines.length * 13);
             });
-            y += 6;
+            return yy + 6;
           };
 
-          hostingKeys.forEach(renderPdfGroup);
+          // Lays groups out 2-per-row, side by side — matching the admin
+          // panel's column view — advancing to the next row only once both
+          // columns in the current row are done.
+          const renderGroupsGrid = (keys) => {
+            for (let i = 0; i < keys.length; i += 2) {
+              const leftKey = keys[i];
+              const rightKey = keys[i + 1];
+              const rowHeight = Math.max(
+                measureGroupHeight(leftKey),
+                rightKey !== undefined ? measureGroupHeight(rightKey) : 0
+              );
+              ensureRoom(rowHeight);
+              renderGroupAt(leftKey, col1X, y);
+              if (rightKey !== undefined) renderGroupAt(rightKey, col2X, y);
+              y += rowHeight;
+            }
+          };
+
+          renderGroupsGrid(hostingKeys);
 
           if (glKeys.length) {
-            ensureRoom(24);
-            y += 8;
+            ensureRoom(32);
+            y += 14;
+            doc.setDrawColor(201, 168, 76);
+            doc.setLineWidth(1);
+            doc.line(marginX, y, pageWidth - marginX, y);
+            y += 22;
             doc.setFont('helvetica', 'bold');
             doc.setFontSize(11);
-            doc.setTextColor(120);
             doc.text('GUEST LIST (GL)', marginX, y);
-            doc.setTextColor(0);
             y += 18;
-            glKeys.forEach(renderPdfGroup);
+            renderGroupsGrid(glKeys);
           }
         }
       }
