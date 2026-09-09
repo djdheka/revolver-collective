@@ -2422,6 +2422,7 @@
       <div class="card" id="mx-${mx.id}">
         <div class="card-title">Mixtape · ${mx.title || 'Untitled'}</div>
         <button class="card-delete" onclick="deleteMixtape(${mx.id})">✕ Delete</button>
+        <button class="btn" style="position:absolute;top:16px;right:110px;font-size:9px;letter-spacing:2px;padding:6px 12px;" onclick="moveMixtapeToTop(${mx.id})">▲ Move to Top</button>
         <div class="form-row">
           <div class="form-group">
             <label class="form-label">Title</label>
@@ -2459,10 +2460,11 @@
 
   async function addMixtape() {
     setStatus('Creating mixtape...');
-    const newMx = { title: 'New Mixtape', youtube_url: '', sort_order: mixtapes.length };
+    const minSortOrder = mixtapes.length ? Math.min(...mixtapes.map(m => m.sort_order || 0)) : 0;
+    const newMx = { title: 'New Mixtape', youtube_url: '', sort_order: minSortOrder - 1 };
     const result = await sbInsert('mixtapes', newMx);
     if (result && result[0]) {
-      mixtapes.push(result[0]);
+      mixtapes.unshift(result[0]);
       renderMixtapes();
       setStatus('Mixtape created ✓ — add a title and link, then save');
     }
@@ -2501,6 +2503,24 @@
         btn.style.color = '';
         btn.textContent = '💾 Save to Live Site';
       }, 2500);
+    }
+  }
+
+  async function moveMixtapeToTop(id) {
+    const mx = mixtapes.find(m => m.id === id);
+    if (!mx) return;
+    const minSortOrder = Math.min(...mixtapes.map(m => m.sort_order || 0));
+    if (mx.sort_order === minSortOrder && mixtapes[0] === mx) return; // already first
+    const newSortOrder = minSortOrder - 1;
+    setStatus('Moving to top...');
+    try {
+      await sbUpdate('mixtapes', id, { sort_order: newSortOrder });
+      mx.sort_order = newSortOrder;
+      mixtapes.sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
+      renderMixtapes();
+      setStatus('Moved to top ✓');
+    } catch (err) {
+      setStatus('Could not reorder: ' + err.message);
     }
   }
 
