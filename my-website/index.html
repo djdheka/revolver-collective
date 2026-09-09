@@ -892,23 +892,27 @@
       position: relative;
       z-index: 1;
     }
-    /* Three glowing pulse blobs behind the box, each drifting through a
-       blue → green → gold → red → purple cycle, offset from each other so
-       the card never pulses in flat unison — more like stage lights. */
+    /* A handful of glowing pulse blobs scattered behind the box, each
+       drifting through a blue → green → gold → red → purple cycle at its
+       own pace and offset — more like shifting stage lights than one flat
+       glow. Sizes vary so it reads as layered atmosphere, not a grid of dots. */
     .mixtape-pulse-blob {
       position: absolute;
-      width: 220px;
-      height: 220px;
       border-radius: 50%;
       filter: blur(34px);
       z-index: -1;
       pointer-events: none;
       mix-blend-mode: screen;
-      animation: mixtape-pulse-rainbow 7s ease-in-out infinite;
+      animation-name: mixtape-pulse-rainbow;
+      animation-timing-function: ease-in-out;
+      animation-iteration-count: infinite;
     }
-    .mixtape-pulse-blob.a { top: -10%; left: 6%; animation-delay: 0s; }
-    .mixtape-pulse-blob.b { top: 30%; right: 4%; animation-delay: -2.3s; }
-    .mixtape-pulse-blob.c { bottom: -12%; left: 38%; animation-delay: -4.6s; }
+    .mixtape-pulse-blob.a { width: 260px; height: 260px; top: -14%;  left: 2%;   animation-duration: 7.5s; animation-delay: 0s; }
+    .mixtape-pulse-blob.b { width: 190px; height: 190px; top: 12%;   right: 2%;  animation-duration: 6.8s; animation-delay: -2s; }
+    .mixtape-pulse-blob.c { width: 210px; height: 210px; bottom: -14%; left: 32%; animation-duration: 7.2s; animation-delay: -4.2s; }
+    .mixtape-pulse-blob.d { width: 240px; height: 240px; bottom: -8%; right: 8%; animation-duration: 8s;   animation-delay: -1.3s; }
+    .mixtape-pulse-blob.e { width: 150px; height: 150px; top: 34%;   left: -6%;  animation-duration: 6.5s; animation-delay: -5.5s; }
+    .mixtape-pulse-blob.f { width: 160px; height: 160px; top: -8%;   right: 26%; animation-duration: 7s;   animation-delay: -3.1s; }
     @keyframes mixtape-pulse-rainbow {
       0%   { background: radial-gradient(circle, rgba(90,140,255,0.55), transparent 70%); opacity: 0.35; transform: scale(0.85); }
       20%  { background: radial-gradient(circle, rgba(90,255,150,0.55), transparent 70%); opacity: 0.7;  transform: scale(1.1); }
@@ -1649,6 +1653,9 @@
         <span class="mixtape-pulse-blob a"></span>
         <span class="mixtape-pulse-blob b"></span>
         <span class="mixtape-pulse-blob c"></span>
+        <span class="mixtape-pulse-blob d"></span>
+        <span class="mixtape-pulse-blob e"></span>
+        <span class="mixtape-pulse-blob f"></span>
         <div class="mixtape-preview-strip" id="mixtape-preview-strip"></div>
         <div class="mixtape-promo-eyebrow">Couldn't make it to the night?</div>
         <div class="mixtape-promo-title">Hear The Sets.<br><span>Relive The Night.</span></div>
