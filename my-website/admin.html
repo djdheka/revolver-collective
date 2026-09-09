@@ -148,6 +148,10 @@
       background: #e5484d; color: var(--black); border: none; padding: 8px 16px;
     }
     .card-delete:hover { background: #ff6b6b; }
+    .mixtape-move-top-btn {
+      position: absolute; top: 16px; right: 110px;
+      font-size: 9px; letter-spacing: 2px; padding: 6px 12px;
+    }
 
     /* ── FORM ELEMENTS ── */
     .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
@@ -425,6 +429,33 @@
     .tag-pill-del { cursor: pointer; color: rgba(255,100,100,0.6); background: none; border: none; font-size: 10px; }
     .tag-input-row { display: flex; gap: 8px; margin-top: 8px; }
     .tag-input-row .form-input { flex: 0 1 260px; }
+
+    /* ── MOBILE FIXES (placed last so they correctly override the base
+       rules above them, regardless of where those rules sit in the file) ── */
+    @media (max-width: 700px) {
+      /* Two/three-column form rows were forcing every field into a
+         cramped half- or third-width column on phones (this is why the
+         Door Open time input and WIB/WIT/WITA buttons were unreadable) —
+         stack them into a single full-width column instead. */
+      .form-row, .form-row-3 { grid-template-columns: 1fr; }
+
+      /* Give the time input + timezone buttons room to wrap onto their
+         own line if they still don't fit a particular phone's width,
+         instead of squeezing down to nothing. */
+      .door-open-row { flex-wrap: wrap; }
+      .door-open-row .form-input { min-width: 120px; }
+      .tz-toggle-btn { padding: 8px 10px; font-size: 11px; }
+
+      /* Delete / Move-to-Top were pinned to the top-right corner of the
+         card regardless of how the title text wrapped, so on narrow
+         screens a long title's second line rendered underneath them.
+         Let them flow as normal buttons below the title instead. */
+      .card-delete, .mixtape-move-top-btn {
+        position: static;
+        display: inline-block;
+        margin: 10px 10px 0 0;
+      }
+    }
   </style>
 </head>
 <body>
@@ -877,7 +908,7 @@
           </div>
           <div class="form-group">
             <label class="form-label">Door Open</label>
-            <div style="display:flex;gap:8px;">
+            <div class="door-open-row" style="display:flex;gap:8px;">
               <input class="form-input" value="${ev.time||''}" onchange="updateEvent(${ev.id},'time',this.value)" placeholder="21:00" style="flex:1;" />
               <div class="tz-toggle-group">
                 <button type="button" class="tz-toggle-btn ${(ev.timezone||'WIB')==='WIB'?'active':''}" data-tz="WIB" onclick="setEventTimezone(${ev.id},'WIB')">WIB</button>
@@ -2422,7 +2453,7 @@
       <div class="card" id="mx-${mx.id}">
         <div class="card-title">Mixtape · ${mx.title || 'Untitled'}</div>
         <button class="card-delete" onclick="deleteMixtape(${mx.id})">✕ Delete</button>
-        <button class="btn" style="position:absolute;top:16px;right:110px;font-size:9px;letter-spacing:2px;padding:6px 12px;" onclick="moveMixtapeToTop(${mx.id})">▲ Move to Top</button>
+        <button class="btn mixtape-move-top-btn" onclick="moveMixtapeToTop(${mx.id})">▲ Move to Top</button>
         <div class="form-row">
           <div class="form-group">
             <label class="form-label">Title</label>
