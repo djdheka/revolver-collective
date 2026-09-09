@@ -449,12 +449,10 @@
       /* Delete / Move-to-Top were pinned to the top-right corner of the
          card regardless of how the title text wrapped, so on narrow
          screens a long title's second line rendered underneath them.
-         Let them flow as normal buttons below the title instead. */
-      .card-delete, .mixtape-move-top-btn {
-        position: static;
-        display: inline-block;
-        margin: 10px 10px 0 0;
-      }
+         Keep them pinned top-right like on desktop, but reserve room in
+         the title so wrapped text stops short of the buttons instead. */
+      .card-title { padding-right: 100px; }
+      .mixtape-card-title { padding-right: 220px; } /* mixtape cards have two buttons, not one */
     }
   </style>
 </head>
@@ -2451,7 +2449,7 @@
     }
     list.innerHTML = mixtapes.map(mx => `
       <div class="card" id="mx-${mx.id}">
-        <div class="card-title">Mixtape · ${mx.title || 'Untitled'}</div>
+        <div class="card-title mixtape-card-title">Mixtape · ${mx.title || 'Untitled'}</div>
         <button class="card-delete" onclick="deleteMixtape(${mx.id})">✕ Delete</button>
         <button class="btn mixtape-move-top-btn" onclick="moveMixtapeToTop(${mx.id})">▲ Move to Top</button>
         <div class="form-row">
