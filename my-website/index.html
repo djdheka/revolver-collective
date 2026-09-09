@@ -875,7 +875,7 @@
 
     /* ── MIXTAPE PROMO ── */
     .mixtape-promo-wrap {
-      max-width: 800px;
+      max-width: 1100px;
       margin: 0 auto;
       padding: 0 40px 32px;
       position: relative;
@@ -886,7 +886,7 @@
       cursor: pointer;
       border: 1px solid rgba(255,215,0,0.18);
       background: linear-gradient(160deg, rgba(255,215,0,0.04), transparent 60%);
-      padding: 48px 40px;
+      padding: 64px 60px;
       text-align: center;
       transition: border-color 0.3s, background 0.3s;
       position: relative;
@@ -912,11 +912,11 @@
     /* Drifting particles scattered around the box */
     .mixtape-particle {
       position: absolute;
-      width: 3px;
-      height: 3px;
+      width: 4px;
+      height: 4px;
       border-radius: 50%;
-      background: rgba(255,215,0,0.75);
-      box-shadow: 0 0 7px 1px rgba(255,215,0,0.55);
+      background: rgba(255,215,0,0.9);
+      box-shadow: 0 0 10px 2px rgba(255,215,0,0.7);
       opacity: 0;
       z-index: 0;
       pointer-events: none;
@@ -924,10 +924,37 @@
     }
     @keyframes mixtape-particle-float {
       0% { transform: translate(0, 0); opacity: 0; }
-      15% { opacity: 0.85; }
-      50% { transform: translate(calc(var(--dx, 0px) * 0.55), calc(var(--dy, -30px) * 0.55)); opacity: 0.55; }
-      85% { opacity: 0.15; }
+      15% { opacity: 1; }
+      50% { transform: translate(calc(var(--dx, 0px) * 0.55), calc(var(--dy, -30px) * 0.55)); opacity: 0.7; }
+      85% { opacity: 0.2; }
       100% { transform: translate(var(--dx, 0px), var(--dy, -55px)); opacity: 0; }
+    }
+
+    /* Flanking gold accent lines on either side of the box — fills the
+       otherwise-empty black space and frames the card like a spotlight. */
+    .mixtape-promo-sideline {
+      position: absolute;
+      top: 8%;
+      bottom: 8%;
+      width: 1px;
+      background: linear-gradient(to bottom, transparent, rgba(255,215,0,0.5) 20%, rgba(255,215,0,0.5) 80%, transparent);
+      pointer-events: none;
+    }
+    .mixtape-promo-sideline.left { left: 0; }
+    .mixtape-promo-sideline.right { right: 0; }
+    .mixtape-promo-sideline::before, .mixtape-promo-sideline::after {
+      content: '';
+      position: absolute;
+      left: 50%;
+      width: 5px;
+      height: 5px;
+      background: var(--gold);
+      transform: translateX(-50%) rotate(45deg);
+    }
+    .mixtape-promo-sideline::before { top: 18%; }
+    .mixtape-promo-sideline::after { bottom: 18%; }
+    @media (max-width: 900px) {
+      .mixtape-promo-sideline { display: none; }
     }
     @media (prefers-reduced-motion: reduce) {
       .mixtape-promo-card::before, .mixtape-particle { animation: none; }
@@ -944,7 +971,7 @@
     }
     .mixtape-preview-thumb {
       position: relative;
-      width: 130px;
+      width: 170px;
       aspect-ratio: 16 / 9;
       overflow: hidden;
       border: 1px solid rgba(255,215,0,0.25);
@@ -1577,6 +1604,8 @@
       </div>
     </div>
     <div class="mixtape-promo-wrap">
+      <div class="mixtape-promo-sideline left"></div>
+      <div class="mixtape-promo-sideline right"></div>
       <!-- top edge — drift upward, away from box -->
       <span class="mixtape-particle" style="left:10%; top:-2%;  --dx:-8px;  --dy:-50px; animation-duration:9s;  animation-delay:0.3s;"></span>
       <span class="mixtape-particle" style="left:24%; top:-4%;  --dx:6px;   --dy:-65px; animation-duration:11s; animation-delay:2.6s;"></span>
