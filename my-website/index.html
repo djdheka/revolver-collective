@@ -936,6 +936,47 @@
       border-color: rgba(255,215,0,0.5);
       background: linear-gradient(160deg, rgba(255,215,0,0.08), transparent 60%);
     }
+    .mixtape-preview-strip {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 26px;
+    }
+    .mixtape-preview-thumb {
+      position: relative;
+      width: 130px;
+      aspect-ratio: 16 / 9;
+      overflow: hidden;
+      border: 1px solid rgba(255,215,0,0.25);
+      background: #050505;
+      flex-shrink: 0;
+    }
+    .mixtape-preview-thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      filter: brightness(0.7) saturate(0.9);
+      transition: filter 0.35s, transform 0.5s;
+    }
+    .mixtape-promo-card:hover .mixtape-preview-thumb img {
+      filter: brightness(0.95) saturate(1);
+      transform: scale(1.06);
+    }
+    .mixtape-preview-play {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--gold);
+      font-size: 15px;
+      text-shadow: 0 0 10px rgba(0,0,0,0.9);
+      pointer-events: none;
+    }
+    @media (max-width: 720px) {
+      .mixtape-preview-thumb { width: 92px; }
+    }
     .mixtape-promo-eyebrow {
       font-family: 'Oswald', sans-serif;
       font-size: 10px;
@@ -970,15 +1011,16 @@
       font-family: 'Oswald', sans-serif;
       font-size: 11px;
       letter-spacing: 3px;
-      color: var(--gold);
+      color: var(--black);
       text-transform: uppercase;
-      border-bottom: 1px solid rgba(255,215,0,0.3);
-      padding-bottom: 6px;
-      transition: gap 0.3s, border-color 0.3s;
+      background: var(--gold);
+      padding: 15px 30px;
+      transition: background 0.3s, gap 0.3s, transform 0.3s;
     }
     .mixtape-promo-card:hover .mixtape-promo-cta {
       gap: 16px;
-      border-color: var(--gold);
+      background: var(--white);
+      transform: translateY(-2px);
     }
     .mixtape-promo-arrow { transition: transform 0.3s; display: inline-block; }
     .mixtape-promo-card:hover .mixtape-promo-arrow { transform: translateX(4px); }
@@ -1567,6 +1609,7 @@
       <span class="mixtape-particle" style="left:102%; top:103%; --dx:40px;  --dy:40px;  animation-duration:12s; animation-delay:0.6s;"></span>
 
       <a class="mixtape-promo-card" href="mixtape.html">
+        <div class="mixtape-preview-strip" id="mixtape-preview-strip"></div>
         <div class="mixtape-promo-eyebrow">Couldn't make it to the night?</div>
         <div class="mixtape-promo-title">Hear The Sets.<br><span>Relive The Night.</span></div>
         <p class="mixtape-promo-body">Full liveset recordings from our gunslingers, straight from the booth — no edits, no filter, just the sound as it happened.</p>
@@ -1822,7 +1865,45 @@
     }
 
     loadMembers();
+
+    // ── MIXTAPE PROMO PREVIEW (dynamic — pulls the latest 3 thumbnails) ──
+    function youtubeIdFrom(url) {
+      if (!url) return null;
+      const m = url.match(/(?:youtube(?:-nocookie)?\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+      return m ? m[1] : null;
+    }
+
+    async function loadMixtapePreview() {
+      const strip = document.getElementById('mixtape-preview-strip');
+      if (!strip) return;
+      try {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/mixtapes?order=sort_order.asc,created_at.asc&limit=3`, {
+          headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+        });
+        const list = await res.json();
+        if (!Array.isArray(list) || !list.length) { strip.remove(); return; }
+
+        const thumbs = list
+          .map(mx => ({ mx, ytId: youtubeIdFrom(mx.youtube_url) }))
+          .filter(t => t.ytId);
+
+        if (!thumbs.length) { strip.remove(); return; }
+
+        strip.innerHTML = thumbs.map(({ mx, ytId }) => `
+          <div class="mixtape-preview-thumb">
+            <img src="https://img.youtube.com/vi/${ytId}/hqdefault.jpg" alt="${mx.title || 'Mixtape'}" loading="lazy" />
+            <div class="mixtape-preview-play">▶</div>
+          </div>
+        `).join('');
+      } catch (e) {
+        console.error('Failed to load mixtape preview:', e);
+        strip.remove();
+      }
+    }
+
+    loadMixtapePreview();
   </script>
+
 
   <script>
     function toggleMenu() {
