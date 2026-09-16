@@ -181,17 +181,19 @@
       position: relative;
       overflow: hidden;
       cursor: pointer;
-      border: 1px solid rgba(255,255,255,0.08);
+      border: 1px solid rgba(201,168,76,0.22);
       border-radius: 15px;
+      background: #151515;
+      box-shadow: 0 4px 18px rgba(0,0,0,0.6);
     }
     .masonry-item img {
       width: 100%;
       display: block;
-      transition: transform 0.5s ease, filter 0.4s ease;
-      filter: brightness(0.85);
+      transition: transform 0.4s ease, filter 0.4s ease;
+      filter: brightness(0.95);
     }
     .masonry-item:hover img {
-      transform: scale(1.04);
+      transform: scale(1.06);
       filter: brightness(1);
     }
     .masonry-item-overlay {
@@ -273,7 +275,8 @@
     .mobile-only { display: none; }
 
     @media (max-width: 800px) {
-      .masonry { columns: 3; column-gap: 10px; }
+      .masonry { columns: 3; column-gap: 12px; }
+      .masonry-item { margin-bottom: 12px; }
       .gallery-wrapper { padding: 40px 20px 80px; }
       .nav { padding: 0 20px; }
       .event-section-header { flex-wrap: wrap; }
@@ -344,8 +347,8 @@
       .nav-dropdown { display: none; }
     }
     @media (max-width: 480px) {
-      .masonry { columns: 3; column-gap: 8px; }
-      .masonry-item { margin-bottom: 8px; }
+      .masonry { columns: 3; column-gap: 10px; }
+      .masonry-item { margin-bottom: 10px; border-radius: 10px; }
     }
   </style>
 
@@ -397,10 +400,6 @@
     .event-section.visible .masonry-item:nth-child(6)  { transition-delay: 0.70s; }
     .event-section.visible .masonry-item:nth-child(n+7) { transition-delay: 0.75s; }
 
-    /* Photo hover zoom */
-    .masonry-item { overflow: hidden; }
-    .masonry-item img { transition: transform 0.4s ease; }
-    .masonry-item:hover img { transform: scale(1.06); }
 
     @keyframes cascade-drop {
       0%   { opacity: 0; transform: translateY(-18px); }
