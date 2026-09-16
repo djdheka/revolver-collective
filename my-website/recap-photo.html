@@ -173,21 +173,22 @@
     /* ── MASONRY GRID ── */
     .masonry {
       columns: 3;
-      column-gap: 8px;
+      column-gap: 14px;
     }
     .masonry-item {
       break-inside: avoid;
-      margin-bottom: 8px;
+      margin-bottom: 14px;
       position: relative;
       overflow: hidden;
       cursor: pointer;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 15px;
     }
     .masonry-item img {
       width: 100%;
       display: block;
       transition: transform 0.5s ease, filter 0.4s ease;
       filter: brightness(0.85);
-      border-radius: 15px;
     }
     .masonry-item:hover img {
       transform: scale(1.04);
@@ -272,7 +273,7 @@
     .mobile-only { display: none; }
 
     @media (max-width: 800px) {
-      .masonry { columns: 3; column-gap: 6px; }
+      .masonry { columns: 3; column-gap: 10px; }
       .gallery-wrapper { padding: 40px 20px 80px; }
       .nav { padding: 0 20px; }
       .event-section-header { flex-wrap: wrap; }
@@ -343,8 +344,8 @@
       .nav-dropdown { display: none; }
     }
     @media (max-width: 480px) {
-      .masonry { columns: 3; column-gap: 4px; }
-      .masonry-item { margin-bottom: 4px; }
+      .masonry { columns: 3; column-gap: 8px; }
+      .masonry-item { margin-bottom: 8px; }
     }
   </style>
 
