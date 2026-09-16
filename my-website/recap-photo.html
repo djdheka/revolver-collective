@@ -192,6 +192,16 @@
       transition: transform 0.4s ease, filter 0.4s ease;
       filter: brightness(0.95);
     }
+    /* Fixed tile shapes so every gallery gets the same staggered look,
+       no matter whether the photos are all the same phone format.
+       The first tile (usually the flyer) keeps its natural shape.
+       The lightbox still shows the full, uncropped photo. */
+    .masonry-item:not(:first-child) img { object-fit: cover; }
+    .masonry-item:nth-child(5n+2) img { aspect-ratio: 2 / 3; }
+    .masonry-item:nth-child(5n+3) img { aspect-ratio: 1 / 1; }
+    .masonry-item:nth-child(5n+4) img { aspect-ratio: 3 / 4; }
+    .masonry-item:nth-child(5n+5) img { aspect-ratio: 4 / 5; }
+    .masonry-item:nth-child(5n+6) img { aspect-ratio: 5 / 6; }
     .masonry-item:hover img {
       transform: scale(1.06);
       filter: brightness(1);
